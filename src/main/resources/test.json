@@ -1,0 +1,13 @@
+{
+  "status": "ok",
+  "retcode": 0,
+  "data": {
+    "online": true,
+    "good": true,
+    "stat": {}
+  },
+  "message": "",
+  "wording": "",
+  "echo": "",
+  "stream": "normal-action"
+}

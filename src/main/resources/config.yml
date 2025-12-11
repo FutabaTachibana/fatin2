@@ -1,0 +1,13 @@
+# NapCat WebSocket连接地址
+websocket_url: ws://localhost:3001
+
+# 访问令牌（如果NapCat配置了token）
+access_token: ""
+
+# 插件配置
+plugin:
+  # 插件目录
+  directory: ./plugins
+
+  # 自动重载插件
+  auto_reload: true
