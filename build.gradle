@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'org.f14a'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // WebSocket client library
+    implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+
+    // Json processing library
+    implementation 'com.google.code.gson:gson:2.13.2'
+
+    // YAML processing library
+    implementation 'org.yaml:snakeyaml:2.5'
+
+    // Logging library
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+
+    // Tools
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    // Lombok
+//    compileOnly 'org.projectlombok:lombok:1.18.30'
+//    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+}
+
+application {
+    mainClass = 'org.f14a.Main'
+}
+
+shadowJar {
+    archiveClassifier.set(name)
+    archiveClassifier.set('')
+    archiveVersion.set(version)
+
+    manifest {
+        attributes(
+                'Main-Class': 'org.f14a.Main',
+                'Implementation-Version': version
+        )
+    }
+
+    mergeServiceFiles()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+task runBot(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.f14a.Main'
+
+    if (project.hasProperty('args')) {
+        args project.args.split('\\s+')
+    }
+}
+
+build.dependsOn shadowJar
