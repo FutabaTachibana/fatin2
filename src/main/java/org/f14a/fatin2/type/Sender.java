@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Sender {
     // User ID
     @SerializedName("user_id")
-    private int userId;
+    private Long userId;
 
     // Nickname
     @SerializedName("nickname")
@@ -29,7 +29,7 @@ public class Sender {
     private String role;
 
     // Getters
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
     public String getNickname() {

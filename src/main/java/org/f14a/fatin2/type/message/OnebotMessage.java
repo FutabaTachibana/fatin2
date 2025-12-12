@@ -8,40 +8,40 @@ import org.f14a.fatin2.type.Sender;
 * To learn Onebot message structure see:
 * https://napneko.github.io/onebot/basic_event
 * */
-public class OnebotMessage extends AbstractOnebotMessage{
+public abstract class OnebotMessage extends AbstractOnebotMessage{
     // The type of the message
     // private | group
     @SerializedName("message_type")
-    private String messageType;
+    protected String messageType;
 
     // Subtype of the message
     // friend | normal | anonymous | notice
     @SerializedName("sub_type")
-    private String text;
+    protected String text;
 
     // Message ID
     @SerializedName("message_id")
-    private String messageId;
+    protected String messageId;
 
     // User ID of the sender
     @SerializedName("user_id")
-    private String userId;
+    protected String userId;
 
     // Message
     @SerializedName("message")
-    private JsonObject[] message;
+    protected JsonObject[] message;
 
     // Raw message
     @SerializedName("raw_message")
-    private String rawMessage;
+    protected String rawMessage;
 
     // Font
     @SerializedName("font")
-    private int font;
+    protected int font;
 
     // Sender
     @SerializedName("sender")
-    private Sender sender;
+    protected Sender sender;
 
     // Getters
     public String getMessageType() {

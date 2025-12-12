@@ -14,7 +14,7 @@ public abstract class AbstractOnebotMessage {
 
     // The id of the self bot
     @SerializedName("self_id")
-    protected String selfId;
+    protected Long selfId;
 
     // Getters
     public Long getTime() {
@@ -23,7 +23,7 @@ public abstract class AbstractOnebotMessage {
     public String getPostType() {
         return this.postType;
     }
-    public String getSelfId() {
+    public Long getSelfId() {
         return this.selfId;
     }
 }

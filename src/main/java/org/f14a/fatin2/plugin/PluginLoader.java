@@ -1,5 +1,6 @@
 package org.f14a.fatin2.plugin;
 
+import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.type.Exception.MainClassNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,17 @@ import java.util.jar.Manifest;
 public class PluginLoader {
     public static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
 
+    public static void loadAllPlugins(File dir) {
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".jar"));;
+        if(files == null || files.length == 0) {
+            LOGGER.info("No plugins found in directory: {}", Config.getConfig().getPluginDirectory());
+            return;
+        }
+        // Load each plugin
+        for(File file : files) {
+            loadPlugins(file);
+        }
+    }
 
     public static void loadPlugins(File jarFile) {
         try {

@@ -6,7 +6,9 @@ import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.dispatcher.MessageDispatcher;
 import org.f14a.fatin2.type.Exception.UnknownMessageTypeException;
 import org.f14a.fatin2.type.message.AbstractOnebotMessage;
+import org.f14a.fatin2.type.message.GroupOnebotMessage;
 import org.f14a.fatin2.type.message.OnebotMessage;
+import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -16,6 +18,11 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class Client extends WebSocketClient {
+    private static Client instance;
+    public static Client getInstance() {
+        return Client.instance;
+    }
+
     private static final int RECONNECT_INTERVAL = 10; // seconds
 
     private final Gson gson = new Gson();
@@ -28,6 +35,7 @@ public class Client extends WebSocketClient {
         super(serverUri, createHeaders(accessToken));
         this.accessToken = accessToken;
         this.dispatcher = dispatcher;
+        Client.instance = this;
     }
 
     private static Map<String, String> createHeaders(String accessToken) {
@@ -35,6 +43,7 @@ public class Client extends WebSocketClient {
         if (accessToken != null && !accessToken.isEmpty()) {
             headers.put("Authorization", "Bearer " + accessToken);
         }
+        headers.put("Content-Type", "application/json");
         return headers;
     }
 
@@ -56,7 +65,8 @@ public class Client extends WebSocketClient {
 
             AbstractOnebotMessage parsedMessage;
             switch (postType) {
-                case "message" -> parsedMessage = gson.fromJson(message, OnebotMessage.class);
+                case "message" -> parsedMessage = ("group".equals(raw.get("message_type"))) ?
+                        gson.fromJson(message, GroupOnebotMessage.class) : gson.fromJson(message, PrivateOnebotMessage.class);
 
                 default -> throw new UnknownMessageTypeException("Unknown type of message: " + postType);
             }
@@ -93,6 +103,8 @@ public class Client extends WebSocketClient {
         super.close();
         Main.LOGGER.info("WebSocket connection closed.");
     }
+
+
 
     // TODO: Reconnect logic
 

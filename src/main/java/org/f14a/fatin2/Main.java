@@ -6,6 +6,8 @@ import org.f14a.fatin2.config.ConfigLoader;
 import org.f14a.fatin2.dispatcher.MessageDispatcher;
 import org.f14a.fatin2.handler.GroupMessageHandler;
 import org.f14a.fatin2.handler.PrivateMessageHandler;
+import org.f14a.fatin2.plugin.PluginLoader;
+import org.f14a.fatin2.plugin.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,9 @@ public class Main {
 
             System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
 
+            // Load plugins
+            PluginManager pluginManager = new PluginManager(config.isPluginAutoReload());
+
             // Init message dispatcher
             MessageDispatcher dispatcher = new MessageDispatcher();
 
@@ -36,6 +41,13 @@ public class Main {
 
             URI serverUri = new URI(config.getWebSocketUrl());
             Client client = new Client(serverUri, config.getAccessToken(), dispatcher);
+
+            // Register closure hook
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                LOGGER.info("Shutting down Fatin2...");
+                // pluginManager.shutdown();
+                client.close();
+            }));
 
             LOGGER.info("Connecting to {}...", serverUri);
             client.connect();

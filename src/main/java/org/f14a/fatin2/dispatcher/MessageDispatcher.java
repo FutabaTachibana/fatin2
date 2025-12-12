@@ -3,15 +3,38 @@ package org.f14a.fatin2.dispatcher;
 import org.f14a.fatin2.handler.MessageHandler;
 import org.f14a.fatin2.type.message.AbstractOnebotMessage;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 public class MessageDispatcher {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MessageDispatcher.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MessageDispatcher.class);
 
     private final List<MessageHandler> handlers = new CopyOnWriteArrayList<>();
+    private final ExecutorService executorService;
+
+    public MessageDispatcher() {
+        this.executorService = new ThreadPoolExecutor(
+                4, // core pool size,
+                16, // maximum pool size
+                60L, // keep-alive time
+                TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(1000), // work queue
+                new ThreadFactory() {
+                    private int count = 0;
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = new Thread(r, "MessageHandler-" + (count++));
+                        thread.setDaemon(false);
+                        return thread;
+                    }
+                },
+                new ThreadPoolExecutor.CallerRunsPolicy() // rejection policy
+        );
+        LOGGER.info("Message Dispatcher initialized with thread pool");
+    }
 
     // Register a message handler
     public void register(MessageHandler handler) {
@@ -34,22 +57,45 @@ public class MessageDispatcher {
 
         LOGGER.debug("Dispatching message: {}", message.getPostType());
 
-        boolean handled = false;
+        // Count of handlers that processed the message
+        int handlerCount = 0;
         for (MessageHandler handler : handlers) {
             try {
                 if (handler.canHandle(message)) {
-                    LOGGER.debug("Message handled by: {}", handler.getClass().getName());
-                    handler.handle(message);
-                    handled = true;
+                    LOGGER.debug("Message handling by: {}", handler.getClass().getName());
+                    handlerCount++;
+                    handleAsync(handler, message);
                 }
             } catch (Exception e) {
                 LOGGER.error("Error while handling message with {}: {}", handler.getClass().getName(), e.getMessage(), e);
             }
         }
 
-        if(!handled) {
-            LOGGER.warn("Message {} cannot be handled", message.getPostType());
+        if(handlerCount == 0) {
+            LOGGER.warn("Message {} may not be handled", message.getPostType());
+        } else {
+            LOGGER.debug("Message {} dispatched to {} handlers", message.getPostType(), handlerCount);
         }
+    }
+
+    // Handle message asynchronously
+    public void handleAsync(MessageHandler handler, AbstractOnebotMessage message) {
+        long startTime = System.currentTimeMillis();
+        String handlerName = handler.getClass().getSimpleName();
+        executorService.submit(() -> {
+            try {
+                LOGGER.debug("Handling message with {}", handlerName);
+                handler.handle(message);
+                long duration = System.currentTimeMillis() - startTime;
+                LOGGER.debug("Handled message with {} in {} ms", handlerName, duration);
+
+                if (duration > 5000) {
+                    LOGGER.warn("Handler {} took too long ({} ms) to process message {}", handlerName, duration, message.getPostType());
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error while handling message asynchronously with {}: {}", handler.getClass().getName(), e.getMessage(), e);
+            }
+        });
     }
 
     // Get all handlers
