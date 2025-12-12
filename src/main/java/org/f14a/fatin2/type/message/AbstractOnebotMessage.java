@@ -7,8 +7,8 @@ public abstract class AbstractOnebotMessage {
     @SerializedName("time")
     protected Long time;
 
-    // The type of the event
-    // message | message_sent
+    // Post type
+    // message | message_sent | notice | request | meta_event
     @SerializedName("post_type")
     protected String postType;
 
@@ -18,12 +18,12 @@ public abstract class AbstractOnebotMessage {
 
     // Getters
     public Long getTime() {
-        return time;
+        return this.time;
     }
     public String getPostType() {
-        return postType;
+        return this.postType;
     }
     public String getSelfId() {
-        return selfId;
+        return this.selfId;
     }
 }

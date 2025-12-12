@@ -45,27 +45,27 @@ public class OnebotMessage extends AbstractOnebotMessage{
 
     // Getters
     public String getMessageType() {
-        return messageType;
+        return this.messageType;
     }
     public String getSubType() {
-        return text;
+        return this.text;
     }
     public String getMessageId() {
-        return messageId;
+        return this.messageId;
     }
     public String getUserId() {
-        return userId;
+        return this.userId;
     }
     public JsonObject[] getMessage() {
-        return message;
+        return this.message;
     }
     public String getRawMessage() {
-        return rawMessage;
+        return this.rawMessage;
     }
     public int getFont() {
-        return font;
+        return this.font;
     }
     public Sender getSender() {
-        return sender;
+        return this.sender;
     }
 }

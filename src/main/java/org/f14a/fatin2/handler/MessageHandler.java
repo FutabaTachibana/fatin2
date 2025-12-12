@@ -1,9 +1,9 @@
 package org.f14a.fatin2.handler;
 
-import org.f14a.fatin2.type.message.OnebotMessage;
+import org.f14a.fatin2.type.message.AbstractOnebotMessage;
 
 public interface MessageHandler {
-    boolean canHandle(OnebotMessage message);
+    boolean canHandle(AbstractOnebotMessage message);
 
-    void handle(OnebotMessage message);
+    void handle(AbstractOnebotMessage message);
 }

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import org.f14a.fatin2.Main;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.dispatcher.MessageDispatcher;
+import org.f14a.fatin2.type.Exception.UnknownMessageTypeException;
+import org.f14a.fatin2.type.message.AbstractOnebotMessage;
 import org.f14a.fatin2.type.message.OnebotMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -49,10 +51,17 @@ public class Client extends WebSocketClient {
             Main.LOGGER.debug("Received message: {}", message);
 
             // Parse
-            OnebotMessage onebotMessage = gson.fromJson(message, OnebotMessage.class);
+            Map<?, ?> raw = gson.fromJson(message, Map.class);
+            String postType = (String) raw.get("post_type");
 
+            AbstractOnebotMessage parsedMessage;
+            switch (postType) {
+                case "message" -> parsedMessage = gson.fromJson(message, OnebotMessage.class);
+
+                default -> throw new UnknownMessageTypeException("Unknown type of message: " + postType);
+            }
             // Dispatch
-            dispatcher.dispatch(onebotMessage);
+            dispatcher.dispatch(parsedMessage);
 
         } catch (Exception e) {
             Main.LOGGER.error("Failed to processing message: {}", message, e);
@@ -84,5 +93,7 @@ public class Client extends WebSocketClient {
         super.close();
         Main.LOGGER.info("WebSocket connection closed.");
     }
+
+    // TODO: Reconnect logic
 
 }

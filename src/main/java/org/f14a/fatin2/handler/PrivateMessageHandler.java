@@ -1,19 +1,21 @@
 package org.f14a.fatin2.handler;
 
+import org.f14a.fatin2.type.message.AbstractOnebotMessage;
 import org.f14a.fatin2.type.message.OnebotMessage;
 
 public class PrivateMessageHandler implements MessageHandler{
     @Override
-    public boolean canHandle(OnebotMessage message) {
-        return ("message".equals(message.getPostType()) ||
-                "message_sent".equals(message.getPostType()))
-                && "private".equals(message.getMessageType());
+    public boolean canHandle(AbstractOnebotMessage message) {
+        if (message instanceof OnebotMessage onebotMessage) {
+            return "private".equals(onebotMessage.getMessageType());
+        }
+        return false;
     }
 
     @Override
-    public void handle(OnebotMessage message) {
+    public void handle(AbstractOnebotMessage abstract_message) {
         // Handle private message
-        System.out.println("Handling private message: " + message.getRawMessage());
+
 
 
     }
