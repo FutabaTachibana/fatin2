@@ -28,7 +28,7 @@ public class MessageDispatcher {
     // Dispatch a message to the appropriate handler
     public void dispatch(OnebotMessage message) {
         if (message == null) {
-            logger.warn("Received null message, skipping dispatch.");
+            logger.warn("Received null message, skipping dispatch");
             return;
         }
 
@@ -48,7 +48,7 @@ public class MessageDispatcher {
         }
 
         if(!handled) {
-            logger.warn("No handler found for message: {}, postType={}", message.getMessageType(), message.getPostType());
+            logger.warn("Message {} has unknown type {}", message.getMessageType(), message.getPostType());
         }
     }
 

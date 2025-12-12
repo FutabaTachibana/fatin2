@@ -7,9 +7,9 @@ package org.f14a.fatin2.config;
 public class Config {
     private String webSocketUrl;
     private String accessToken;
+    private boolean debug;
     private String pluginDirectory;
     private boolean pluginAutoReload;
-
     // Getters and Setters
     public String getWebSocketUrl() {
         return this.webSocketUrl;
@@ -22,6 +22,16 @@ public class Config {
     }
     public void setAccessToken(Object accessToken) {
         this.accessToken = accessToken.toString();
+    }
+    public boolean isDebug() {
+        return this.debug;
+    }
+    public void setDebug(Object debug) {
+        if (debug instanceof Boolean) {
+            this.debug = (Boolean) debug;
+        } else {
+            this.debug = Boolean.parseBoolean(debug.toString());
+        }
     }
     public String getPluginDirectory() {
         return this.pluginDirectory;

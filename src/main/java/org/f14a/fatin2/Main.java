@@ -15,15 +15,17 @@ import java.net.URI;
 * Entry of the application
 * */
 public class Main {
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         try {
             // Load Config
             // Choose Command Line Args fist
             String configPath = args.length > 0 ? args[0] : "config.yml";
-            logger.info("Loading config from: {}", configPath);
+            LOGGER.info("Loading config from: {}", configPath);
             Config config = ConfigLoader.load(configPath);
+
+            System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
 
             // Init message dispatcher
             MessageDispatcher dispatcher = new MessageDispatcher();
@@ -35,13 +37,13 @@ public class Main {
             URI serverUri = new URI(config.getWebSocketUrl());
             Client client = new Client(serverUri, config.getAccessToken(), dispatcher);
 
-            logger.info("Connecting to {}...", serverUri);
+            LOGGER.info("Connecting to {}...", serverUri);
             client.connect();
 
             Thread.currentThread().join();
 
         } catch (Exception e) {
-            logger.error("Failed to start bot", e);
+            LOGGER.error("Failed to start fatin2", e);
             System.exit(1);
         }
     }

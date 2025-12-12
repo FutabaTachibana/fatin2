@@ -1,5 +1,6 @@
 package org.f14a.fatin2.config;
 
+import org.f14a.fatin2.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -11,8 +12,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class ConfigLoader {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigLoader.class);
-
     public static Config load(String path) throws Exception {
         Yaml yaml = new Yaml();
         InputStream input;
@@ -20,7 +19,7 @@ public class ConfigLoader {
         try {
             input = new FileInputStream(path);
         } catch (FileNotFoundException e) {
-            logger.warn("Configuration file not found at {}. Using default configuration.", path);
+            Main.LOGGER.warn("Configuration file not found at {}. Using default configuration.", path);
             return new Config();
         }
 
@@ -30,6 +29,7 @@ public class ConfigLoader {
         Config config = new Config();
         config.setWebSocketUrl(data.getOrDefault("websocket_url", DefaultConfig.WEBSOCKET_URL));
         config.setAccessToken(data.getOrDefault("access_token", DefaultConfig.ACCESS_TOKEN));
+        config.setDebug(data.getOrDefault("debug", DefaultConfig.DEBUG));
         if (data.containsKey("plugin")) {
             @SuppressWarnings("unchecked")
             Map<String, Object> pluginData = (Map<String, Object>) data.get("plugin");

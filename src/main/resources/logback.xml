@@ -1,32 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- 控制台输出 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SS} [%thread] %-5level %logger{36} - %msg%n" />
+    <property name="LOG_LEVEL" value="${log.level:INFO}" />
+    <property name="APP_NAME" value="fatin2" />
+    <property name="LOG_PATH" value="logs/" />
+    <!-- Console -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss. SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            <charset>UTF-8</charset>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-
-    <!-- 文件输出 -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/napcat-bot.log</file>
+    <!-- latest.log -->
+    <appender name="LATEST" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/latest.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>${LOG_LEVEL}</pattern>
+        </encoder>
+    </appender>
+    <!-- saved logs -->
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/latest.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/napcat-bot. %d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxIndex>999</maxIndex>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            <charset>UTF-8</charset>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-
-    <!-- 根日志级别 -->
-    <root level="INFO">
+<!--    <logger name="org.java_websocket" level="WARN" />-->
+    <root level="${LOG_LEVEL}">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="LATEST"/>
+        <appender-ref ref="ROLLING"/>
     </root>
-
-    <!-- 调试时可以设置DEBUG级别 -->
-    <logger name="org.f14a.fatin2" level="DEBUG"/>
 </configuration>
