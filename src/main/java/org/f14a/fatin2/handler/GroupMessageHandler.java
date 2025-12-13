@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import org.f14a.fatin2.client.sender.GroupMessageSender;
 import org.f14a.fatin2.type.message.AbstractOnebotMessage;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
-import org.f14a.fatin2.type.message.OnebotMessage;
 
+@Deprecated
 public class GroupMessageHandler implements MessageHandler {
     @Override
     public boolean canHandle(AbstractOnebotMessage message) {

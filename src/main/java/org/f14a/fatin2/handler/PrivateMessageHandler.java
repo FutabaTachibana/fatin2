@@ -4,6 +4,7 @@ import org.f14a.fatin2.type.message.AbstractOnebotMessage;
 import org.f14a.fatin2.type.message.OnebotMessage;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
+@Deprecated
 public class PrivateMessageHandler implements MessageHandler{
     @Override
     public boolean canHandle(AbstractOnebotMessage message) {

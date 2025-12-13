@@ -4,6 +4,7 @@ import org.f14a.fatin2.client.Client;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.config.ConfigLoader;
 import org.f14a.fatin2.dispatcher.MessageDispatcher;
+import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.handler.GroupMessageHandler;
 import org.f14a.fatin2.handler.PrivateMessageHandler;
 import org.f14a.fatin2.plugin.PluginLoader;
@@ -35,9 +36,12 @@ public class Main {
             // Init message dispatcher
             MessageDispatcher dispatcher = new MessageDispatcher();
 
-            // Init Handlers
-            dispatcher.register(new PrivateMessageHandler());
-            dispatcher.register(new GroupMessageHandler());
+            // Init event bus
+            new EventBus();
+
+//            // Init Handlers
+//            dispatcher.register(new PrivateMessageHandler());
+//            dispatcher.register(new GroupMessageHandler());
 
             URI serverUri = new URI(config.getWebSocketUrl());
             Client client = new Client(serverUri, config.getAccessToken(), dispatcher);
