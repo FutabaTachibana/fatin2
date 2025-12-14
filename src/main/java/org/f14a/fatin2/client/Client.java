@@ -3,11 +3,10 @@ package org.f14a.fatin2.client;
 import com.google.gson.Gson;
 import org.f14a.fatin2.Main;
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.dispatcher.MessageDispatcher;
-import org.f14a.fatin2.type.Exception.UnknownMessageTypeException;
-import org.f14a.fatin2.type.message.AbstractOnebotMessage;
+import org.f14a.fatin2.event.message.GroupMessageEvent;
+import org.f14a.fatin2.event.message.PrivateMessageEvent;
+import org.f14a.fatin2.type.exception.UnknownMessageTypeException;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
-import org.f14a.fatin2.type.message.OnebotMessage;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -27,14 +26,12 @@ public class Client extends WebSocketClient {
 
     private final Gson gson = new Gson();
     private final String accessToken;
-    private final MessageDispatcher dispatcher;
     private ScheduledExecutorService reconnectExecutor;
     private volatile boolean closed = false;
 
-    public Client(URI serverUri, String accessToken, MessageDispatcher dispatcher) {
+    public Client(URI serverUri, String accessToken) {
         super(serverUri, createHeaders(accessToken));
         this.accessToken = accessToken;
-        this.dispatcher = dispatcher;
         Client.instance = this;
     }
 
@@ -63,15 +60,22 @@ public class Client extends WebSocketClient {
             Map<?, ?> raw = gson.fromJson(message, Map.class);
             String postType = (String) raw.get("post_type");
 
-            AbstractOnebotMessage parsedMessage;
+
+
             switch (postType) {
-                case "message" -> parsedMessage = ("group".equals(raw.get("message_type"))) ?
-                        gson.fromJson(message, GroupOnebotMessage.class) : gson.fromJson(message, PrivateOnebotMessage.class);
+                case "message" -> {
+                    if (("group".equals(raw.get("message_type")))) {
+                        new GroupMessageEvent(gson.fromJson(message, GroupOnebotMessage.class)).fire();
+                    } else {
+                        new PrivateMessageEvent(gson.fromJson(message, PrivateOnebotMessage.class)).fire();
+                    }
+                }
 
                 default -> throw new UnknownMessageTypeException("Unknown type of message: " + postType);
             }
             // Dispatch
-            dispatcher.dispatch(parsedMessage);
+
+
 
         } catch (Exception e) {
             Main.LOGGER.error("Failed to processing message: {}", message, e);

@@ -30,21 +30,15 @@ public class Main {
 
             System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
 
-            // Load plugins
-            PluginManager pluginManager = new PluginManager(config.isPluginAutoReload());
-
-            // Init message dispatcher
-            MessageDispatcher dispatcher = new MessageDispatcher();
-
             // Init event bus
             new EventBus();
 
-//            // Init Handlers
-//            dispatcher.register(new PrivateMessageHandler());
-//            dispatcher.register(new GroupMessageHandler());
+            // Load plugins
+            PluginManager pluginManager = new PluginManager(config.isPluginAutoReload());
+
 
             URI serverUri = new URI(config.getWebSocketUrl());
-            Client client = new Client(serverUri, config.getAccessToken(), dispatcher);
+            Client client = new Client(serverUri, config.getAccessToken());
 
             // Register closure hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

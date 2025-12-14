@@ -1,4 +1,4 @@
-package org.f14a.fatin2.type.Exception;
+package org.f14a.fatin2.type.exception;
 
 public class MainClassNotFoundException extends RuntimeException {
     public MainClassNotFoundException(String message) {

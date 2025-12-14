@@ -1,7 +1,8 @@
 package org.f14a.fatin2.plugin;
 
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.type.Exception.MainClassNotFoundException;
+import org.f14a.fatin2.plugin.integrated.EchoPlugin;
+import org.f14a.fatin2.type.exception.MainClassNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,10 @@ public class PluginLoader {
     public static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
 
     public static void loadAllPlugins(File dir) {
+        // Load integrated plugins
+        loadIntegratedPlugins();
+
+        // Load external plugins
         File[] files = dir.listFiles((d, name) -> name.endsWith(".jar"));;
         if(files == null || files.length == 0) {
             LOGGER.info("No plugins found in directory: {}", Config.getConfig().getPluginDirectory());
@@ -54,7 +59,6 @@ public class PluginLoader {
 
             // Start lifecycle
             plugin.onLoad();
-            plugin.onEnable();
             wrapper.setEnabled(true);
 
             LOGGER.info("Plugin loaded: {} v{} by{}", plugin.getName(), plugin.getVersion(), plugin.getAuthor());
@@ -62,6 +66,16 @@ public class PluginLoader {
         } catch (Exception e) {
             LOGGER.error("Failed to load plugin from: {}", jarFile.getName(), e);
         }
+
+    }
+
+    private static void loadIntegratedPlugins() {
+        EchoPlugin echoPlugin = new EchoPlugin();
+        PluginWrapper wrapper = new PluginWrapper(echoPlugin, null, "Integrated");
+        echoPlugin.onLoad();
+        wrapper.setEnabled(true);
+        LOGGER.info("Integrated Plugin loaded: {} v{} by{}", echoPlugin.getName(), echoPlugin.getVersion(), echoPlugin.getAuthor());
+
 
     }
 

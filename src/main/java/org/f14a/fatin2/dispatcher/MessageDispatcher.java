@@ -1,7 +1,7 @@
 package org.f14a.fatin2.dispatcher;
 
 import org.f14a.fatin2.handler.MessageHandler;
-import org.f14a.fatin2.type.message.AbstractOnebotMessage;
+import org.f14a.fatin2.type.AbstractOnebotMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+@Deprecated
 public class MessageDispatcher {
     public static final Logger LOGGER = LoggerFactory.getLogger(MessageDispatcher.class);
 
@@ -55,7 +56,7 @@ public class MessageDispatcher {
             return;
         }
 
-        LOGGER.debug("Dispatching message: {}", message.getPostType());
+        LOGGER.debug("Dispatching message: {}", message.postType());
 
         // Count of handlers that processed the message
         int handlerCount = 0;
@@ -72,9 +73,9 @@ public class MessageDispatcher {
         }
 
         if(handlerCount == 0) {
-            LOGGER.warn("Message {} may not be handled", message.getPostType());
+            LOGGER.warn("Message {} may not be handled", message.postType());
         } else {
-            LOGGER.debug("Message {} dispatched to {} handlers", message.getPostType(), handlerCount);
+            LOGGER.debug("Message {} dispatched to {} handlers", message.postType(), handlerCount);
         }
     }
 
@@ -90,7 +91,7 @@ public class MessageDispatcher {
                 LOGGER.debug("Handled message with {} in {} ms", handlerName, duration);
 
                 if (duration > 5000) {
-                    LOGGER.warn("Handler {} took too long ({} ms) to process message {}", handlerName, duration, message.getPostType());
+                    LOGGER.warn("Handler {} took too long ({} ms) to process message {}", handlerName, duration, message.postType());
                 }
             } catch (Exception e) {
                 LOGGER.error("Error while handling message asynchronously with {}: {}", handler.getClass().getName(), e.getMessage(), e);

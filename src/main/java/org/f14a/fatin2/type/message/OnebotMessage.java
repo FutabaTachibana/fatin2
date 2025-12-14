@@ -2,70 +2,31 @@ package org.f14a.fatin2.type.message;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import org.f14a.fatin2.type.AbstractOnebotMessage;
 import org.f14a.fatin2.type.Sender;
 
 /*
 * To learn Onebot message structure see:
 * https://napneko.github.io/onebot/basic_event
 * */
-public abstract class OnebotMessage extends AbstractOnebotMessage{
-    // The type of the message
+
+public interface OnebotMessage extends AbstractOnebotMessage {
     // private | group
     @SerializedName("message_type")
-    protected String messageType;
-
-    // Subtype of the message
+    String messageType();
     // friend | normal | anonymous | notice
     @SerializedName("sub_type")
-    protected String text;
-
-    // Message ID
+    String subType();
     @SerializedName("message_id")
-    protected String messageId;
-
-    // User ID of the sender
+    String messageId();
     @SerializedName("user_id")
-    protected String userId;
-
-    // Message
+    Long userId();
     @SerializedName("message")
-    protected JsonObject[] message;
-
-    // Raw message
+    JsonObject[] message();
     @SerializedName("raw_message")
-    protected String rawMessage;
-
-    // Font
+    String rawMessage();
     @SerializedName("font")
-    protected int font;
-
-    // Sender
+    Integer font();
     @SerializedName("sender")
-    protected Sender sender;
-
-    // Getters
-    public String getMessageType() {
-        return this.messageType;
-    }
-    public String getSubType() {
-        return this.text;
-    }
-    public String getMessageId() {
-        return this.messageId;
-    }
-    public String getUserId() {
-        return this.userId;
-    }
-    public JsonObject[] getMessage() {
-        return this.message;
-    }
-    public String getRawMessage() {
-        return this.rawMessage;
-    }
-    public int getFont() {
-        return this.font;
-    }
-    public Sender getSender() {
-        return this.sender;
-    }
+    Sender sender();
 }

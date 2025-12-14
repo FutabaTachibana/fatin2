@@ -8,7 +8,6 @@ public class GroupMessageSender {
     public static void send(GroupOnebotMessage message){
         String string = message.toString();
         Main.LOGGER.debug("Sending group message: {}", string);
-
         Client.getInstance().send("{\"action\":\"send_group_msg\",\"params\":" + string + "}");
     }
 }

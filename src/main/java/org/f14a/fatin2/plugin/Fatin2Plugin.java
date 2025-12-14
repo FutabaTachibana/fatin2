@@ -14,4 +14,8 @@ public interface Fatin2Plugin {
     default String getAuthor() {
         return "Anonymous";
     }
+
+    default String getDescription() {
+        return "No description provided.";
+    }
 }

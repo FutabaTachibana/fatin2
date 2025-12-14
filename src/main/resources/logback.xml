@@ -3,40 +3,38 @@
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SS} [%thread] %-5level %logger{36} - %msg%n" />
     <property name="LOG_LEVEL" value="${log.level:INFO}" />
     <property name="APP_NAME" value="fatin2" />
-    <property name="LOG_PATH" value="logs/" />
+    <property name="LOG_PATH" value="logs" />
+
     <!-- Console -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-    <!-- latest.log -->
-    <appender name="LATEST" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/latest.log</file>
-        <append>false</append>
-        <encoder>
-            <pattern>${LOG_LEVEL}</pattern>
-        </encoder>
-    </appender>
-    <!-- saved logs -->
+
+    <!-- Rolling file appender:
+         - current logs -> ${LOG_PATH}/latest.log (Override)
+         - archived logs -> ${LOG_PATH}/${APP_NAME}-YYYY-MM-DD-i.log.gz (compressed)
+    -->
     <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/latest.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
-            <maxHistory>30</maxHistory>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-            <maxIndex>999</maxIndex>
-        </rollingPolicy>
+        <append>false</append>
+        <prudent>false</prudent>
+        <immediateFlush>true</immediateFlush>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
     </appender>
-<!--    <logger name="org.java_websocket" level="WARN" />-->
-    <root level="${LOG_LEVEL}">
+
+    <root level="${log.level:INFO}">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="LATEST"/>
         <appender-ref ref="ROLLING"/>
     </root>
 </configuration>

@@ -1,6 +1,5 @@
 package org.f14a.fatin2.event;
 
-import org.f14a.fatin2.event.events.MessageEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +15,10 @@ public class EventBus {
         return EventBus.instance;
     }
     private final ExecutorService executorService;
-    private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<Method>> handlers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<EventListener>> handlers = new ConcurrentHashMap<>();
 
     public EventBus() {
+        EventBus.instance = this;
         this.executorService = new ThreadPoolExecutor(
                 4, // core pool size,
                 16, // maximum pool size
@@ -45,7 +45,7 @@ public class EventBus {
         for (Method method : clazz.getDeclaredMethods()) {
             // Check if the method is annotated with @EventHandler
             EventHandler annotation = method.getAnnotation(EventHandler.class);
-            if (annotation != null) {
+            if (annotation == null) {
                 continue;
             }
 
@@ -69,11 +69,46 @@ public class EventBus {
             Class<? extends Event> eventClass = (Class<? extends Event>) eventType;
 
             // Register the event handler
-            handlers.computeIfAbsent(eventClass, k -> new CopyOnWriteArrayList<>()).add(method);
+            handlers.computeIfAbsent(eventClass, k -> new CopyOnWriteArrayList<>()).add(new EventListener(listener, method, plugin));
         }
     }
 
-    public List<Method> getHandlers(Class<? extends Event> eventClass) {
+    private List<EventListener> getHandlers(Class<? extends Event> eventClass) {
         return handlers.getOrDefault(eventClass, new CopyOnWriteArrayList<>());
+    }
+
+    public void post(Event event) {
+        if (event.isAsync()) {
+            postAsync(event);
+        } else {
+            postSync(event);
+        }
+    }
+
+    public void postAsync(Event event) {
+        executorService.submit(() -> {
+            List<EventListener> eventListeners = getHandlers(event.getClass());
+            LOGGER.debug("Found {} handlers for event {}", eventListeners.size(), event.getClass().getName());
+            for (EventListener listener : eventListeners) {
+                try {
+                    listener.method().invoke(listener.listener(), event);
+                } catch (Exception e) {
+                    EventBus.LOGGER.error("Error invoking event handler method: {} with listener {}",
+                            listener.method().getName(), listener.listener().getClass().getName(), e);
+                }
+            }
+        });
+    }
+    public void postSync(Event event) {
+        List<EventListener> eventListeners = getHandlers(event.getClass());
+        LOGGER.debug("Found {} handlers for event {}", eventListeners.size(), event.getClass().getName());
+        for (EventListener listener : eventListeners) {
+            try {
+                listener.method().invoke(listener.listener(), event);
+            } catch (Exception e) {
+                EventBus.LOGGER.error("Error invoking event handler method: {} with listener {}",
+                        listener.method().getName(), listener.listener().getClass().getName(), e);
+            }
+        }
     }
 }
