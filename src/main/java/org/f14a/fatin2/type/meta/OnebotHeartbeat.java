@@ -2,7 +2,6 @@ package org.f14a.fatin2.type.meta;
 
 import com.google.gson.annotations.SerializedName;
 import org.f14a.fatin2.type.AbstractOnebotMessage;
-import org.f14a.fatin2.type.Status;
 
 public record OnebotHeartbeat (
         @SerializedName("time") Long time,
@@ -11,4 +10,9 @@ public record OnebotHeartbeat (
         @SerializedName("meta_event_type") String metaEventType,
         @SerializedName("status") Status status,
         @SerializedName("interval") Integer interval
-) implements AbstractOnebotMessage { }
+) implements AbstractOnebotMessage {
+    public record Status(
+            @SerializedName("online") Boolean online,
+            @SerializedName("good") Boolean good
+    ) { }
+}

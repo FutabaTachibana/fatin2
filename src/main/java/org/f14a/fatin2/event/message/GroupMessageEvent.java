@@ -24,7 +24,8 @@ public class GroupMessageEvent extends Event {
 
     @Override
     public void fire() {
-        EventBus.getInstance().post(this);
+        new MessageEvent(this.message).fire();
+        super.fire();
     }
 
     public void reply(JsonObject ... sendMessages) {

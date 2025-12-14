@@ -38,9 +38,11 @@ application {
     mainClass = 'org.f14a.fatin2.Main'
 }
 
+// Create a fat JAR (also known as uber JAR)
 task fatJar(type: Jar) {
-    archiveBaseName.set(name)
+    archiveBaseName.set('fatin2')
     archiveVersion.set(version)
+    archiveClassifier.set('')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
@@ -56,6 +58,15 @@ task fatJar(type: Jar) {
     exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
 }
 
+// Standard JAR without dependencies
+jar {
+    archiveBaseName.set('fatin2')
+    archiveVersion.set(version)
+    archiveClassifier.set('plain')
+}
+
+build.dependsOn fatJar, jar
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
@@ -64,9 +75,15 @@ task runBot(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'org.f14a.fatin2.Main'
 
+    // Debug environment
+    workingDir = file("$projectDir/run")
+
+    // Create run directory if it doesn't exist
+    doFirst {
+        file("$projectDir/run").mkdirs()
+    }
+
     if (project.hasProperty('args')) {
         args project.args.split('\\s+')
     }
 }
-
-build.dependsOn fatJar

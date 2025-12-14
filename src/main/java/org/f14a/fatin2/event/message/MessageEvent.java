@@ -26,16 +26,6 @@ public class MessageEvent extends Event {
         return true;
     }
 
-    @Override
-    public void fire() {
-        EventBus.getInstance().post(this);
-        if (message instanceof PrivateOnebotMessage privateMessage) {
-            EventBus.getInstance().post(new PrivateMessageEvent(privateMessage));
-        } else if (message instanceof GroupOnebotMessage groupMessage) {
-            EventBus.getInstance().post(new GroupMessageEvent(groupMessage));
-        }
-    }
-
     public void reply(JsonObject ... sendMessages) {
         if (message instanceof PrivateOnebotMessage privateMessage) {
             PrivateMessageSender.send(new PrivateOnebotMessage(privateMessage.userId(), sendMessages));

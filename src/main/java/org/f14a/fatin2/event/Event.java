@@ -5,5 +5,7 @@ import java.util.List;
 
 public abstract class Event {
     public abstract boolean isAsync();
-    public abstract void fire();
+    public  void fire() {
+        EventBus.getInstance().post(this);
+    }
 }

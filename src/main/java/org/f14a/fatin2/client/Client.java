@@ -57,23 +57,11 @@ public class Client extends WebSocketClient {
             Main.LOGGER.debug("Received message: {}", message);
 
             // Parse
-            Map<?, ?> raw = gson.fromJson(message, Map.class);
-            String postType = (String) raw.get("post_type");
-
-
-
-            switch (postType) {
-                case "message" -> {
-                    if (("group".equals(raw.get("message_type")))) {
-                        new GroupMessageEvent(gson.fromJson(message, GroupOnebotMessage.class)).fire();
-                    } else {
-                        new PrivateMessageEvent(gson.fromJson(message, PrivateOnebotMessage.class)).fire();
-                    }
-                }
-
-                default -> throw new UnknownMessageTypeException("Unknown type of message: " + postType);
+            try {
+                RawParser.parseRaw(message).fire();
+            } catch (NullPointerException e) {
+                Main.LOGGER.info("Received unsupported message");
             }
-            // Dispatch
 
 
 
