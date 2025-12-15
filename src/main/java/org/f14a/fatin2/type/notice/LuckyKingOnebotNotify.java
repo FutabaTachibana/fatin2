@@ -9,6 +9,8 @@ public record LuckyKingOnebotNotify(
         @SerializedName("notice_type") String noticeType,
         @SerializedName("sub_type") String subType,
         @SerializedName("group_id") Long groupId,
+        // Red packet owner ID
         @SerializedName("user_id") Long userId,
+        // Lucky king ID
         @SerializedName("target_id") Long targetId
 ) implements AbstractOnebotNotify { }

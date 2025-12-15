@@ -4,18 +4,18 @@ import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.notice.FriendRecallOnebotNotice;
 
 public class FriendRecallEvent extends Event {
-    private final FriendRecallOnebotNotice friendRecallOnebotNotice;
-    public FriendRecallEvent(FriendRecallOnebotNotice friendRecallOnebotNotice) {
-        this.friendRecallOnebotNotice = friendRecallOnebotNotice;
+    private final FriendRecallOnebotNotice notice;
+    public FriendRecallEvent(FriendRecallOnebotNotice notice) {
+        this.notice = notice;
     }
-    public FriendRecallOnebotNotice getFriendRecallNotice() {
-        return this.friendRecallOnebotNotice;
+    public FriendRecallOnebotNotice getNotice() {
+        return this.notice;
     }
     public long getUserId() {
-        return this.friendRecallOnebotNotice.userId() != null ? this.friendRecallOnebotNotice.userId() : 0L;
+        return this.notice.userId() != null ? this.notice.userId() : 0L;
     }
     public long getMessageId() {
-        return this.friendRecallOnebotNotice.messageId() != null ? this.friendRecallOnebotNotice.messageId() : 0L;
+        return this.notice.messageId() != null ? this.notice.messageId() : 0L;
     }
 
     @Override
@@ -24,9 +24,9 @@ public class FriendRecallEvent extends Event {
     }
     @Override
     public void fire() {
-        new RecallEvent(this.friendRecallOnebotNotice, true,
-                null, this.friendRecallOnebotNotice.userId(),
-                null, this.friendRecallOnebotNotice.messageId()).fire();
+        new RecallEvent(this.notice, RecallEvent.RecallType.PRIVATE,
+                null, this.notice.userId(),
+                null, this.notice.messageId()).fire();
         super.fire();
     }
 }

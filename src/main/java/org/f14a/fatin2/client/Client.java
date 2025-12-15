@@ -59,8 +59,8 @@ public class Client extends WebSocketClient {
             // Parse
             try {
                 RawParser.parseRaw(message).fire();
-            } catch (NullPointerException e) {
-                Main.LOGGER.info("Received unsupported message");
+            } catch (NullPointerException | UnknownMessageTypeException e) {
+                Main.LOGGER.info("Received unsupported message", e);
             }
 
 

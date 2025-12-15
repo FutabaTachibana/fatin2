@@ -1,14 +1,14 @@
 package org.f14a.fatin2.event.notice;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.notice.PokeOnebotNotify;
+import org.f14a.fatin2.type.notice.LuckyKingOnebotNotify;
 
-public class PokeEvent extends Event {
-    private final PokeOnebotNotify notify;
-    public PokeEvent(PokeOnebotNotify notify) {
+public class LuckyKingEvent extends Event {
+    private final LuckyKingOnebotNotify notify;
+    public LuckyKingEvent(LuckyKingOnebotNotify notify) {
         this.notify = notify;
     }
-    public PokeOnebotNotify getNotify() {
+    public LuckyKingOnebotNotify getNotify() {
         return this.notify;
     }
     public long getGroupId() {
@@ -20,6 +20,7 @@ public class PokeEvent extends Event {
     public long getTargetId() {
         return this.notify.targetId() != null ? this.notify.targetId() : 0L;
     }
+
     @Override
     public boolean isAsync() {
         return true;

@@ -3,7 +3,6 @@ package org.f14a.fatin2.event.message;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.client.sender.GroupMessageSender;
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 
 public class GroupMessageEvent extends Event {
@@ -15,7 +14,6 @@ public class GroupMessageEvent extends Event {
     public GroupOnebotMessage getMessage() {
         return message;
     }
-
 
     @Override
     public boolean isAsync() {

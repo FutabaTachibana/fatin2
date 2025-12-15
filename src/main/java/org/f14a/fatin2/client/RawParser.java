@@ -6,19 +6,19 @@ import org.f14a.fatin2.event.message.GroupMessageEvent;
 import org.f14a.fatin2.event.message.PrivateMessageEvent;
 import org.f14a.fatin2.event.meta.HeartbeatEvent;
 import org.f14a.fatin2.event.meta.LifecycleEvent;
-import org.f14a.fatin2.event.notice.BanEvent;
-import org.f14a.fatin2.event.notice.FriendRecallEvent;
-import org.f14a.fatin2.event.notice.GroupRecallEvent;
-import org.f14a.fatin2.event.notice.PokeEvent;
+import org.f14a.fatin2.event.notice.*;
+import org.f14a.fatin2.event.request.AddRequestEvent;
+import org.f14a.fatin2.event.request.FriendRequestEvent;
+import org.f14a.fatin2.event.request.InviteRequestEvent;
 import org.f14a.fatin2.type.exception.UnknownMessageTypeException;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 import org.f14a.fatin2.type.meta.OnebotHeartbeat;
 import org.f14a.fatin2.type.meta.OnebotLifecycle;
-import org.f14a.fatin2.type.notice.GroupBanOnebotNotice;
-import org.f14a.fatin2.type.notice.FriendRecallOnebotNotice;
-import org.f14a.fatin2.type.notice.GroupRecallOnebotNotice;
-import org.f14a.fatin2.type.notice.PokeOnebotNotify;
+import org.f14a.fatin2.type.notice.*;
+import org.f14a.fatin2.type.request.AddOnebotRequest;
+import org.f14a.fatin2.type.request.FriendOnebotRequest;
+import org.f14a.fatin2.type.request.InviteOnebotRequest;
 
 import java.util.Map;
 
@@ -56,25 +56,48 @@ public class RawParser {
                 case "notice" -> {
                     String noticeType = (String) raw.get("notice_type");
                     return switch (noticeType) {
-                        case "group_upload" -> null;
-                        case "group_admin" -> null;
-                        case "group_decrease" -> null;
-                        case "group_increase" -> null;
-                        case "group_ban" ->  new BanEvent(gson.fromJson(message, GroupBanOnebotNotice.class));
-                        case "friend_add" -> null;
+                        case "group_upload" -> new GroupUploadEvent(gson.fromJson(message, GroupUploadOnebotNotice.class));
+                        case "group_admin" -> new GroupAdminEvent(gson.fromJson(message, GroupAdminOnebotNotice.class));
+                        case "group_decrease" -> new GroupDecreaseEvent(gson.fromJson(message, GroupDecreaseOnebotNotice.class));
+                        case "group_increase" -> new GroupIncreaseEvent(gson.fromJson(message, GroupIncreaseOnebotNotice.class));
+                        case "group_ban" ->  new GroupBanEvent(gson.fromJson(message, GroupBanOnebotNotice.class));
+                        case "friend_add" -> new FriendAddEvent(gson.fromJson(message, FriendAddOnebotNotice.class));
                         case "friend_recall" -> new FriendRecallEvent(gson.fromJson(message, FriendRecallOnebotNotice.class));
                         case "group_recall" -> new GroupRecallEvent(gson.fromJson(message, GroupRecallOnebotNotice.class));
                         case "poke" -> new PokeEvent(gson.fromJson(message, PokeOnebotNotify.class));
-                        case "lucky_king" -> null;
-                        case "honor" -> null;
+                        case "lucky_king" -> new LuckyKingEvent(gson.fromJson(message, LuckyKingOnebotNotify.class));
+                        case "honor" -> new HonorEvent(gson.fromJson(message, HonorOnebotNotify.class));
                         case "group_msg_emoji_like" -> null;
                         case "essence" -> null;
                         case "group_card" -> null;
-                        default -> throw new UnknownMessageTypeException("Unexpected notice_type: " + noticeType);
+                        default -> throw new UnknownMessageTypeException("Unknown notice_type: " + noticeType);
+                    };
+                }
+                case "request" -> {
+                    String requestType = (String) raw.get("request_type");
+                    return switch (requestType) {
+                        case "friend" -> new FriendRequestEvent(gson.fromJson(message, FriendOnebotRequest.class));
+                        case "group" -> {
+                            String subType = (String) raw.get("sub_type");
+                            if ("add".equals(subType)) {
+                                yield new AddRequestEvent(gson.fromJson(message, AddOnebotRequest.class));
+                            }
+                            else if ("invite".equals(subType)) {
+                                yield new InviteRequestEvent(gson.fromJson(message, InviteOnebotRequest.class));
+                            }
+                            else {
+                                throw new UnknownMessageTypeException("Unknown sub_type: " + subType);
+                            }
+                        }
+                        default -> throw new UnknownMessageTypeException("Unknown request_type: " + requestType);
                     };
                 }
                 default -> throw new UnknownMessageTypeException("Unknown post_type: " + postType);
             }
+        }
+        else if (raw.containsKey("retcode")) {
+            // TODO: handle API response events
+            return null;
         }
         return null;
     }

@@ -9,5 +9,8 @@ public record InviteOnebotRequest(
         @SerializedName("request_type") String requestType,
         @SerializedName("flag") String flag,
         @SerializedName("user_id") Long userId,
-        @SerializedName("comment") String comment
+        @SerializedName("comment") String comment,
+        // invite
+        @SerializedName("sub_type") String subType,
+        @SerializedName("group_id") Long groupId
 ) implements AbstractOnebotRequest { }
