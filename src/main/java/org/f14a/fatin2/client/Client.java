@@ -3,18 +3,16 @@ package org.f14a.fatin2.client;
 import com.google.gson.Gson;
 import org.f14a.fatin2.Main;
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.event.message.GroupMessageEvent;
-import org.f14a.fatin2.event.message.PrivateMessageEvent;
 import org.f14a.fatin2.type.exception.UnknownMessageTypeException;
-import org.f14a.fatin2.type.message.GroupOnebotMessage;
-import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Client extends WebSocketClient {
     private static Client instance;
@@ -78,6 +76,7 @@ public class Client extends WebSocketClient {
         else {
             Main.LOGGER.warn("Connection lost. Reason: {} - {}, remote = {}", code, reason, remote);
             // Attempt to reconnect
+            sheduleReconnect();
         }
     }
 
@@ -93,11 +92,19 @@ public class Client extends WebSocketClient {
             reconnectExecutor.shutdownNow();
         }
         super.close();
-        Main.LOGGER.info("WebSocket connection closed.");
     }
 
-
-
-    // TODO: Reconnect logic
-
+    private void sheduleReconnect() {
+        if (this.reconnectExecutor == null || this.reconnectExecutor.isShutdown()) {
+            this.reconnectExecutor = Executors.newScheduledThreadPool(1);
+            this.reconnectExecutor.schedule(() -> {
+                Main.LOGGER.info("Attempting to reconnect...");
+                try {
+                    super.reconnect();
+                } catch (Exception e) {
+                    Main.LOGGER.error("Reconnection attempt failed", e);
+                }
+            }, RECONNECT_INTERVAL, TimeUnit.SECONDS);
+        }
+    }
 }

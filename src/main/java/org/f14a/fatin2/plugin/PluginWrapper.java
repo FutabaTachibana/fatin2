@@ -28,8 +28,12 @@ public class PluginWrapper {
         return this.enabled;
     }
     // Setters
-    public void setEnabled(boolean enabled) {
+    public void enable() {
         this.plugin.onEnable();
-        this.enabled = enabled;
+        this.enabled = true;
+    }
+    public void disable() {
+        this.plugin.onDisable();
+        this.enabled = false;
     }
 }

@@ -14,12 +14,12 @@ public class EventBus {
     public static EventBus getInstance() {
         return EventBus.instance;
     }
-    private final ExecutorService executorService;
+    private final ExecutorService asyncService;
     private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<EventListener>> handlers = new ConcurrentHashMap<>();
 
     public EventBus() {
         EventBus.instance = this;
-        this.executorService = new ThreadPoolExecutor(
+        this.asyncService = new ThreadPoolExecutor(
                 4, // core pool size,
                 16, // maximum pool size
                 60L, // keep-alive time
@@ -72,6 +72,11 @@ public class EventBus {
             handlers.computeIfAbsent(eventClass, k -> new CopyOnWriteArrayList<>()).add(new EventListener(listener, method, plugin));
         }
     }
+    public void unregister(Fatin2Plugin plugin) {
+        for (List<EventListener> listenerList : handlers.values()) {
+            listenerList.removeIf(listener -> listener.plugin() == plugin);
+        }
+    }
 
     private List<EventListener> getHandlers(Class<? extends Event> eventClass) {
         return handlers.getOrDefault(eventClass, new CopyOnWriteArrayList<>());
@@ -86,7 +91,7 @@ public class EventBus {
     }
 
     public void postAsync(Event event) {
-        executorService.submit(() -> {
+        asyncService.submit(() -> {
             List<EventListener> eventListeners = getHandlers(event.getClass());
             LOGGER.debug("Found {} handlers for event {}", eventListeners.size(), event.getClass().getName());
             for (EventListener listener : eventListeners) {
@@ -110,5 +115,17 @@ public class EventBus {
                         listener.method().getName(), listener.listener().getClass().getName(), e);
             }
         }
+    }
+    public void shutdown() {
+        LOGGER.info("Shutting down Event Bus...");
+        asyncService.shutdown();
+        try {
+            if (!asyncService.awaitTermination(60, TimeUnit.SECONDS)) {
+                asyncService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            asyncService.shutdownNow();
+        }
+        LOGGER.debug("Event Bus shut down complete.");
     }
 }

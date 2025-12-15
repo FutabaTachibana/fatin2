@@ -45,11 +45,9 @@ public class RawParser {
                     String metaEventType = (String) raw.get("meta_event_type");
                     if("heartbeat".equals(metaEventType)) {
                         return new HeartbeatEvent(gson.fromJson(message, OnebotHeartbeat.class));
-                    }
-                    else if ("lifecycle".equals(metaEventType)) {
+                    } else if ("lifecycle".equals(metaEventType)) {
                         return new LifecycleEvent(gson.fromJson(message, OnebotLifecycle.class));
-                    }
-                    else {
+                    } else {
                         throw new UnknownMessageTypeException("Unknown meta_event_type: " + metaEventType);
                     }
                 }
@@ -81,11 +79,9 @@ public class RawParser {
                             String subType = (String) raw.get("sub_type");
                             if ("add".equals(subType)) {
                                 yield new AddRequestEvent(gson.fromJson(message, AddOnebotRequest.class));
-                            }
-                            else if ("invite".equals(subType)) {
+                            } else if ("invite".equals(subType)) {
                                 yield new InviteRequestEvent(gson.fromJson(message, InviteOnebotRequest.class));
-                            }
-                            else {
+                            } else {
                                 throw new UnknownMessageTypeException("Unknown sub_type: " + subType);
                             }
                         }
@@ -94,8 +90,7 @@ public class RawParser {
                 }
                 default -> throw new UnknownMessageTypeException("Unknown post_type: " + postType);
             }
-        }
-        else if (raw.containsKey("retcode")) {
+        } else if (raw.containsKey("retcode")) {
             // TODO: handle API response events
             return null;
         }

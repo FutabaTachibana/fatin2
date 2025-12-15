@@ -34,21 +34,22 @@ public class Main {
             new EventBus();
 
             // Load plugins
-            PluginManager pluginManager = new PluginManager(config.isPluginAutoReload());
+            new PluginManager(config.isPluginAutoReload());
 
 
             URI serverUri = new URI(config.getWebSocketUrl());
-            Client client = new Client(serverUri, config.getAccessToken());
+            new Client(serverUri, config.getAccessToken());
 
             // Register closure hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down Fatin2...");
-                // pluginManager.shutdown();
-                client.close();
+                PluginManager.getInstance().shutdown();
+                EventBus.getInstance().shutdown();
+                Client.getInstance().close();
             }));
 
             LOGGER.info("Connecting to {}...", serverUri);
-            client.connect();
+            Client.getInstance().connect();
 
             Thread.currentThread().join();
 

@@ -1,7 +1,9 @@
 package org.f14a.fatin2.plugin;
 
 import org.f14a.fatin2.config.Config;
+import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.plugin.integrated.EchoPlugin;
+import org.f14a.fatin2.type.exception.IllegalPluginException;
 import org.f14a.fatin2.type.exception.MainClassNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +30,11 @@ public class PluginLoader {
         }
         // Load each plugin
         for(File file : files) {
-            loadPlugins(file);
+            loadPlugin(file);
         }
     }
 
-    public static void loadPlugins(File jarFile) {
+    public static void loadPlugin(File jarFile) {
         try {
             // Load JAR file
             LOGGER.debug("Loading plugin from: {}", jarFile.getName());
@@ -47,36 +49,81 @@ public class PluginLoader {
             // Check if it implements Fatin2Plugin
             if(!Fatin2Plugin.class.isAssignableFrom(pluginClass)) {
                 classLoader.close();
-                throw new IllegalArgumentException("It is NOT a valid Fatin2 plugin: " + jarFile.getName());
+                throw new IllegalPluginException("It is NOT a valid Fatin2 plugin: " + jarFile.getName());
             }
 
             Fatin2Plugin plugin = (Fatin2Plugin) pluginClass.getDeclaredConstructor().newInstance();
-
-            // TODO: Check if it already loaded
-
+            if(plugin.getName() == null || plugin.getName().isEmpty()) {
+                classLoader.close();
+                throw new IllegalPluginException("Plugin name is empty: " + jarFile.getName());
+            }
+            if (PluginManager.getInstance().getPlugins().containsKey(plugin.getName())) {
+                classLoader.close();
+                throw new IllegalPluginException("Plugin with the same name already loaded: " + plugin.getName());
+            }
             // Instantiate plugin
             PluginWrapper wrapper = new PluginWrapper(plugin, classLoader, jarFile.getAbsolutePath());
-
             // Start lifecycle
             plugin.onLoad();
-            wrapper.setEnabled(true);
-
+            wrapper.enable();
             LOGGER.info("Plugin loaded: {} v{} by{}", plugin.getName(), plugin.getVersion(), plugin.getAuthor());
 
         } catch (Exception e) {
             LOGGER.error("Failed to load plugin from: {}", jarFile.getName(), e);
         }
-
     }
-
     private static void loadIntegratedPlugins() {
         EchoPlugin echoPlugin = new EchoPlugin();
         PluginWrapper wrapper = new PluginWrapper(echoPlugin, null, "Integrated");
         echoPlugin.onLoad();
-        wrapper.setEnabled(true);
+        wrapper.enable();
         LOGGER.info("Integrated Plugin loaded: {} v{} by{}", echoPlugin.getName(), echoPlugin.getVersion(), echoPlugin.getAuthor());
+    }
 
-
+    public static void reloadPlugin(String pluginName) {
+        try {
+            PluginWrapper wrapper = PluginManager.getInstance().getPlugins().get(pluginName);
+            File jarFile = new File(wrapper.getJarPath());
+            if (!jarFile.exists()) {
+                LOGGER.warn("Plugin JAR file not found for reload: {}", wrapper.getJarPath());
+                return;
+            }
+            unloadPlugin(pluginName);
+            // Load plugin again
+            loadPlugin(jarFile);
+        } catch (Exception e) {
+            LOGGER.error("Failed to reload plugin: {}", pluginName, e);
+        }
+    }
+    public static void unloadPlugin(String pluginName) {
+        unloadPlugin(PluginManager.getInstance().getPlugins().get(pluginName), pluginName);
+    }
+    public static void unloadPlugin(PluginWrapper wrapper) {
+        unloadPlugin(wrapper, wrapper.getPlugin().getName());
+    }
+    private static void unloadPlugin(PluginWrapper wrapper, String pluginName) {
+        try {
+            // Remove and get wrapper from plugin manager
+            PluginManager.getInstance().getPlugins().remove(pluginName);
+            // static void unloadPlugin(String pluginName) may take a null wrapper
+            if (wrapper == null) {
+                LOGGER.warn("Plugin {} not found for reload", pluginName);
+                return;
+            } else if (!wrapper.isEnabled()) {
+                LOGGER.warn("Plugin {} is already disabled", pluginName);
+                return;
+            }
+            // Unload current plugin
+            wrapper.disable();
+            if (wrapper.getClassLoader() != null) {
+                wrapper.getClassLoader().close();
+            }
+            // Remove from eventbus
+            EventBus.getInstance().unregister(wrapper.getPlugin());
+            LOGGER.info("Plugin unloaded: {}", pluginName);
+        } catch (Exception e) {
+            LOGGER.error("Failed to unload plugin: {}", pluginName, e);
+        }
     }
 
     // Read main class from MANIFEST.MF
