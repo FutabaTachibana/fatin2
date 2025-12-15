@@ -5,6 +5,10 @@ import org.f14a.fatin2.client.Client;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
 public class PrivateMessageSender {
+    /**
+     * Send a private message.
+     * @param message the original json message.
+     */
     public static void send(PrivateOnebotMessage message){
         String string = message.toString();
         Main.LOGGER.debug("Sending private message: {}", string);

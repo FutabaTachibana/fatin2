@@ -22,6 +22,9 @@ import org.f14a.fatin2.type.request.InviteOnebotRequest;
 
 import java.util.Map;
 
+/**
+* A class contains a static method to parse raw JSON messages into Event objects.
+* */
 public class RawParser {
     public static Event parseRaw(String message) {
         Gson gson = new Gson();

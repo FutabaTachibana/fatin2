@@ -3,6 +3,9 @@ package org.f14a.fatin2.event.request;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.request.InviteOnebotRequest;
 
+/**
+ * Called when someone invite you to a group.
+ */
 public class InviteRequestEvent extends Event {
     private final InviteOnebotRequest request;
     public InviteRequestEvent(InviteOnebotRequest request) {

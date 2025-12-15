@@ -23,7 +23,7 @@ public class PluginLoader {
         loadIntegratedPlugins();
 
         // Load external plugins
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".jar"));;
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".jar"));
         if(files == null || files.length == 0) {
             LOGGER.info("No plugins found in directory: {}", Config.getConfig().getPluginDirectory());
             return;
@@ -66,7 +66,7 @@ public class PluginLoader {
             // Start lifecycle
             plugin.onLoad();
             wrapper.enable();
-            LOGGER.info("Plugin loaded: {} v{} by{}", plugin.getName(), plugin.getVersion(), plugin.getAuthor());
+            LOGGER.info("Plugin loaded: {} v{} by {}", plugin.getName(), plugin.getVersion(), plugin.getAuthor());
 
         } catch (Exception e) {
             LOGGER.error("Failed to load plugin from: {}", jarFile.getName(), e);
@@ -77,68 +77,56 @@ public class PluginLoader {
         PluginWrapper wrapper = new PluginWrapper(echoPlugin, null, "Integrated");
         echoPlugin.onLoad();
         wrapper.enable();
-        LOGGER.info("Integrated Plugin loaded: {} v{} by{}", echoPlugin.getName(), echoPlugin.getVersion(), echoPlugin.getAuthor());
+        LOGGER.info("Integrated Plugin loaded: {} v{} by {}", echoPlugin.getName(), echoPlugin.getVersion(), echoPlugin.getAuthor());
     }
 
-    public static void reloadPlugin(String pluginName) {
+    public static void reloadPlugin(PluginWrapper wrapper) {
         try {
-            PluginWrapper wrapper = PluginManager.getInstance().getPlugins().get(pluginName);
             File jarFile = new File(wrapper.getJarPath());
             if (!jarFile.exists()) {
                 LOGGER.warn("Plugin JAR file not found for reload: {}", wrapper.getJarPath());
                 return;
             }
-            unloadPlugin(pluginName);
+            unloadPlugin(wrapper);
             // Load plugin again
             loadPlugin(jarFile);
         } catch (Exception e) {
-            LOGGER.error("Failed to reload plugin: {}", pluginName, e);
+            LOGGER.error("Failed to reload plugin: {}", wrapper.getPlugin().getName(), e);
         }
     }
-    public static void unloadPlugin(String pluginName) {
-        unloadPlugin(PluginManager.getInstance().getPlugins().get(pluginName), pluginName);
-    }
     public static void unloadPlugin(PluginWrapper wrapper) {
-        unloadPlugin(wrapper, wrapper.getPlugin().getName());
-    }
-    private static void unloadPlugin(PluginWrapper wrapper, String pluginName) {
         try {
             // Remove and get wrapper from plugin manager
-            PluginManager.getInstance().getPlugins().remove(pluginName);
-            // static void unloadPlugin(String pluginName) may take a null wrapper
-            if (wrapper == null) {
-                LOGGER.warn("Plugin {} not found for reload", pluginName);
-                return;
-            } else if (!wrapper.isEnabled()) {
-                LOGGER.warn("Plugin {} is already disabled", pluginName);
+            PluginManager.getInstance().getPlugins().remove(wrapper.getPlugin().getName());
+            if (!wrapper.isEnabled()) {
+                LOGGER.warn("Plugin {} is already disabled", wrapper.getPlugin().getName());
                 return;
             }
             // Unload current plugin
             wrapper.disable();
+            // Close classloader
             if (wrapper.getClassLoader() != null) {
                 wrapper.getClassLoader().close();
             }
-            // Remove from eventbus
-            EventBus.getInstance().unregister(wrapper.getPlugin());
-            LOGGER.info("Plugin unloaded: {}", pluginName);
+            LOGGER.info("Plugin unloaded: {}", wrapper.getPlugin().getName());
         } catch (Exception e) {
-            LOGGER.error("Failed to unload plugin: {}", pluginName, e);
+            LOGGER.error("Failed to unload plugin: {}", wrapper.getPlugin().getName(), e);
         }
     }
 
     // Read main class from MANIFEST.MF
     private static String getMainClass(File jarFile) throws Exception {
-        JarFile jar = new JarFile(jarFile);
-        Manifest manifest = jar.getManifest();
-        if (manifest == null) {
-            throw new MainClassNotFoundException("MANIFEST.MF of {} do NOT exist");
+        try (JarFile jar = new JarFile(jarFile)) {
+            Manifest manifest = jar.getManifest();
+            if (manifest == null) {
+                throw new MainClassNotFoundException("MANIFEST.MF of {} do NOT exist");
+            }
+            Attributes attributes = manifest.getMainAttributes();
+            String mainClass = attributes.getValue("Main-Class");
+            if (mainClass == null || mainClass.isEmpty()) {
+                throw new MainClassNotFoundException("Main-Class not found in MANIFEST.MF of {}");
+            }
+            return mainClass;
         }
-        Attributes attributes = manifest.getMainAttributes();
-        String mainClass = attributes.getValue("Main-Class");
-        if (mainClass == null || mainClass.isEmpty()) {
-            throw new MainClassNotFoundException("Main-Class not found in MANIFEST.MF of {}");
-        }
-        jar.close();
-        return mainClass;
     }
 }

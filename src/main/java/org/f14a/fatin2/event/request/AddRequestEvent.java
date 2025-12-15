@@ -3,6 +3,9 @@ package org.f14a.fatin2.event.request;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.request.AddOnebotRequest;
 
+/**
+* Called when someone sends a group request.
+*/
 public class AddRequestEvent extends Event {
     private final AddOnebotRequest request;
     public AddRequestEvent(AddOnebotRequest request) {
