@@ -3,6 +3,9 @@ package org.f14a.fatin2.event.request;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.request.FriendOnebotRequest;
 
+/**
+ * Called when someone sends a friend request.
+ */
 public class FriendRequestEvent extends Event {
     private final FriendOnebotRequest request;
     public FriendRequestEvent(FriendOnebotRequest request) {

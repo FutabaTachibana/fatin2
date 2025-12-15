@@ -3,16 +3,13 @@ package org.f14a.fatin2;
 import org.f14a.fatin2.client.Client;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.config.ConfigLoader;
-import org.f14a.fatin2.dispatcher.MessageDispatcher;
 import org.f14a.fatin2.event.EventBus;
-import org.f14a.fatin2.handler.GroupMessageHandler;
-import org.f14a.fatin2.handler.PrivateMessageHandler;
-import org.f14a.fatin2.plugin.PluginLoader;
 import org.f14a.fatin2.plugin.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 /*
 * Entry of the application
@@ -23,7 +20,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             // Load Config
-            // Choose Command Line Args fist
+            // Choose Command Line Args first
             String configPath = args.length > 0 ? args[0] : "config.yml";
             LOGGER.info("Loading config from: {}", configPath);
             Config config = ConfigLoader.load(configPath);
@@ -40,7 +37,7 @@ public class Main {
             URI serverUri = new URI(config.getWebSocketUrl());
             new Client(serverUri, config.getAccessToken());
 
-            // Register closure hook
+            // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down Fatin2...");
                 PluginManager.getInstance().shutdown();
@@ -53,8 +50,15 @@ public class Main {
 
             Thread.currentThread().join();
 
+        } catch (URISyntaxException e) {
+            LOGGER.error("Invalid WebSocket URL in config: {}", e.getMessage(), e);
+            System.exit(1);
+        } catch (InterruptedException e) {
+            LOGGER.error("Main thread was interrupted", e);
+            Thread.currentThread().interrupt();
+            System.exit(1);
         } catch (Exception e) {
-            LOGGER.error("Failed to start fatin2", e);
+            LOGGER.error("Failed to start Fatin2 due to unexpected error", e);
             System.exit(1);
         }
     }

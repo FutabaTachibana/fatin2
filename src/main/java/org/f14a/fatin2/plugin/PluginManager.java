@@ -104,9 +104,22 @@ public class PluginManager {
                     Thread.sleep(500);
                     if (kind == StandardWatchEventKinds.ENTRY_MODIFY || kind == StandardWatchEventKinds.ENTRY_CREATE) {
                         LOGGER.info("Detected plugin file change: {}", name);
-                        File file = new File(pluginDir, name);
-                        if (file.exists()) {
-                            PluginLoader.loadPlugin(file);
+                        boolean found = false;
+                        for (Map.Entry<String, PluginWrapper> entry : plugins.entrySet()) {
+                            PluginWrapper wrapper = entry.getValue();
+                            // Reload plugin already loaded from this jar
+                            if (wrapper.getJarPath().endsWith(name)) {
+                                LOGGER.info("Reloading plugin: {}", wrapper.getPlugin().getName());
+                                found = true;
+                                PluginLoader.reloadPlugin(wrapper);
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            // Load new plugin
+                            File jarFile = new File(this.pluginDir, name);
+                            LOGGER.info("Loading new plugin from file: {}", name);
+                            PluginLoader.loadPlugin(jarFile);
                         }
                     }
                 }

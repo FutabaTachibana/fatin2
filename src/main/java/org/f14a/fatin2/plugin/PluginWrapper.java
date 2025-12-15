@@ -1,5 +1,7 @@
 package org.f14a.fatin2.plugin;
 
+import org.f14a.fatin2.event.EventBus;
+
 import java.net.URLClassLoader;
 
 public class PluginWrapper {
@@ -33,7 +35,10 @@ public class PluginWrapper {
         this.enabled = true;
     }
     public void disable() {
+        // Call onDisable
         this.plugin.onDisable();
+        // Remove from eventbus
+        EventBus.getInstance().unregister(this.plugin);
         this.enabled = false;
     }
 }
