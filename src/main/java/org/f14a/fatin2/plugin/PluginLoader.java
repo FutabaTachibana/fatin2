@@ -119,12 +119,12 @@ public class PluginLoader {
         try (JarFile jar = new JarFile(jarFile)) {
             Manifest manifest = jar.getManifest();
             if (manifest == null) {
-                throw new MainClassNotFoundException("MANIFEST.MF of {} do NOT exist");
+                throw new MainClassNotFoundException("MANIFEST.MF of " + jarFile.getAbsolutePath() + " do NOT exist");
             }
             Attributes attributes = manifest.getMainAttributes();
             String mainClass = attributes.getValue("Main-Class");
             if (mainClass == null || mainClass.isEmpty()) {
-                throw new MainClassNotFoundException("Main-Class not found in MANIFEST.MF of {}");
+                throw new MainClassNotFoundException("Main-Class not found in MANIFEST.MF of " + jarFile.getAbsolutePath());
             }
             return mainClass;
         }

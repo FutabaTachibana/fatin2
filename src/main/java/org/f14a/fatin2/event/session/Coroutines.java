@@ -1,4 +1,4 @@
-package org.f14a.fatin2.event;
+package org.f14a.fatin2.event.session;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to mark methods as event handlers.
+ * Annotation to mark methods as coroutine handlers
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EventHandler {
-    EventPriority priority() default EventPriority.NORMAL;
+public @interface Coroutines {
+
 }

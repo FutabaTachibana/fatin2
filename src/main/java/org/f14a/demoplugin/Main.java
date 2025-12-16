@@ -1,4 +1,4 @@
-package org.f14a.fatin2.plugin.integrated;
+package org.f14a.demoplugin;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -12,10 +12,10 @@ import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.f14a.fatin2.util.MessageGenerator;
 import org.f14a.fatin2.util.RequestGenerator;
 
-public class EchoPlugin implements Fatin2Plugin {
+public class Main implements Fatin2Plugin {
     @Override
     public void onLoad() {
-        //EventBus.getInstance().register(this, this);
+        EventBus.getInstance().register(new EventListener(), this);
     }
 
     @Override

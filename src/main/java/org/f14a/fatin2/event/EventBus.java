@@ -2,10 +2,14 @@ package org.f14a.fatin2.event;
 
 import org.f14a.fatin2.event.command.CommandEvent;
 import org.f14a.fatin2.event.command.OnCommand;
+import org.f14a.fatin2.event.session.Coroutines;
+import org.f14a.fatin2.event.session.SessionManager;
+import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +24,10 @@ public class EventBus {
     private final ExecutorService asyncService;
     private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<EventListener>> handlers = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, CopyOnWriteArrayList<EventListener>> commandHandlers = new ConcurrentHashMap<>();
+    private final SessionManager sessionManager;
+    public static SessionManager getSessionManager() {
+        return getInstance().sessionManager;
+    }
 
     public EventBus() {
         EventBus.instance = this;
@@ -33,13 +41,14 @@ public class EventBus {
                     private int count = 0;
                     @Override
                     public Thread newThread(Runnable r) {
-                        Thread thread = new Thread(r, "MessageHandler-" + (count++));
+                        Thread thread = new Thread(r, "Message-Handler-" + (count++));
                         thread.setDaemon(false);
                         return thread;
                     }
                 },
                 new ThreadPoolExecutor.CallerRunsPolicy() // rejection policy
         );
+        this.sessionManager = new SessionManager();
         LOGGER.debug("Event Bus initialized with thread pool");
     }
 
@@ -86,7 +95,7 @@ public class EventBus {
         Class<? extends Event> eventClass = (Class<? extends Event>) eventType;
         // Register the event handler
         handlers.computeIfAbsent(eventClass, k -> new CopyOnWriteArrayList<>())
-                .add(new EventListener(listener, method, plugin, annotation.priority()));
+                .add(new EventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class)));
         return 1;
     }
     private int registerCommand(Object listener, Fatin2Plugin plugin, Method method, OnCommand annotation){
@@ -104,7 +113,8 @@ public class EventBus {
             return 0;
         }
         commandHandlers.computeIfAbsent(annotation.command(), k -> new CopyOnWriteArrayList<>())
-                .add(new EventListener(listener, method, plugin, annotation.priority()));
+                .add(new EventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class)));
+        // TODO: register the aliases as well
         return 1;
     }
     public void unregister(Fatin2Plugin plugin) {
@@ -122,25 +132,36 @@ public class EventBus {
     }
 
     public void post(Event event) {
-        if (event.isAsync()) {
+        if (event instanceof CommandEvent) {
+            postCommand((CommandEvent) event);
+        } else if (event.isAsync()) {
             postAsync(event);
         } else {
             postSync(event);
         }
     }
-
-    public void postAsync(Event event) {
-        asyncService.submit(() -> {
+    private void postAsync(Event event) {
+        this.asyncService.submit(() -> {
             postSync(event);
         });
     }
-    public void postSync(Event event) {
+    private void postSync(Event event) {
         List<EventListener> eventListeners = getHandlers(event.getClass());
         boolean cancelable = event instanceof Cancelable;
         LOGGER.debug("Found {} handlers for event {}", eventListeners.size(), event.getClass().getName());
         for (EventListener listener : eventListeners) {
             try {
-                listener.method().invoke(listener.listener(), event);
+                if(listener.isCoroutine()) {
+                    this.asyncService.submit(() -> {
+                        try {
+                            listener.method().invoke(listener.listener(), event);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } else {
+                    listener.method().invoke(listener.listener(), event);
+                }
                 if (cancelable && ((Cancelable) event).isCancelled()) {
                     LOGGER.debug("Event {} has been cancelled by plugin {}. Stopping further processing.",
                             event.getClass().getName(), listener.plugin().getName());
@@ -152,8 +173,31 @@ public class EventBus {
             }
         }
     }
+    private void postCommand(CommandEvent event) {
+        List<EventListener> eventListeners = getCommandHandlers(event.getCommand());
+        LOGGER.debug("Found {} handlers for command {}", eventListeners.size(), event.getCommand());
+        for (EventListener listener : eventListeners) {
+            try {
+                if(listener.isCoroutine()) {
+                    this.asyncService.submit(() -> {
+                        try {
+                            listener.method().invoke(listener.listener(), event);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } else {
+                    listener.method().invoke(listener.listener(), event);
+                }
+            } catch (Exception e) {
+                EventBus.LOGGER.error("Error invoking command handler method: {} with listener {}",
+                        listener.method().getName(), listener.listener().getClass().getName(), e);
+            }
+        }
+    }
     public void shutdown() {
         LOGGER.info("Shutting down Event Bus...");
+        sessionManager.shutdown();
         asyncService.shutdown();
         try {
             if (!asyncService.awaitTermination(60, TimeUnit.SECONDS)) {

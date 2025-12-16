@@ -2,6 +2,8 @@ package org.f14a.fatin2.client;
 
 import com.google.gson.Gson;
 import org.f14a.fatin2.event.Event;
+import org.f14a.fatin2.event.command.GroupCommandEvent;
+import org.f14a.fatin2.event.command.PrivateCommandEvent;
 import org.f14a.fatin2.event.message.GroupMessageEvent;
 import org.f14a.fatin2.event.message.PrivateMessageEvent;
 import org.f14a.fatin2.event.meta.HeartbeatEvent;
@@ -37,9 +39,9 @@ public class RawParser {
                 case "message" -> {
                     String messageType = (String) raw.get("message_type");
                     if ("private".equals(messageType)) {
-                        return new PrivateMessageEvent(gson.fromJson(message, PrivateOnebotMessage.class));
+                        return PrivateCommandEvent.getCommandOrBasic(gson.fromJson(message, PrivateOnebotMessage.class));
                     } else if ("group".equals(messageType)) {
-                        return new GroupMessageEvent(gson.fromJson(message, GroupOnebotMessage.class));
+                        return GroupCommandEvent.getCommandOrBasic(gson.fromJson(message, GroupOnebotMessage.class));
                     } else {
                         throw new UnknownMessageTypeException("Unknown message_type: " + messageType);
                     }

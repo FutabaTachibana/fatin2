@@ -5,6 +5,7 @@ public class DefaultConfig {
     static final String ACCESS_TOKEN = "";
     static final String COMMAND_PREFIX = "/";
     static final boolean DEBUG = false;
+    static final int MAX_SESSION_DURATION = 60;
     static final String PLUGIN_DIRECTORY = "plugins";
     static final boolean PLUGIN_AUTO_RELOAD = false;
 }
