@@ -7,6 +7,12 @@ plugins {
 group = 'org.f14a.fatin2'
 version = '2.0.0'
 
+// Java版本配置
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 repositories {
     mavenCentral()
 }
@@ -27,26 +33,43 @@ dependencies {
 
     // Tools
     implementation 'org.apache.commons:commons-lang3:3.18.0'
-
-    // Lombok
-//    compileOnly 'org.projectlombok:lombok:1.18.30'
-//    annotationProcessor 'org.projectlombok:lombok:1.18.30'
-
 }
 
 application {
     mainClass = 'org.f14a.fatin2.Main'
 }
 
+// Define a separate source set for the plugin
+sourceSets {
+    plugin {
+        java {
+            srcDir 'src/main/java'
+            include 'org/f14a/demoplugin/**'
+        }
+        compileClasspath += sourceSets.main.output
+    }
+}
+
+// Dependencies for the plugin source set
+dependencies {
+    pluginCompileOnly sourceSets.main.output
+}
+
 // Create a fat JAR (also known as uber JAR)
 task fatJar(type: Jar) {
     archiveBaseName.set('fatin2')
     archiveVersion.set(version)
-    archiveClassifier.set('')
+    archiveClassifier.set('all')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes 'Main-Class': application.mainClass
+        attributes(
+            'Main-Class': application.mainClass.get(),
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Built-By': System.getProperty('user.name'),
+            'Built-JDK': System.getProperty('java.version')
+        )
     }
 
     from {
@@ -62,20 +85,110 @@ task fatJar(type: Jar) {
 jar {
     archiveBaseName.set('fatin2')
     archiveVersion.set(version)
-    archiveClassifier.set('plain')
+    archiveClassifier.set('')
+
+    exclude 'org/f14a/demoplugin/**'
+
+    manifest {
+        attributes(
+            'Main-Class': application.mainClass.get(),
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version
+        )
+    }
 }
 
-build.dependsOn fatJar, jar
+// Shadow JAR
+shadowJar {
+    archiveBaseName.set('fatin2')
+    archiveVersion.set(version)
+    archiveClassifier.set('shadow')
+
+    exclude 'org/f14a/demoplugin/**'
+
+    manifest {
+        attributes(
+            'Main-Class': application.mainClass.get(),
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version
+        )
+    }
+}
+
+// Build the demo plugin JAR
+task buildPlugin(type: Jar) {
+    group = 'plugin'
+    description = 'Build the demo plugin JAR'
+
+    archiveBaseName.set('demoplugin')
+    archiveVersion.set(version)
+    archiveClassifier.set('')
+
+    // 只包含demoplugin的类
+    from(sourceSets.main.output) {
+        include 'org/f14a/demoplugin/**'
+    }
+
+    // Set the output directory to the plugins folder
+    destinationDirectory.set(file("$projectDir/run/plugins"))
+
+    manifest {
+        attributes(
+            'Name': 'DemoPlugin',
+            'Version': project.version,
+            'Main-Class': 'org.f14a.demoplugin.Main'
+        )
+    }
+
+    // Make sure the run/plugins directory exists
+    doFirst {
+        file("$projectDir/run/plugins").mkdirs()
+    }
+}
+
+// Run the bot with the demo plugin
+task runPlugin(type: JavaExec) {
+    group = 'plugin'
+    description = 'Run the bot with the demo plugin'
+
+    dependsOn buildPlugin, classes
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.f14a.fatin2.Main'
+    workingDir = file("$projectDir/run")
+
+    // Make sure the run/plugins directory exists
+    doFirst {
+        file("$projectDir/run").mkdirs()
+        file("$projectDir/run/plugins").mkdirs()
+    }
+
+    if (project.hasProperty('args')) {
+        args project.args.split('\\s+')
+    }
+}
+
+// Do not forget to build both JARs during the build process
+build.dependsOn jar, shadowJar
+
+// Add a task to build all artifacts
+task buildAll {
+    group = 'build'
+    description = 'Build all artifacts including fat JAR'
+    dependsOn build, fatJar
+}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 }
 
 task runBot(type: JavaExec) {
+    group = 'application'
+    description = 'Run the Fatin2 bot'
+
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'org.f14a.fatin2.Main'
-
-    // Debug environment
     workingDir = file("$projectDir/run")
 
     // Create run directory if it doesn't exist
@@ -87,3 +200,9 @@ task runBot(type: JavaExec) {
         args project.args.split('\\s+')
     }
 }
+
+// Clean up the plugin JAR on clean task
+clean {
+    delete "$projectDir/run/plugins/demoplugin-${version}.jar"
+}
+

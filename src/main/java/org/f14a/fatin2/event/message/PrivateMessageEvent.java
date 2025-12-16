@@ -5,9 +5,10 @@ import org.f14a.fatin2.util.MessageSender;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
-public class PrivateMessageEvent extends Event {
+public class PrivateMessageEvent extends MessageEvent {
     private final PrivateOnebotMessage message;
     public PrivateMessageEvent(PrivateOnebotMessage message) {
+        super(message, MessageType.PRIVATE);
         this.message = message;
     }
 
@@ -16,17 +17,9 @@ public class PrivateMessageEvent extends Event {
     }
 
     @Override
-    public boolean isAsync() {
-        return true;
+    public void send(String message) {
+        MessageSender.sendPrivate(this.message.userId(), message);
+        finishSession();
     }
 
-    @Override
-    public void fire() {
-        new MessageEvent(this.message).fire();
-        super.fire();
-    }
-
-    public void reply(String sendMessages) {
-        MessageSender.sendPrivate(this.message.userId(), sendMessages);
-    }
 }

@@ -6,49 +6,59 @@ Fatin2 是一个通过 WebSocket 连接上游（例如 Onebot 客户端）接收
 
 ## 特性
 - **高性能异步处理** - 基于线程池的异步事件处理机制
-- **插件化架构** - 支持热加载/热重载插件，无需重启
+- **插件化架构** - 支持热加载/热重载插件，无需重启，支持使用 Java 或 Kotlin 开发插件
 - **完善的事件系统** - 灵活的事件监听器，支持优先级和取消机制
+- **多种消息类型支持** - 支持私聊、群聊、讨论组等多种消息类型
+- **命令处理** - 内置命令解析与处理功能
+- **会话管理** - 支持用户会话状态管理
 - **配置** -使用 YAML 配置应用。
 
 ## 系统要求与依赖
+- 操作系统：跨平台（Windows、Linux、macOS等）
 - Java 17 或更高版本
 - Gradle 8.0+（或使用项目自带的 Gradle Wrapper）
 - 支持的 Onebot 客户端。
 
-## 快速开始（构建与运行）
-### 使用 Gradle 构建
-使用 `./gradlew shadowJar` 构建项目。
+## 快速开始
+### 构建 fatin2 主程序
+```bash
+# 构建项目
+./gradlew build
 
-输出文件:  build/libs/fatin2-2.0.0.jar
+# 构建标准 JAR（不含依赖）
+./gradlew jar
+
+# 构建 Shadow JAR（包含所有依赖）
+./gradlew shadowJar
+
+# 构建所有类型的 JAR
+./gradlew buildAll
+```
 
 ### 运行
-使用 `java -jar build/libs/fatin2-2.0.0.jar` 运行项目。
+使用 `java -jar build/libs/fatin2-2.0.0-shadow.jar` 运行项目。
 
 ### IDE
 推荐使用 IntelliJ IDEA 构建项目。
+
+在 IntelliJ IDEA 中打开项目后，等待 Gradle 同步完成即可运行和调试。
 
 ## 配置说明
 默认示例配置位于 `config.yml`：
 
 ```yaml
-# NapCat WebSocket 连接地址
+# WebSocket address
 websocket_url: ws://localhost:3001
-
-# 访问令牌（如果 NapCat 配置了 token）
+# Token (set "" if no token is required)
 access_token: ""
-
-# 日志配置
-log: 
-  # 日志级别:  TRACE, DEBUG, INFO, WARN, ERROR
-  level: INFO
-  # 日志文件路径
-  path: ./logs
-
-# 插件配置
+# Command prefix for bot commands
+command_prefix: "/"
+# Debug mode
+debug: false
 plugin:
-  # 插件目录
-  directory: ./plugins
-  # 自动重载插件
+  # directory without dot or slash(backslash in Windows) means relative path to working directory.
+  directory: plugins
+  # watch plugin directory for changes and reload automatically
   auto_reload: true
 ```
 
@@ -76,6 +86,23 @@ OneBotMessage 解析
 EventBus 分发事件
     ↓
 按优先级调用监听器
-    ↓
-返回事件结果（TODO）
 ```
+
+## 其它
+### 贡献
+欢迎提交 issue 或 pull request 贡献代码。
+
+### 许可证
+本项目采用 **MIT** 许可证。
+
+### AI说明
+该项目部分内容由 AI 协助生成，但本人已对所有生成内容进行了审核与修改，确保代码质量与可用性。
+
+项目中以下内容完全由 AI 生成: 
+- README.md
+- build.gradle
+- logback.xml
+
+项目中以下内容部分由 AI 生成:
+- README_CN.md
+- 部分代码及注释

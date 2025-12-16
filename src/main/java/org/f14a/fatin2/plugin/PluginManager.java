@@ -76,7 +76,7 @@ public class PluginManager {
                     StandardWatchEventKinds.ENTRY_MODIFY,
                     StandardWatchEventKinds.ENTRY_DELETE
             );
-            this.watchThread = new Thread(this::watchLoop, "PluginAutoReloadThread");
+            this.watchThread = new Thread(this::watchLoop, "Plugin-AutoReload");
             this.watchThread.setDaemon(true);
             this.watchThread.start();
             LOGGER.info("Plugin auto-reload service enable");
