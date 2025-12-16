@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonObject;
-import org.f14a.fatin2.client.sender.GroupMessageSender;
+import org.f14a.fatin2.util.MessageSender;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 
@@ -13,6 +13,9 @@ public class GroupMessageEvent extends Event {
 
     public GroupOnebotMessage getMessage() {
         return message;
+    }
+    public long getGroupId() {
+        return message.groupId() != null ? message.groupId() : null;
     }
 
     @Override
@@ -26,7 +29,7 @@ public class GroupMessageEvent extends Event {
         super.fire();
     }
 
-    public void reply(JsonObject ... sendMessages) {
-        GroupMessageSender.send(new GroupOnebotMessage(this.message.groupId(), sendMessages));
+    public void reply(String sendMessages) {
+        MessageSender.sendGroup(this.message.groupId(), sendMessages);
     }
 }

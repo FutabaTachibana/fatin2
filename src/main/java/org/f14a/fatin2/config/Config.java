@@ -7,6 +7,7 @@ package org.f14a.fatin2.config;
 public class Config {
     private String webSocketUrl;
     private String accessToken;
+    private String commandPrefix;
     private boolean debug;
     private String pluginDirectory;
     private boolean pluginAutoReload;
@@ -22,6 +23,12 @@ public class Config {
     }
     public void setAccessToken(Object accessToken) {
         this.accessToken = accessToken.toString();
+    }
+    public String getCommandPrefix() {
+        return commandPrefix;
+    }
+    public void setCommandPrefix(Object commandPrefix) {
+        this.commandPrefix = commandPrefix.toString();
     }
     public boolean isDebug() {
         return this.debug;

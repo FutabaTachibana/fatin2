@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -29,11 +30,16 @@ public class ConfigLoader {
         Config config = new Config();
         config.setWebSocketUrl(data.getOrDefault("websocket_url", DefaultConfig.WEBSOCKET_URL));
         config.setAccessToken(data.getOrDefault("access_token", DefaultConfig.ACCESS_TOKEN));
+        config.setCommandPrefix(data.getOrDefault("command_prefix", DefaultConfig.COMMAND_PREFIX));
         config.setDebug(data.getOrDefault("debug", DefaultConfig.DEBUG));
         if (data.containsKey("plugin")) {
             @SuppressWarnings("unchecked")
             Map<String, Object> pluginData = (Map<String, Object>) data.get("plugin");
             config.setPluginDirectory(data.getOrDefault("directory", DefaultConfig.PLUGIN_DIRECTORY));
+            if (!config.getCommandPrefix().startsWith(".") && !config.getCommandPrefix().startsWith("!")) {
+                config.setCommandPrefix("." + File.separator + config.getCommandPrefix());
+                Main.LOGGER.debug("Plugin directory reset to: {}", config.getPluginDirectory());
+            }
             config.setPluginAutoReload(data.getOrDefault("auto_reload", DefaultConfig.PLUGIN_AUTO_RELOAD));
         }
         else {

@@ -72,7 +72,7 @@ public class Client extends WebSocketClient {
         else {
             Main.LOGGER.warn("Connection lost. Reason: {} - {}, remote = {}", code, reason, remote);
             // Attempt to reconnect
-            sheduleReconnect();
+            scheduleReconnect();
         }
     }
 
@@ -90,7 +90,7 @@ public class Client extends WebSocketClient {
         super.close();
     }
 
-    private void sheduleReconnect() {
+    private void scheduleReconnect() {
         if (this.reconnectExecutor == null || this.reconnectExecutor.isShutdown()) {
             this.reconnectExecutor = Executors.newScheduledThreadPool(1);
             this.reconnectExecutor.schedule(() -> {

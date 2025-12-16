@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonObject;
-import org.f14a.fatin2.client.sender.PrivateMessageSender;
+import org.f14a.fatin2.util.MessageSender;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
@@ -26,7 +26,7 @@ public class PrivateMessageEvent extends Event {
         super.fire();
     }
 
-    public void reply(JsonObject ... sendMessages) {
-        PrivateMessageSender.send(new PrivateOnebotMessage(this.message.userId(), sendMessages));
+    public void reply(String sendMessages) {
+        MessageSender.sendPrivate(this.message.userId(), sendMessages);
     }
 }
