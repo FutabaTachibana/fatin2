@@ -1,4 +1,4 @@
-package org.f14a.fatin2.client;
+package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
 import java.util.ArrayList;

@@ -1,6 +1,5 @@
 package org.f14a.fatin2.plugin;
 
-
 import org.f14a.fatin2.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

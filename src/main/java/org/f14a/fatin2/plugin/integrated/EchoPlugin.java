@@ -4,9 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.EventHandler;
+import org.f14a.fatin2.event.command.CommandEvent;
+import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.message.GroupMessageEvent;
 import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.util.MessageGenerator;
+import org.f14a.fatin2.util.RequestGenerator;
 
 public class EchoPlugin implements Fatin2Plugin {
     @Override
@@ -34,13 +38,8 @@ public class EchoPlugin implements Fatin2Plugin {
         return "Fatin2";
     }
 
-    @EventHandler
-    public void onMessage(MessageEvent event) {
-        if (event.getMessage().rawMessage().startsWith("/echo ")) {
-            String reply = event.getMessage().rawMessage().substring(5);
-            String raw_reply = "{\"type\":\"text\",\"data\":{\"text\":\"" + reply + "\"}}";
-            Gson gson = new Gson();
-            event.reply(gson.fromJson(raw_reply, JsonObject.class));
-        }
+    @OnCommand(command = "echo")
+    public void onEcho(CommandEvent event) {
+        event.reply(event.getMessage().rawMessage().substring(6).trim());
     }
 }

@@ -1,4 +1,4 @@
-package org.f14a.fatin2.client;
+package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
 import java.util.LinkedHashMap;
@@ -26,7 +26,7 @@ public class RequestGenerator {
          * @param groupId the group identifier
          * @return this builder instance for method chaining
          */
-        public RequestBuilder groupId(String groupId) {
+        public RequestBuilder groupId(Long groupId) {
             this.fields.put("group_id", groupId);
             return this;
         }
@@ -35,7 +35,7 @@ public class RequestGenerator {
          * @param userId the user identifier
          * @return this builder instance for method chaining
          */
-        public RequestBuilder userId(String userId) {
+        public RequestBuilder userId(Long userId) {
             this.fields.put("user_id", userId);
             return this;
         }
@@ -96,6 +96,14 @@ public class RequestGenerator {
 
     /**
      * Creates a new RequestBuilder instance.
+     * <Blockquote><pre>
+     * RequestGenerator.builder().userId(1925451275L).message(
+     *         MessageGenerator.builder().segment("text")
+     *                 .data("text", "你好")
+     *                 .end()
+     *                 .build()
+     * ).build();
+     * </pre></Blockquote>
      * @return a new builder instance
      */
     public static RequestBuilder builder() {
