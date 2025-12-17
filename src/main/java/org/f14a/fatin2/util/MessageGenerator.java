@@ -48,6 +48,28 @@ public class MessageGenerator {
         public SegmentBuilder segment(String type) {
             return new SegmentBuilder(this, type);
         }
+
+        public MessageBuilder text(String text) {
+            Map<String, String> data = new HashMap<>();
+            data.put("text", text);
+            return addSegment("text", data);
+        }
+
+        public MessageBuilder at(long userId) {
+            Map<String, String> data = new HashMap<>();
+            data.put("qq", Long.toString(userId));
+            return addSegment("at", data);
+        }
+        public MessageBuilder face(Faces faces){
+            Map<String, String> data = new HashMap<>();
+            data.put("id", Integer.toString(faces.slot()));
+            return addSegment("face", data);
+        }
+        public MessageBuilder reply(long messageId){
+            Map<String, String> data = new HashMap<>();
+            data.put("id", Long.toString(messageId));
+            return addSegment("reply", data);
+        }
         /**
          * Builds and returns the JSON string representation of the message array.
          * @return JSON formatted string

@@ -8,9 +8,8 @@ public class PrivateCommandEvent extends PrivateMessageEvent implements CommandE
     private final String[] args;
 
     public static PrivateMessageEvent getCommandOrBasic(PrivateOnebotMessage message) {
-        // TODO: parse command without raw
-        if (message.rawMessage().startsWith("/")) {
-            String[] splits = message.rawMessage().split(" ");
+        if (message.parse().startsWith("/")) {
+            String[] splits = message.parse().split(" ");
             String command = splits[0].substring(1);
             String[] args = new String[splits.length - 1];
             System.arraycopy(splits, 1, args, 0, splits.length - 1);

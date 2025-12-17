@@ -1,8 +1,8 @@
 package org.f14a.fatin2.type.message;
 
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import org.f14a.fatin2.type.AbstractOnebotMessage;
+import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.Sender;
 
 /*
@@ -22,11 +22,20 @@ public interface OnebotMessage extends AbstractOnebotMessage {
     @SerializedName("user_id")
     Long userId();
     @SerializedName("message")
-    JsonObject[] message();
+    Message[] message();
+    @Deprecated
     @SerializedName("raw_message")
     String rawMessage();
     @SerializedName("font")
     Integer font();
     @SerializedName("sender")
     Sender sender();
+
+    default String parse(){
+        StringBuilder sb = new StringBuilder();
+        for(Message msg : this.message()) {
+            sb.append(msg.parse());
+        }
+        return sb.toString();
+    }
 }

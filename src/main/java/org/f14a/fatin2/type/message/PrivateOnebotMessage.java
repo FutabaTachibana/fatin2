@@ -2,6 +2,7 @@ package org.f14a.fatin2.type.message;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.Sender;
 
 import java.util.Arrays;
@@ -14,16 +15,16 @@ public record PrivateOnebotMessage(
         @SerializedName("sub_type") String subType,
         @SerializedName("message_id") String messageId,
         @SerializedName("user_id") Long userId,
-        @SerializedName("message") JsonObject[] message,
+        @SerializedName("message") Message[] message,
         @SerializedName("raw_message") String rawMessage,
         @SerializedName("font") Integer font,
         @SerializedName("sender") Sender sender
 ) implements OnebotMessage {
-    public PrivateOnebotMessage(Long userId, JsonObject... message){
+    public PrivateOnebotMessage(Long userId, Message... message){
         this(null, null, null, null, null, null, userId, message, null, null, null);
     }
     @Override
     public String toString() {
-        return "{\"user_id\":\"" + this.userId + "\",\"message\":" + String.join(",", Arrays.toString(this.message)) + "}";
+        return "{\"user_id\":\"" + this.userId + "\",\"message\":" + Arrays.toString(this.message) + "}";
     }
 }

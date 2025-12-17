@@ -14,8 +14,8 @@ import java.util.function.Consumer;
  */
 public class SessionContext<T extends Event> {
     private final String sessionId;
-    private final String userId;
-    private final String scope;
+    private final long userId;
+    private final long scope;
     private final long createTime;
     private long lastActiveTime;
     private int timeout; // in seconds
@@ -28,7 +28,7 @@ public class SessionContext<T extends Event> {
     private Consumer<T> onFinish;
     private T currentEvent;
 
-    public SessionContext(String sessionId, String userId, String scope) {
+    public SessionContext(String sessionId, long userId, long scope) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.scope = scope;
@@ -76,10 +76,10 @@ public class SessionContext<T extends Event> {
     public String getSessionId() {
         return this.sessionId;
     }
-    public String getUserId() {
+    public long getUserId() {
         return this.userId;
     }
-    public String getScope() {
+    public long getScope() {
         return this.scope;
     }
     public boolean isActive() {
@@ -102,6 +102,9 @@ public class SessionContext<T extends Event> {
     }
     public void setCurrentEvent(T event) {
         this.currentEvent = event;
+    }
+    public T getCurrentEvent(){
+        return this.currentEvent;
     }
     public long getCreateTime() {
         return this.createTime;
