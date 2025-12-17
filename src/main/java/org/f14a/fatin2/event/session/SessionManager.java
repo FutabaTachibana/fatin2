@@ -27,7 +27,14 @@ public class SessionManager {
         EventBus.LOGGER.info("SessionManager initialized");
     }
 
-    public <T extends Event> SessionContext<T> createSession(String userId, String scope) {
+    /**
+     * Create a new session for a user in a specific scope.
+     * @param userId ID of the user triggering the session.
+     * @param scope Scope of the session, is chosen from group ID and user ID.
+     * @return The created SessionContext.
+     * @param <T> The type of event associated with the session.
+     */
+    public <T extends Event> SessionContext<T> createSession(long userId, long scope) {
         String userKey = userId + "@" + scope;
         if (this.userSessions.containsKey(userKey)) {
             String oldSessionId = this.userSessions.get(userKey);
@@ -43,21 +50,18 @@ public class SessionManager {
 
     @SuppressWarnings("unchecked")
     public <T extends Event> SessionContext<T> getSession(String sessionId) {
-        return (SessionContext<T>) this.sessions.get(sessionId);
-    }
-    @SuppressWarnings("unchecked")
-    public <T extends Event> SessionContext<T> getSession(String useId, String scope) {
-        String sessionId = this.userSessions.get(useId + "@" + scope);
-        if(sessionId != null) {
-            SessionContext<T> context = (SessionContext<T>) this.sessions.get(sessionId);
-            if (context != null && context.isActive()) {
-                return context;
-            }
+        SessionContext<T> context = (SessionContext<T>) this.sessions.get(sessionId);
+        if (context != null && context.isActive()) {
+            return context;
         }
         return null;
     }
-    public boolean hasActiveSession(String useId, String scope) {
-        return this.getSession(useId, scope) != null;
+    public <T extends Event> SessionContext<T> getSession(long useId, long scope) {
+        String sessionId = this.userSessions.get(useId + "@" + scope);
+        if(sessionId != null) {
+            return getSession(sessionId);
+        }
+        return null;
     }
     public void endSession(String sessionId) {
         SessionContext<?> context = this.sessions.remove(sessionId);
@@ -67,12 +71,6 @@ public class SessionManager {
             this.userSessions.remove(userKey);
             userSessions.remove(userKey);
             EventBus.LOGGER.debug("Ended session {}", sessionId);
-        }
-    }
-    public void receiveInput(String useId, String scope, String input) {
-        SessionContext<?> context = getSession(useId, scope);
-        if (context != null) {
-            context.receiveInput(input);
         }
     }
     // Cleanup of expired sessions lazily called every fixed interval

@@ -10,6 +10,7 @@ import org.f14a.fatin2.type.message.OnebotMessage;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public abstract class MessageEvent extends Event {
     private final OnebotMessage message;
@@ -64,36 +65,51 @@ public abstract class MessageEvent extends Event {
     public String waitSilent() {
         return wait(null);
     }
-    public void finishSession() {
+    protected void finishSession() {
         if (this.sessionContext != null) {
             EventBus.getSessionManager().endSession(this.sessionContext.getSessionId());
             this.sessionContext = null;
         }
     }
+    public void setTimeOut(int seconds) {
+        createSessionContext();
+        this.sessionContext.setTimeout(seconds);
+    }
+    public void setOnTimeout(Consumer<MessageEvent> callback) {
+        createSessionContext();
+        this.sessionContext.setOnTimeout(callback);
+    }
+    public void setOnFinish(Consumer<MessageEvent> callback) {
+        createSessionContext();
+        this.sessionContext.setOnFinish(callback);
+    }
+    public MessageEvent getSessionEvent() {
+        createSessionContext();
+        return this.sessionContext.getCurrentEvent();
+    }
 
     @Override
     public void fire() {
         SessionManager sessionManager = EventBus.getSessionManager();
-        String scope = message.userId() + "@" + (messageType == MessageType.PRIVATE
-                ? message.userId()
-                : ((GroupOnebotMessage) this.getMessage()).groupId());
-        SessionContext<MessageEvent> context = sessionManager.getSession(Long.toString(message.userId()), scope);
+        long scope = messageType == MessageType.PRIVATE ?
+                message.userId() : ((GroupOnebotMessage) this.getMessage()).groupId();
+        SessionContext<MessageEvent> context = sessionManager.getSession(message.userId(), scope);
         // Check if an active session exists
         // Do NOT dispatch to other handlers if in session
-        if (context != null && context.isActive()) {
-            context.receiveInput(message.rawMessage());
+        if (context != null) {
+            context.setCurrentEvent(this);
+            context.receiveInput(message.parse());
         } else {
             super.fire();
         }
     }
-
     private void createSessionContext() {
         if (this.sessionContext == null) {
             this.sessionContext = EventBus.getSessionManager().createSession(
-                    Long.toString(message.userId()),
-                    message.userId() + "@" + (messageType == MessageType.PRIVATE
+                    message.userId(),
+                    messageType == MessageType.PRIVATE
                             ? message.userId()
-                            : ((GroupOnebotMessage) this.getMessage()).groupId())
+                            : ((GroupOnebotMessage) this.getMessage()).groupId()
             );
         }
     }

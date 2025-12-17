@@ -22,6 +22,7 @@ public class EventBus {
         return EventBus.instance;
     }
     private final ExecutorService asyncService;
+    private final ExecutorService virtualAsyncService;
     private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<EventListener>> handlers = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, CopyOnWriteArrayList<EventListener>> commandHandlers = new ConcurrentHashMap<>();
     private final SessionManager sessionManager;
@@ -48,6 +49,7 @@ public class EventBus {
                 },
                 new ThreadPoolExecutor.CallerRunsPolicy() // rejection policy
         );
+        this.virtualAsyncService = Executors.newVirtualThreadPerTaskExecutor();
         this.sessionManager = new SessionManager();
         LOGGER.debug("Event Bus initialized with thread pool");
     }
@@ -152,7 +154,7 @@ public class EventBus {
         for (EventListener listener : eventListeners) {
             try {
                 if(listener.isCoroutine()) {
-                    this.asyncService.submit(() -> {
+                    this.virtualAsyncService.submit(() -> {
                         try {
                             listener.method().invoke(listener.listener(), event);
                         } catch (Exception e) {
