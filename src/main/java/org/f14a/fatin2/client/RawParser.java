@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
 * A class contains a static method to parse raw JSON messages into Event objects.
-* */
+*/
 public class RawParser {
     public static Event parseRaw(String message) {
         Gson gson = new Gson();
@@ -97,6 +97,11 @@ public class RawParser {
             }
         } else if (raw.containsKey("retcode")) {
             // TODO: handle API response events
+            // To match the message sent, there are 2 ways:
+            // 1. Return the hash code after sending a message, and while receiving the response,
+            //    match the hash code to identify the response.
+            // 2. send() method provides a callback function to handle the response,
+            //    it should be Consumer<Long>.
             return null;
         }
         return null;

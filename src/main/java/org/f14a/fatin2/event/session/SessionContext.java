@@ -37,7 +37,7 @@ public class SessionContext<T extends Event> {
         this.timeout = 60;
         this.active = true;
     }
-    public CompletableFuture<String> waitForInput(String prompt) {
+    public CompletableFuture<String> waitForInput() {
         this.lastActiveTime = System.currentTimeMillis();
         this.waitingFuture = new CompletableFuture<>();
 

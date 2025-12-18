@@ -1,16 +1,26 @@
 package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
-* A class contains some helper methods to generate request HTTP bodies.
-* */
+ * You can use this class to generate WebSocket request JSON strings. <br>
+ * It uses the Builder pattern to allow flexible and readable JSON construction.
+ * <Blockquote><pre>
+ * RequestGenerator.builder().userId(114514L).message(
+ *         MessageGenerator.builder()
+ *                 .segment("text").data("text", "你好").end()
+ *                 .build()
+ * ).build();
+ * </pre></Blockquote>
+ */
 public class RequestGenerator {
     private static final Gson gson = new Gson();
     /**
-     * Builder class for constructing WebSocket request JSON strings.
+     * Builder class for constructing WebSocket request JSON strings. <br>
      * Uses the Builder pattern to allow flexible and readable JSON construction.
      */
     public static class RequestBuilder {
@@ -44,7 +54,7 @@ public class RequestGenerator {
          * @param message the message content
          * @return this builder instance for method chaining
          */
-        public RequestBuilder message(String message) {
+        public RequestBuilder message(JsonElement message) {
             this.fields.put("message", message);
             return this;
         }
@@ -95,16 +105,8 @@ public class RequestGenerator {
     }
 
     /**
-     * Creates a new RequestBuilder instance.
-     * <Blockquote><pre>
-     * RequestGenerator.builder().userId(1925451275L).message(
-     *         MessageGenerator.builder().segment("text")
-     *                 .data("text", "你好")
-     *                 .end()
-     *                 .build()
-     * ).build();
-     * </pre></Blockquote>
-     * @return a new builder instance
+     * Starts building a new WebSocket request.
+     * @return a RequestBuilder instance
      */
     public static RequestBuilder builder() {
         return new RequestBuilder();

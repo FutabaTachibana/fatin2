@@ -1,16 +1,38 @@
 package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import org.f14a.fatin2.Main;
+import org.f14a.fatin2.type.Message;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Generator for constructing Message arrays in JSON format.
+ * Generator for constructing Message arrays in JSON format.<br>
  * A Message is an array of segments, where each segment contains:
- * - "type": String
- * - "data": Map<String, String>
+ * <ul>
+ * <li>"type": String
+ * <li>"data": Map<String, String>
+ * </ul>
+ * You can use this class to generate WebSocket request JSON strings.
+ * It uses the Builder pattern to allow flexible and readable JSON construction.
+ * <Blockquote><pre>
+ * String message = MessageGenerator.builder()
+ *         .segment("text").data("text", "你好").end()
+ *         // Or use `text("你好")` directly
+ *         .build();
+ * </pre></Blockquote>
+ * You can also use static methods for simple segments:
+ * <Blockquote><pre>
+ * String message = MessageGenerator.create(
+ *         MessageGenerator.at(114514L),
+ *         MessageGenerator.text("你好")
+ * );
+ * </pre></Blockquote>
  */
 public class MessageGenerator {
     private static final Gson gson = new Gson();
@@ -32,7 +54,7 @@ public class MessageGenerator {
          * @param data the segment data map
          * @return this builder instance for method chaining
          */
-        public MessageBuilder addSegment(String type, Map<String, String> data) {
+        public MessageBuilder addSegment(String type, Map<String, Object> data) {
             Map<String, Object> segment = new HashMap<>();
             segment.put("type", type);
             segment.put("data", data);
@@ -49,24 +71,24 @@ public class MessageGenerator {
             return new SegmentBuilder(this, type);
         }
 
+        // TODO: Check the type of data values, they should be String, but may be Integer in some cases.
         public MessageBuilder text(String text) {
-            Map<String, String> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("text", text);
             return addSegment("text", data);
         }
-
         public MessageBuilder at(long userId) {
-            Map<String, String> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("qq", Long.toString(userId));
             return addSegment("at", data);
         }
         public MessageBuilder face(Faces faces){
-            Map<String, String> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("id", Integer.toString(faces.slot()));
             return addSegment("face", data);
         }
         public MessageBuilder reply(long messageId){
-            Map<String, String> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("id", Long.toString(messageId));
             return addSegment("reply", data);
         }
@@ -74,8 +96,8 @@ public class MessageGenerator {
          * Builds and returns the JSON string representation of the message array.
          * @return JSON formatted string
          */
-        public String build() {
-            return gson.toJson(segments);
+        public JsonElement build() {
+            return gson.toJsonTree(segments);
         }
         /**
          * Returns the segments list (for testing or advanced usage).
@@ -92,7 +114,7 @@ public class MessageGenerator {
     public static class SegmentBuilder {
         private final MessageBuilder parent;
         private final String type;
-        private final Map<String, String> data;
+        private final Map<String, Object> data;
         /**
          * Constructor for SegmentBuilder.
          * @param parent the parent MessageBuilder
@@ -109,7 +131,7 @@ public class MessageGenerator {
          * @param value the field value
          * @return this SegmentBuilder for method chaining
          */
-        public SegmentBuilder data(String key, String value) {
+        public SegmentBuilder data(String key, Object value) {
             this.data.put(key, value);
             return this;
         }
@@ -128,5 +150,65 @@ public class MessageGenerator {
      */
     public static MessageBuilder builder() {
         return new MessageBuilder();
+    }
+
+    /**
+     * Creates a message array JSON string from the given segments.
+     * It is much simpler to use the Builder for complex messages.
+     * <Blockquote><pre>
+     * String message = MessageGenerator.create(
+     *         MessageGenerator.at(114514L),
+     *         MessageGenerator.text("你好")
+     * );
+     * </pre></Blockquote>
+     * Available static methods:
+     * <ui>
+     * <li> text(String text)
+     * <li> at(long userId)
+     * <li> face(Faces faces)
+     * <li> reply(long messageId)
+     * </ui>
+     * @param messages a series of message some static methods return, e.g. MessageGenerator.text("Hello")
+     * @return JSON formatted string
+     */
+    public static JsonElement create(JsonElement ... messages) {
+        JsonArray arr = new JsonArray();
+        for (JsonElement msg : messages) {
+            arr.add(msg);
+        }
+        return arr;
+    }
+    public static JsonElement create(Message ... messages) {
+        JsonArray arr = new JsonArray();
+        for (Message msg : messages) {
+            arr.add(gson.toJsonTree(msg));
+        }
+        return arr;
+    }
+    // TODO: Check the type of data values, they should be String, but may be Integer in some cases.
+    // TODO: Optimize these methods to avoid constructing JSON strings manually.
+    public static JsonElement text(String text) {
+        return gson.toJsonTree(Map.of(
+                "type", "text",
+                "data", Map.of("text", text)
+        ));
+    }
+    public static JsonElement at(long userId) {
+        return gson.toJsonTree(Map.of(
+                "type", "at",
+                "data", Map.of("qq", Long.toString(userId))
+        ));
+    }
+    public static JsonElement face(Faces faces){
+        return gson.toJsonTree(Map.of(
+                "type", "face",
+                "data", Map.of("id", Integer.toString(faces.slot()))
+        ));
+    }
+    public static JsonElement reply(long messageId) {
+        return gson.toJsonTree(Map.of(
+                "type", "reply",
+                "data", Map.of("id", Long.toString(messageId))
+        ));
     }
 }

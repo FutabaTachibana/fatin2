@@ -1,5 +1,6 @@
 package org.f14a.fatin2.type;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import org.f14a.fatin2.util.Faces;
 
@@ -9,11 +10,12 @@ public record Message(
         @SerializedName("type") String type,
         @SerializedName("data") Map<String, Object> data
 ) {
+    private static final Gson gson = new Gson();
     public String parse() {
         return switch (this.type) {
             case "text" -> (String) this.data.get("text");
             case "at" -> " @" + this.data.get("qq") + " ";
-            case "face" -> " [face:" + Faces.meaningOf((int) this.data.get("id")) + " ]";
+            case "face" -> " [face:" + Faces.meaningOf(Integer.parseInt((String) this.data.get("id"))) + "] ";
             case "record" -> " [voice] ";
             case "image" -> " [image] ";
             case "video" -> " [video] ";
@@ -24,6 +26,6 @@ public record Message(
     }
     @Override
     public String toString() {
-        return "{\"type\":\"" + this.type + "\",\"data\":" + this.data.toString() + "}";
+        return "{\"type\":\"" + this.type + "\",\"data\":" + gson.toJson(this.data) + "}";
     }
 }

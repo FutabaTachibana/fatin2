@@ -1,11 +1,8 @@
 package org.f14a.fatin2.type.message;
 
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.Sender;
-
-import java.util.Arrays;
 
 public record GroupOnebotMessage(
         @SerializedName("time") Long time,
@@ -16,17 +13,7 @@ public record GroupOnebotMessage(
         @SerializedName("message_id") String messageId,
         @SerializedName("user_id") Long userId,
         @SerializedName("message") Message[] message,
-        @SerializedName("raw_message") String rawMessage,
         @SerializedName("font") Integer font,
         @SerializedName("sender") Sender sender,
         @SerializedName("group_id") Long groupId
-) implements OnebotMessage {
-    // new GroupOnebotMessage(groupId, message...)
-    public GroupOnebotMessage(Long groupId, Message... message) {
-        this(null, null, null, null, null, null, null, message, null, null, null, groupId);
-    }
-    @Override
-    public String toString() {
-        return "{\"group_id\":\"" + this.groupId + "\",\"message\":" + Arrays.toString(this.message) + "}";
-    }
-}
+) implements OnebotMessage { }

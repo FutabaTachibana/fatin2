@@ -1,5 +1,6 @@
 package org.f14a.fatin2.event.message;
 
+import com.google.gson.JsonElement;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
@@ -41,19 +42,34 @@ public abstract class MessageEvent extends Event {
         return true;
     }
 
-    public void send(String message) {
+    /**
+     * A simple method to send messages, it cannot end the handler but can finish the session.
+     * @param message the message created by MessageGenerator to send.
+     */
+    public void send(JsonElement message) {
+        sendOnly(message);
+        finishSession();
+    }
+    public void sendOnly(JsonElement message) {
         if (this.messageType == MessageType.PRIVATE) {
-            MessageSender.sendPrivate(((PrivateOnebotMessage) this.message).userId(), message);
+            MessageSender.sendPrivate(this.message.userId(), message);
         } else if (this.messageType == MessageType.GROUP) {
             MessageSender.sendGroup(((GroupOnebotMessage) this.message).groupId(), message);
         }
-        finishSession();
     }
-
-    public String wait(String message) {
-        this.send(message);
+    /**
+     * Wait for user input after sending a message, it will create a session and hang the handler until user reply or timeout.
+     * @param prompt the message created by MessageGenerator to send before waiting.
+     * @return the user input message content, or null if timeout or error occurs.
+     */
+    public String wait(JsonElement prompt) {
+        if (this.messageType == MessageType.PRIVATE) {
+            MessageSender.sendPrivate(this.message.userId(), prompt);
+        } else if (this.messageType == MessageType.GROUP) {
+            MessageSender.sendGroup(((GroupOnebotMessage) this.message).groupId(), prompt);
+        }
         createSessionContext();
-        CompletableFuture<String> future = this.sessionContext.waitForInput(message);
+        CompletableFuture<String> future = this.sessionContext.waitForInput();
         String reply;
         try {
             reply = future.get();
@@ -62,6 +78,11 @@ public abstract class MessageEvent extends Event {
         }
         return reply;
     }
+
+    /**
+     * Wait for user input without sending any message.
+     * @return the user input message content, or null if timeout or error occurs.
+     */
     public String waitSilent() {
         return wait(null);
     }

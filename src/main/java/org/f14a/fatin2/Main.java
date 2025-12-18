@@ -43,10 +43,11 @@ public class Main {
                 PluginManager.getInstance().shutdown();
                 EventBus.getInstance().shutdown();
                 Client.getInstance().close();
-            }));
+            }, "Shutdown-Hook-Thread"));
 
             LOGGER.info("Connecting to {}...", serverUri);
             Client.getInstance().connect();
+
 
             Thread.currentThread().join();
 

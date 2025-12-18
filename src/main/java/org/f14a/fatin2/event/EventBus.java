@@ -1,30 +1,36 @@
 package org.f14a.fatin2.event;
 
-import org.f14a.fatin2.event.command.CommandEvent;
-import org.f14a.fatin2.event.command.OnCommand;
+import org.f14a.fatin2.event.command.*;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.event.session.SessionManager;
-import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EventBus {
     public static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
-    public static EventBus instance;
-    public static EventBus getInstance() {
-        return EventBus.instance;
-    }
+    private static final Map<Class<?>, CommandEventListener.Scope> SCOPE_BY_EVENT = Map.of(
+            CommandEvent.class, CommandEventListener.Scope.BOTH,
+            PrivateCommandEvent.class, CommandEventListener.Scope.PRIVATE,
+            GroupCommandEvent.class, CommandEventListener.Scope.GROUP
+    );
     private final ExecutorService asyncService;
     private final ExecutorService virtualAsyncService;
     private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<EventListener>> handlers = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, CopyOnWriteArrayList<EventListener>> commandHandlers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, CopyOnWriteArrayList<CommandEventListener>> commandHandlers = new ConcurrentHashMap<>();
+
+    private static EventBus instance;
+    public static EventBus getInstance() {
+        return EventBus.instance;
+    }
     private final SessionManager sessionManager;
     public static SessionManager getSessionManager() {
         return getInstance().sessionManager;
@@ -102,6 +108,7 @@ public class EventBus {
     }
     private int registerCommand(Object listener, Fatin2Plugin plugin, Method method, OnCommand annotation){
         Class<?>[] paramTypes = method.getParameterTypes();
+        AtomicInteger count = new AtomicInteger();
         if (paramTypes.length != 1) {
             LOGGER.warn("Method {} in class {} is annotated with @OnCommand but does not have exactly one parameter. Skipping registration.",
                     method.getName(), listener.getClass().getName());
@@ -114,14 +121,24 @@ public class EventBus {
                     method.getName(), listener.getClass().getName(), eventType.getName());
             return 0;
         }
+        CommandEventListener.Scope scope = SCOPE_BY_EVENT.get(eventType);
         commandHandlers.computeIfAbsent(annotation.command(), k -> new CopyOnWriteArrayList<>())
-                .add(new EventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class)));
-        // TODO: register the aliases as well
-        return 1;
+                .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope));
+        count.getAndIncrement();
+        Arrays.stream(annotation.alias()).toList().forEach(command -> {
+            commandHandlers.computeIfAbsent(command, k -> new CopyOnWriteArrayList<>())
+                    .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope));
+            count.getAndIncrement();
+        });
+        return count.get();
     }
     public void unregister(Fatin2Plugin plugin) {
         // Unregister from common event handlers
         for (List<EventListener> listenerList : handlers.values()) {
+            listenerList.removeIf(listener -> listener.plugin() == plugin);
+        }
+        // unregister from command handlers
+        for (List<CommandEventListener> listenerList : commandHandlers.values()) {
             listenerList.removeIf(listener -> listener.plugin() == plugin);
         }
     }
@@ -129,14 +146,15 @@ public class EventBus {
     private List<EventListener> getHandlers(Class<? extends Event> eventClass) {
         return handlers.getOrDefault(eventClass, new CopyOnWriteArrayList<>());
     }
-    private List<EventListener> getCommandHandlers(String command) {
+    private List<CommandEventListener> getCommandHandlers(String command) {
         return commandHandlers.getOrDefault(command, new CopyOnWriteArrayList<>());
     }
 
     public void post(Event event) {
         if (event instanceof CommandEvent) {
             postCommand((CommandEvent) event);
-        } else if (event.isAsync()) {
+        }
+        if (event.isAsync()) {
             postAsync(event);
         } else {
             postSync(event);
@@ -144,13 +162,23 @@ public class EventBus {
     }
     private void postAsync(Event event) {
         this.asyncService.submit(() -> {
-            postSync(event);
+            postSync(event, event.getClass());
         });
     }
     private void postSync(Event event) {
-        List<EventListener> eventListeners = getHandlers(event.getClass());
+        postSync(event, event.getClass());
+    }
+    @SuppressWarnings("unchecked")
+    private void postSync(Event event, Class<? extends Event> clazz) {
+        if (clazz == null || !Event.class.isAssignableFrom(clazz)) {
+            return;
+        }
+        // Handle superclass first
+        postSync(event, (Class<? extends Event>) clazz.getSuperclass());
+
+        List<EventListener> eventListeners = getHandlers(clazz);
         boolean cancelable = event instanceof Cancelable;
-        LOGGER.debug("Found {} handlers for event {}", eventListeners.size(), event.getClass().getName());
+        LOGGER.debug("Found {} handlers for event {}", eventListeners.size(), clazz.getName());
         for (EventListener listener : eventListeners) {
             try {
                 if(listener.isCoroutine()) {
@@ -166,7 +194,7 @@ public class EventBus {
                 }
                 if (cancelable && ((Cancelable) event).isCancelled()) {
                     LOGGER.debug("Event {} has been cancelled by plugin {}. Stopping further processing.",
-                            event.getClass().getName(), listener.plugin().getName());
+                            clazz.getName(), listener.plugin().getName());
                     break;
                 }
             } catch (Exception e) {
@@ -176,11 +204,18 @@ public class EventBus {
         }
     }
     private void postCommand(CommandEvent event) {
-        List<EventListener> eventListeners = getCommandHandlers(event.getCommand());
+        List<CommandEventListener> eventListeners = getCommandHandlers(event.getCommand());
         LOGGER.debug("Found {} handlers for command {}", eventListeners.size(), event.getCommand());
-        for (EventListener listener : eventListeners) {
+        for (CommandEventListener listener : eventListeners) {
             try {
-                if(listener.isCoroutine()) {
+                if (!switch (listener.scope()) {
+                    case BOTH -> true;
+                    case PRIVATE -> event instanceof PrivateCommandEvent;
+                    case GROUP -> event instanceof GroupCommandEvent;
+                }) {
+                    continue;
+                }
+                if (listener.isCoroutine()) {
                     this.asyncService.submit(() -> {
                         try {
                             listener.method().invoke(listener.listener(), event);

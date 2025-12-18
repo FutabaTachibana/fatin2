@@ -3,6 +3,9 @@ package org.f14a.fatin2.util;
 import org.f14a.fatin2.Main;
 import org.f14a.fatin2.client.Client;
 
+/**
+ * A utility class for applying request.
+ */
 public class RequestSender {
     /**
      * Handle group request.
