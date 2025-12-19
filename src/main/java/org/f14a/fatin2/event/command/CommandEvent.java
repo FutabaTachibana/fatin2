@@ -1,18 +1,20 @@
 package org.f14a.fatin2.event.command;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.message.MessageEvent;
+import org.f14a.fatin2.type.MessageType;
+import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.type.message.OnebotMessage;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public interface CommandEvent {
     String getCommand();
     String[] getArgs();
     OnebotMessage getMessage();
-    MessageEvent.MessageType getMessageType();
+    MessageType getMessageType();
     String wait(JsonArray message);
     String wait(JsonObject... message);
     String waitSilent();
@@ -20,6 +22,8 @@ public interface CommandEvent {
     int send(JsonObject... message);
     int sendOnly(JsonArray message);
     int sendOnly(JsonObject... message);
+    CompletableFuture<Response> sendFuture(JsonArray message);
+    CompletableFuture<Response> sendFuture(JsonObject... message);
     void setTimeOut(int seconds);
     void setOnTimeout(Consumer<MessageEvent> callback);
     void setOnFinish(Consumer<MessageEvent> callback);

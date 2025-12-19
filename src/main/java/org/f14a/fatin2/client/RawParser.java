@@ -12,6 +12,8 @@ import org.f14a.fatin2.event.notice.*;
 import org.f14a.fatin2.event.request.AddRequestEvent;
 import org.f14a.fatin2.event.request.FriendRequestEvent;
 import org.f14a.fatin2.event.request.InviteRequestEvent;
+import org.f14a.fatin2.event.response.ResponseEvent;
+import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.type.exception.UnknownMessageTypeException;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
@@ -102,7 +104,7 @@ public class RawParser {
             //    match the hash code to identify the response.
             // 2. send() method provides a callback function to handle the response,
             //    it should be Consumer<Long>.
-            return null;
+            return new ResponseEvent(gson.fromJson(message, Response.class));
         }
         return null;
     }

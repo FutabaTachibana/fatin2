@@ -4,26 +4,27 @@ import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 
 public class Main implements Fatin2Plugin {
+    // This method is called when the plugin is loaded
     @Override
     public void onLoad() {
         EventBus.getInstance().register(new EventListener(), this);
     }
-
+    // This method is called when the plugin is enabled
     @Override
     public void onEnable() {
 
     }
-
+    // This method is called when the plugin is disabled, including during shutdown
     @Override
     public void onDisable() {
 
     }
-
+    // What do you name for this plugin
     @Override
     public String getName() {
         return "Echo";
     }
-
+    // The name of yours
     @Override
     public String getAuthor() {
         return "Fatin2";

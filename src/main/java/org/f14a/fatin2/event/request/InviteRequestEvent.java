@@ -16,10 +16,10 @@ public class InviteRequestEvent extends Event {
         return this.request;
     }
     public long getUserId() {
-        return this.request.userId() != null ? this.request.userId() : 0L;
+        return this.request.userId();
     }
     public long getGroupId() {
-        return this.request.groupId() != null ? this.request.groupId() : 0L;
+        return this.request.groupId();
     }
     public void agree() {
         RequestSender.approveGroup(this.request.flag(), true);

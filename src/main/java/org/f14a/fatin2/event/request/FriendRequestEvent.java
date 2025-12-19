@@ -13,7 +13,7 @@ public class FriendRequestEvent extends Event {
         this.request = request;
     }
     public long getUserId() {
-        return this.request.userId() != null ? this.request.userId() : 0L;
+        return this.request.userId();
     }
     public void agree() {
         RequestSender.approveFriend(this.request.flag(), true);

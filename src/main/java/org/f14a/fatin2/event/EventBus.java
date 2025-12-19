@@ -1,6 +1,7 @@
 package org.f14a.fatin2.event;
 
 import org.f14a.fatin2.event.command.*;
+import org.f14a.fatin2.event.response.ResponseManager;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.event.session.SessionManager;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
@@ -35,6 +36,10 @@ public class EventBus {
     public static SessionManager getSessionManager() {
         return getInstance().sessionManager;
     }
+    private final ResponseManager responseManager;
+    public static ResponseManager getResponseManager() {
+        return getInstance().responseManager;
+    }
 
     public EventBus() {
         EventBus.instance = this;
@@ -57,6 +62,7 @@ public class EventBus {
         );
         this.virtualAsyncService = Executors.newVirtualThreadPerTaskExecutor();
         this.sessionManager = new SessionManager();
+        this.responseManager = new ResponseManager();
         LOGGER.debug("Event Bus initialized with thread pool");
     }
 
@@ -235,6 +241,7 @@ public class EventBus {
     public void shutdown() {
         LOGGER.info("Shutting down Event Bus...");
         sessionManager.shutdown();
+        responseManager.shutdown();
         asyncService.shutdown();
         try {
             if (!asyncService.awaitTermination(60, TimeUnit.SECONDS)) {

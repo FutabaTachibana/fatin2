@@ -3,6 +3,7 @@ package org.f14a.fatin2.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.type.Faces;
 import org.f14a.fatin2.type.Message;
 
 import java.util.ArrayList;

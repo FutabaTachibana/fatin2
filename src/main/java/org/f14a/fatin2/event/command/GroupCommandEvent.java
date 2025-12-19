@@ -8,6 +8,7 @@ public class GroupCommandEvent extends GroupMessageEvent implements CommandEvent
     private final String[] args;
 
     public static GroupMessageEvent getCommandOrBasic(GroupOnebotMessage message) {
+        // TODO: split command and args.
         if (message.parse().startsWith("/")) {
             String[] splits = message.parse().split(" ");
             String command = splits[0].substring(1);

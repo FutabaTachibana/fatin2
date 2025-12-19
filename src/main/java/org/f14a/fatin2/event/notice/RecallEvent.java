@@ -3,6 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.notice.AbstractOnebotNotice;
 
+// TODO: Need to refactor
 public class RecallEvent extends Event {
     private final AbstractOnebotNotice notice;
     public enum RecallType {

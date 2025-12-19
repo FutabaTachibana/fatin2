@@ -2,7 +2,6 @@ package org.f14a.fatin2.type;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import org.f14a.fatin2.util.Faces;
 
 import java.util.Map;
 

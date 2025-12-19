@@ -1,4 +1,4 @@
-package org.f14a.fatin2.util;
+package org.f14a.fatin2.type;
 
 import java.util.HashMap;
 import java.util.Map;

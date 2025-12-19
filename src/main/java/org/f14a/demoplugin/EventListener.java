@@ -7,17 +7,21 @@ import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.type.Message;
+import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.util.MessageGenerator;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.random.RandomGenerator;
 
 public class EventListener {
+    // Example for command handling
     @OnCommand(command = "echo")
     public void onEcho(CommandEvent event) {
         Message[] message = event.getMessage().message();
         event.send(MessageGenerator.create(Arrays.copyOfRange(message, 1, message.length)));
     }
+    // Example for coroutine handling and session management
     @OnCommand(command = "guess")
     @Coroutines
     public void onGuessNumber(GroupCommandEvent event) {
@@ -30,10 +34,25 @@ public class EventListener {
         }
         event.send(MessageGenerator.text("恭喜你，成功猜中数字" + number));
     }
+    // Example for raw message handling
     @EventHandler
     public void onCallMe(MessageEvent event) {
         if (event.getMessage().parse().contains("Fatin")) {
             event.send(MessageGenerator.text("有什么事情吗"));
         }
     }
+    @OnCommand(command = "sendandrecall")
+    public void onSendAndRecall(CommandEvent event) {
+        CompletableFuture<Response> future = event.sendFuture(MessageGenerator.text("这条消息将在5秒后被撤回"));
+        future.thenAccept(response -> {
+            // Recall the message after 5 seconds
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            event.send(MessageGenerator.text("骗你的，我没撤回"));
+        });
+    }
+
 }

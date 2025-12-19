@@ -1,28 +1,22 @@
 package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
+import org.f14a.fatin2.type.MessageType;
+import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.util.MessageGenerator;
-import org.f14a.fatin2.util.MessageSender;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 import org.f14a.fatin2.type.message.OnebotMessage;
-import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public abstract class MessageEvent extends Event {
     private final OnebotMessage message;
-
-    public enum MessageType {
-        PRIVATE,
-        GROUP
-    }
 
     private final MessageType messageType;
     private SessionContext<MessageEvent> sessionContext;
@@ -65,6 +59,7 @@ public abstract class MessageEvent extends Event {
     }
     /**
      * Wait for user input after sending a message, it will create a session and hang the handler until user reply or timeout.
+     * It can be used only in coroutine handlers.
      * @param prompt the message created by MessageGenerator to send before waiting.
      * @return the user input message content, or null if timeout or error occurs.
      */
@@ -82,6 +77,12 @@ public abstract class MessageEvent extends Event {
     }
     public String wait(JsonObject ... prompts) {
         return wait(MessageGenerator.create(prompts));
+    }
+    public CompletableFuture<Response> sendFuture(JsonArray message) {
+        return EventBus.getResponseManager().registerFuture(String.valueOf(send(message)), 30);
+    }
+    public CompletableFuture<Response> sendFuture(JsonObject ... messages) {
+        return EventBus.getResponseManager().registerFuture(String.valueOf(send(messages)), 30);
     }
     /**
      * Wait for user input without sending any message.
