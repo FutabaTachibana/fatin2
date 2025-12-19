@@ -1,6 +1,7 @@
 package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -50,12 +51,16 @@ public class RequestGenerator {
             this.fields.put("user_id", userId);
             return this;
         }
+        public RequestBuilder messageId(long messageId) {
+            this.fields.put("message_id", messageId);
+            return this;
+        }
         /**
          * Sets the message field.
          * @param message the message content
          * @return this builder instance for method chaining
          */
-        public RequestBuilder message(JsonElement message) {
+        public RequestBuilder message(JsonArray message) {
             this.fields.put("message", message);
             return this;
         }

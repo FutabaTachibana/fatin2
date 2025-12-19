@@ -12,9 +12,9 @@ public record Message(
     private static final Gson gson = new Gson();
     public String parse() {
         return switch (this.type) {
-            case "text" -> (String) this.data.get("text");
+            case "text" -> this.data.get("text").toString();
             case "at" -> " @" + this.data.get("qq") + " ";
-            case "face" -> " [face:" + Faces.meaningOf(Integer.parseInt((String) this.data.get("id"))) + "] ";
+            case "face" -> " [face:" + Faces.meaningOf(Integer.parseInt(this.data.get("id").toString())) + "] ";
             case "record" -> " [voice] ";
             case "image" -> " [image] ";
             case "video" -> " [video] ";
@@ -25,6 +25,7 @@ public record Message(
     }
     @Override
     public String toString() {
-        return "{\"type\":\"" + this.type + "\",\"data\":" + gson.toJson(this.data) + "}";
+        return gson.toJson(this);
     }
+    // TODO: Implement unformatted text parsing
 }

@@ -68,4 +68,21 @@ public class RequestSender {
     public static int approveFriend(String flag, boolean approve) {
         return approveFriend(flag, approve, "");
     }
+    /**
+     * Delete a message.
+     * @param messageId the message ID to delete.
+     * @return the echo of the request, for tracking the message status.
+     */
+    public static int deleteMessage(long messageId) {
+        JsonObject jsonObject = RequestGenerator.builder().messageId(messageId).build();
+        int echo = jsonObject.hashCode();
+        String request = gson.toJson(Map.of(
+                "action", "delete_msg",
+                "params", jsonObject,
+                "echo", Integer.toString(echo)
+        ));
+        Main.LOGGER.debug("Deleting message: {}", request);
+        Client.getInstance().send(request);
+        return echo;
+    }
 }

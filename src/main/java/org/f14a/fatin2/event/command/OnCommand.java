@@ -16,4 +16,5 @@ public @interface OnCommand {
     EventPriority priority() default EventPriority.NORMAL;
     String command();
     String[] alias() default {};
+    boolean needAt() default false;
 }

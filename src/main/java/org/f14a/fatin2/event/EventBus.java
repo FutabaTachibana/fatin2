@@ -129,11 +129,11 @@ public class EventBus {
         }
         CommandEventListener.Scope scope = SCOPE_BY_EVENT.get(eventType);
         commandHandlers.computeIfAbsent(annotation.command(), k -> new CopyOnWriteArrayList<>())
-                .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope));
+                .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt()));
         count.getAndIncrement();
         Arrays.stream(annotation.alias()).toList().forEach(command -> {
             commandHandlers.computeIfAbsent(command, k -> new CopyOnWriteArrayList<>())
-                    .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope));
+                    .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt()));
             count.getAndIncrement();
         });
         return count.get();

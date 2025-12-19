@@ -9,8 +9,10 @@ import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.util.MessageGenerator;
+import org.f14a.fatin2.util.RequestSender;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.random.RandomGenerator;
 
@@ -18,8 +20,21 @@ public class EventListener {
     // Example for command handling
     @OnCommand(command = "echo")
     public void onEcho(CommandEvent event) {
-        Message[] message = event.getMessage().message();
-        event.send(MessageGenerator.create(Arrays.copyOfRange(message, 1, message.length)));
+        // Do NOT edit the original message array directly
+        Message[] messages = Arrays.copyOf(event.getMessage().message(), event.getMessage().message().length);
+        for (int i = 0; i < messages.length; i++) {
+            if (messages[i].parse().startsWith("/echo")) {
+                try {
+                    messages[i] = new Message(messages[i].type(), Map.of(
+                            "text", messages[i].parse().replace("/echo ", "").trim()
+                    ));
+                    break;
+                } catch (Exception e) {
+                    return;
+                }
+            }
+        }
+        event.send(MessageGenerator.create(messages));
     }
     // Example for coroutine handling and session management
     @OnCommand(command = "guess")
@@ -41,6 +56,7 @@ public class EventListener {
             event.send(MessageGenerator.text("有什么事情吗"));
         }
     }
+    // Example for action after sending successfully and message recall
     @OnCommand(command = "sendandrecall")
     public void onSendAndRecall(CommandEvent event) {
         CompletableFuture<Response> future = event.sendFuture(MessageGenerator.text("这条消息将在5秒后被撤回"));
@@ -51,8 +67,7 @@ public class EventListener {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            event.send(MessageGenerator.text("骗你的，我没撤回"));
+            RequestSender.deleteMessage(response.getMessageId());
         });
     }
-
 }

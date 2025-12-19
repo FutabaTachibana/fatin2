@@ -98,12 +98,6 @@ public class RawParser {
                 default -> throw new UnknownMessageTypeException("Unknown post_type: " + postType);
             }
         } else if (raw.containsKey("retcode")) {
-            // TODO: handle API response events
-            // To match the message sent, there are 2 ways:
-            // 1. Return the hash code after sending a message, and while receiving the response,
-            //    match the hash code to identify the response.
-            // 2. send() method provides a callback function to handle the response,
-            //    it should be Consumer<Long>.
             return new ResponseEvent(gson.fromJson(message, Response.class));
         }
         return null;
