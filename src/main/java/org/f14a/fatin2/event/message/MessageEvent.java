@@ -1,9 +1,12 @@
 package org.f14a.fatin2.event.message;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
+import org.f14a.fatin2.util.MessageGenerator;
 import org.f14a.fatin2.util.MessageSender;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
@@ -45,29 +48,28 @@ public abstract class MessageEvent extends Event {
     /**
      * A simple method to send messages, it cannot end the handler but can finish the session.
      * @param message the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
      */
-    public void send(JsonElement message) {
-        sendOnly(message);
+    public int send(JsonArray message) {
         finishSession();
+        return sendOnly(message);
     }
-    public void sendOnly(JsonElement message) {
-        if (this.messageType == MessageType.PRIVATE) {
-            MessageSender.sendPrivate(this.message.userId(), message);
-        } else if (this.messageType == MessageType.GROUP) {
-            MessageSender.sendGroup(((GroupOnebotMessage) this.message).groupId(), message);
-        }
+    public int send(JsonObject ... messages) {
+        finishSession();
+        return sendOnly(MessageGenerator.create(messages));
+    }
+    // Exactly abstract method to send message subclasses must override.
+    abstract public int sendOnly(JsonArray message);
+    public int sendOnly(JsonObject ... messages) {
+        return sendOnly(MessageGenerator.create(messages));
     }
     /**
      * Wait for user input after sending a message, it will create a session and hang the handler until user reply or timeout.
      * @param prompt the message created by MessageGenerator to send before waiting.
      * @return the user input message content, or null if timeout or error occurs.
      */
-    public String wait(JsonElement prompt) {
-        if (this.messageType == MessageType.PRIVATE) {
-            MessageSender.sendPrivate(this.message.userId(), prompt);
-        } else if (this.messageType == MessageType.GROUP) {
-            MessageSender.sendGroup(((GroupOnebotMessage) this.message).groupId(), prompt);
-        }
+    public String wait(JsonArray prompt) {
+        sendOnly(prompt);
         createSessionContext();
         CompletableFuture<String> future = this.sessionContext.waitForInput();
         String reply;
@@ -78,13 +80,15 @@ public abstract class MessageEvent extends Event {
         }
         return reply;
     }
-
+    public String wait(JsonObject ... prompts) {
+        return wait(MessageGenerator.create(prompts));
+    }
     /**
      * Wait for user input without sending any message.
      * @return the user input message content, or null if timeout or error occurs.
      */
     public String waitSilent() {
-        return wait(null);
+        return wait((JsonArray) null);
     }
     protected void finishSession() {
         if (this.sessionContext != null) {

@@ -23,10 +23,10 @@ public class GroupAdminEvent extends Event {
         };
     }
     public long getGroupId() {
-        return this.notice.groupId() != null ? this.notice.groupId() : 0L;
+        return this.notice.groupId();
     }
     public long getUserId() {
-        return this.notice.userId() != null ? this.notice.userId() : 0L;
+        return this.notice.userId();
     }
     @Override
     public boolean isAsync() {

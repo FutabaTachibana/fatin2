@@ -15,10 +15,10 @@ public class HonorEvent extends Event {
         return this.notify.honorType();
     }
     public long getGroupId() {
-        return this.notify.groupId() != null ? this.notify.groupId() : 0L;
+        return this.notify.groupId();
     }
     public long getUserId() {
-        return this.notify.userId() != null ? this.notify.userId() : 0L;
+        return this.notify.userId();
     }
     @Override
     public boolean isAsync() {

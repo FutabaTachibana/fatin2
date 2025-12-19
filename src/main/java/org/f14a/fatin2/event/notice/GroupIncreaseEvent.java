@@ -23,13 +23,13 @@ public class GroupIncreaseEvent extends Event {
         };
     }
     public long getGroupId(){
-        return this.notice.groupId() != null ? this.notice.groupId() : 0L;
+        return this.notice.groupId();
     }
     public long getOperatorId(){
-        return this.notice.operatorId() != null ? this.notice.operatorId() : 0L;
+        return this.notice.operatorId();
     }
     public long getUserId(){
-        return this.notice.userId() != null ? this.notice.userId() : 0L;
+        return this.notice.userId();
     }
     @Override
     public boolean isAsync() {

@@ -2,8 +2,7 @@ package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.f14a.fatin2.Main;
+import com.google.gson.JsonObject;
 import org.f14a.fatin2.type.Message;
 
 import java.util.ArrayList;
@@ -70,8 +69,6 @@ public class MessageGenerator {
         public SegmentBuilder segment(String type) {
             return new SegmentBuilder(this, type);
         }
-
-        // TODO: Check the type of data values, they should be String, but may be Integer in some cases.
         public MessageBuilder text(String text) {
             Map<String, Object> data = new HashMap<>();
             data.put("text", text);
@@ -96,8 +93,8 @@ public class MessageGenerator {
          * Builds and returns the JSON string representation of the message array.
          * @return JSON formatted string
          */
-        public JsonElement build() {
-            return gson.toJsonTree(segments);
+        public JsonArray build() {
+            return gson.toJsonTree(segments).getAsJsonArray();
         }
         /**
          * Returns the segments list (for testing or advanced usage).
@@ -171,44 +168,42 @@ public class MessageGenerator {
      * @param messages a series of message some static methods return, e.g. MessageGenerator.text("Hello")
      * @return JSON formatted string
      */
-    public static JsonElement create(JsonElement ... messages) {
+    public static JsonArray create(JsonObject ... messages) {
         JsonArray arr = new JsonArray();
-        for (JsonElement msg : messages) {
+        for (JsonObject msg : messages) {
             arr.add(msg);
         }
         return arr;
     }
-    public static JsonElement create(Message ... messages) {
+    public static JsonArray create(Message ... messages) {
         JsonArray arr = new JsonArray();
         for (Message msg : messages) {
             arr.add(gson.toJsonTree(msg));
         }
         return arr;
     }
-    // TODO: Check the type of data values, they should be String, but may be Integer in some cases.
-    // TODO: Optimize these methods to avoid constructing JSON strings manually.
-    public static JsonElement text(String text) {
+    public static JsonObject text(String text) {
         return gson.toJsonTree(Map.of(
                 "type", "text",
                 "data", Map.of("text", text)
-        ));
+        )).getAsJsonObject();
     }
-    public static JsonElement at(long userId) {
+    public static JsonObject at(long userId) {
         return gson.toJsonTree(Map.of(
                 "type", "at",
                 "data", Map.of("qq", Long.toString(userId))
-        ));
+        )).getAsJsonObject();
     }
-    public static JsonElement face(Faces faces){
+    public static JsonObject face(Faces faces){
         return gson.toJsonTree(Map.of(
                 "type", "face",
                 "data", Map.of("id", Integer.toString(faces.slot()))
-        ));
+        )).getAsJsonObject();
     }
-    public static JsonElement reply(long messageId) {
+    public static JsonObject reply(long messageId) {
         return gson.toJsonTree(Map.of(
                 "type", "reply",
                 "data", Map.of("id", Long.toString(messageId))
-        ));
+        )).getAsJsonObject();
     }
 }

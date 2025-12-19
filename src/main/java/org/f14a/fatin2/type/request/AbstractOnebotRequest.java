@@ -7,6 +7,6 @@ public interface AbstractOnebotRequest extends AbstractOnebotMessage {
     // friend | group
     @SerializedName("request_type") String requestType();
     @SerializedName("flag") String flag();
-    @SerializedName("user_id") Long userId();
+    @SerializedName("user_id") long userId();
     @SerializedName("comment") String comment();
 }

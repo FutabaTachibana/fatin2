@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName;
 
 public interface AbstractOnebotMessage {
     @SerializedName("time")
-    Long time();
+    long time();
     // message | message_sent | notice | request | meta_event
     @SerializedName("post_type")
     String postType();
     @SerializedName("self_id")
-    Long selfId();
+    long selfId();
 }

@@ -1,5 +1,6 @@
 package org.f14a.fatin2.event.message;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.f14a.fatin2.util.MessageSender;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
@@ -15,12 +16,11 @@ public class GroupMessageEvent extends MessageEvent {
         return message;
     }
     public long getGroupId() {
-        return message.groupId() != null ? message.groupId() : 0L;
+        return message.groupId();
     }
 
     @Override
-    public void sendOnly(JsonElement message) {
-        MessageSender.sendGroup(this.message.groupId(), message);
-        finishSession();
+    public int sendOnly(JsonArray message) {
+        return MessageSender.sendGroup(this.message.groupId(), message);
     }
 }

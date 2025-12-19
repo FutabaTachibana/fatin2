@@ -2,6 +2,7 @@ package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class RequestGenerator {
          * @param groupId the group identifier
          * @return this builder instance for method chaining
          */
-        public RequestBuilder groupId(Long groupId) {
+        public RequestBuilder groupId(long groupId) {
             this.fields.put("group_id", groupId);
             return this;
         }
@@ -45,7 +46,7 @@ public class RequestGenerator {
          * @param userId the user identifier
          * @return this builder instance for method chaining
          */
-        public RequestBuilder userId(Long userId) {
+        public RequestBuilder userId(long userId) {
             this.fields.put("user_id", userId);
             return this;
         }
@@ -99,8 +100,8 @@ public class RequestGenerator {
          * Builds and returns the JSON string representation of the request.
          * @return JSON formatted string
          */
-        public String build() {
-            return gson.toJson(fields);
+        public JsonObject build() {
+            return gson.toJsonTree(fields).getAsJsonObject();
         }
     }
 

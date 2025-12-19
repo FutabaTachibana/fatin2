@@ -12,10 +12,10 @@ public class HeartbeatEvent extends Event {
     public OnebotHeartbeat getHeartbeat() {
         return heartbeat;
     }
-    public Boolean isOnline() {
+    public boolean isOnline() {
         return heartbeat.status().online();
     }
-    public Boolean isGood() {
+    public boolean isGood() {
         return heartbeat.status().good();
     }
 

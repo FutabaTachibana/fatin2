@@ -5,15 +5,15 @@ import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.Sender;
 
 public record GroupOnebotMessage(
-        @SerializedName("time") Long time,
+        @SerializedName("time") long time,
         @SerializedName("post_type") String postType,
-        @SerializedName("self_id") Long selfId,
+        @SerializedName("self_id") long selfId,
         @SerializedName("message_type") String messageType,
         @SerializedName("sub_type") String subType,
         @SerializedName("message_id") String messageId,
-        @SerializedName("user_id") Long userId,
+        @SerializedName("user_id") long userId,
         @SerializedName("message") Message[] message,
-        @SerializedName("font") Integer font,
+        @SerializedName("font") int font,
         @SerializedName("sender") Sender sender,
-        @SerializedName("group_id") Long groupId
+        @SerializedName("group_id") long groupId
 ) implements OnebotMessage { }

@@ -20,14 +20,14 @@ public interface OnebotMessage extends AbstractOnebotMessage {
     @SerializedName("message_id")
     String messageId();
     @SerializedName("user_id")
-    Long userId();
+    long userId();
     @SerializedName("message")
     Message[] message();
 //    @Deprecated
 //    @SerializedName("raw_message")
 //    String rawMessage();
     @SerializedName("font")
-    Integer font();
+    int font();
     @SerializedName("sender")
     Sender sender();
 

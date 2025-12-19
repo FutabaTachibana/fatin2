@@ -16,7 +16,7 @@ public class EventListener {
     @OnCommand(command = "echo")
     public void onEcho(CommandEvent event) {
         Message[] message = event.getMessage().message();
-        event.send(MessageGenerator.create(Arrays.copyOfRange(message, 1, message.length) ));
+        event.send(MessageGenerator.create(Arrays.copyOfRange(message, 1, message.length)));
     }
     @OnCommand(command = "guess")
     @Coroutines

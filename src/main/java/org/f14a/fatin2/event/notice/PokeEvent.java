@@ -12,13 +12,13 @@ public class PokeEvent extends Event {
         return this.notify;
     }
     public long getGroupId() {
-        return this.notify.groupId() != null ? this.notify.groupId() : 0L;
+        return this.notify.groupId();
     }
     public long getUserId() {
-        return this.notify.userId() != null ? this.notify.userId() : 0L;
+        return this.notify.userId();
     }
     public long getTargetId() {
-        return this.notify.targetId() != null ? this.notify.targetId() : 0L;
+        return this.notify.targetId();
     }
     @Override
     public boolean isAsync() {

@@ -1,5 +1,6 @@
 package org.f14a.fatin2.event.message;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.util.MessageSender;
@@ -18,9 +19,8 @@ public class PrivateMessageEvent extends MessageEvent {
     }
 
     @Override
-    public void sendOnly(JsonElement message) {
-        MessageSender.sendPrivate(this.message.userId(), message);
-        finishSession();
+    public int sendOnly(JsonArray message) {
+        return MessageSender.sendPrivate(this.message.userId(), message);
     }
 
 }

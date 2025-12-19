@@ -12,10 +12,10 @@ public class FriendRecallEvent extends Event {
         return this.notice;
     }
     public long getUserId() {
-        return this.notice.userId() != null ? this.notice.userId() : 0L;
+        return this.notice.userId();
     }
     public long getMessageId() {
-        return this.notice.messageId() != null ? this.notice.messageId() : 0L;
+        return this.notice.messageId();
     }
 
     @Override
