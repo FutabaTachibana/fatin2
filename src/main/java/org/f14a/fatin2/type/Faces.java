@@ -6,10 +6,10 @@ import java.util.Map;
 /**
  * An enum representing various facial expressions with their corresponding slot numbers and meanings.
  * <ul>
- * <li> For getting the meaning of a specific face by its slot number, use <b>static</b> method <code>Faces.meaningOf(14)</code> returns "微笑" (Smiling). <br>
- * <li> For getting the face enum by its slot number, use <b>static</b> method <code>Faces.fromSlot(11)</code> which returns <code>Faces.ANGRY</code>. <br>
- * <li> For getting the meaning of a specific face, use <code>Faces.QUESTION.meaning()</code> which returns "疑问". <br>
- * <li>For getting the slot of a specific face, use <code>Faces.SURPRISED.slot()</code> which returns 0.
+ * <li> For getting the meaning of a specific face by its slot number, use <b>static</b> method <code>Faces.meaningOf(14)</code> returns "微笑" (Smiling). </li>
+ * <li> For getting the face enum by its slot number, use <b>static</b> method <code>Faces.fromSlot(11)</code> which returns <code>Faces.ANGRY</code>. </li>
+ * <li> For getting the meaning of a specific face, use <code>Faces.QUESTION.meaning()</code> which returns "疑问". </li>
+ * <li>For getting the slot of a specific face, use <code>Faces.SURPRISED.slot()</code> which returns 0. </li>
  * </ul>
  */
 public enum Faces {

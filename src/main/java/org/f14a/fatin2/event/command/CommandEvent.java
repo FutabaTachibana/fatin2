@@ -12,8 +12,11 @@ import java.util.function.Consumer;
 
 public interface CommandEvent {
     String getCommand();
+    CommandParser.Result getResult();
     String[] getArgs();
     OnebotMessage getMessage();
+    boolean isAtBot();
+    boolean hasReply();
     MessageType getMessageType();
     String wait(JsonArray message);
     String wait(JsonObject... message);

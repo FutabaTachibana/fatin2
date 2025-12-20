@@ -1,38 +1,43 @@
 package org.f14a.fatin2.event.command;
 
+import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.message.PrivateMessageEvent;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
 
 public class PrivateCommandEvent extends PrivateMessageEvent implements CommandEvent {
-    private final String command;
-    private final String[] args;
+    private final CommandParser.Result result;
 
     public static PrivateMessageEvent getCommandOrBasic(PrivateOnebotMessage message) {
-        // TODO: analyze the logic
-        if (message.parse().startsWith("/")) {
-            String[] splits = message.parse().split(" ");
-            String command = splits[0].substring(1);
-            String[] args = new String[splits.length - 1];
-            System.arraycopy(splits, 1, args, 0, splits.length - 1);
-            return new PrivateCommandEvent(message, command, args);
+        CommandParser.Result result = CommandParser.parse(message.selfId(), message.messages());
+        if (result.isCommand()) {
+            EventBus.LOGGER.debug("PrivateCommandEvent: Command parsed: {}", result.rawCommandLine());
+            return new PrivateCommandEvent(message, result);
         }
-        else {
-            return new PrivateMessageEvent(message);
-        }
+        return new PrivateMessageEvent(message);
     }
-    public PrivateCommandEvent(PrivateOnebotMessage message, String command, String[] args) {
+    public PrivateCommandEvent(PrivateOnebotMessage message, CommandParser.Result result) {
         super(message);
-        this.command = command;
-        this.args = args;
+        this.result = result;
     }
 
+    @Override
+    public CommandParser.Result getResult() {
+        return result;
+    }
     @Override
     public String getCommand() {
-        return command;
+        return result.command();
     }
-
     @Override
     public String[] getArgs() {
-        return args;
+        return result.args();
+    }
+    @Override
+    public boolean isAtBot() {
+        return result.atBot();
+    }
+    @Override
+    public boolean hasReply() {
+        return result.hasReply();
     }
 }

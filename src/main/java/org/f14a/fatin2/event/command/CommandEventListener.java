@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 public record CommandEventListener (
         Object listener, Method method, Fatin2Plugin plugin,
         EventPriority priority, boolean isCoroutine,
-        Scope scope, boolean needAt
+        Scope scope, boolean needAt, int permission
 ) implements Comparable<CommandEventListener> {
     public enum Scope {
         PRIVATE,

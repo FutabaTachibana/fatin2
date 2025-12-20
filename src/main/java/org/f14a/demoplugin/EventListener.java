@@ -21,7 +21,7 @@ public class EventListener {
     @OnCommand(command = "echo")
     public void onEcho(CommandEvent event) {
         // Do NOT edit the original message array directly
-        Message[] messages = Arrays.copyOf(event.getMessage().message(), event.getMessage().message().length);
+        Message[] messages = Arrays.copyOf(event.getMessage().messages(), event.getMessage().messages().length);
         for (int i = 0; i < messages.length; i++) {
             if (messages[i].parse().startsWith("/echo")) {
                 try {

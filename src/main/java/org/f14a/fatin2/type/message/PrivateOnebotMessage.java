@@ -12,7 +12,7 @@ public record PrivateOnebotMessage(
         @SerializedName("sub_type") String subType,
         @SerializedName("message_id") String messageId,
         @SerializedName("user_id") long userId,
-        @SerializedName("message") Message[] message,
+        @SerializedName("message") Message[] messages,
         @SerializedName("font") int font,
         @SerializedName("sender") Sender sender
 ) implements OnebotMessage { }

@@ -1,0 +1,139 @@
+package org.f14a.fatin2.event.command;
+
+import org.f14a.fatin2.config.Config;
+import org.f14a.fatin2.event.EventBus;
+import org.f14a.fatin2.type.Message;
+import org.f14a.fatin2.type.exception.OnebotProtocolException;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+/**
+ * Parse OneBot message segments (Message[]) into command invocation. <br>
+ * This parser is protocol-aware:
+ * <ul>
+ * <li> It can ignore leading [reply] segments</li>
+ * <li> It can ignore leading [at] segments and detect whether @selfId occurred</li>
+ * <li> It can ignore leading whitespace-only text segments</li>
+ * </ul>
+ * It does NOT depend on Message.parse() (display text), so it is stable against formatting changes.
+ */
+public class CommandParser {
+    private CommandParser() {
+    }
+    public record Result(
+            boolean isCommand,
+            boolean atBot,
+            boolean hasReply,
+            String command,
+            String[] args,
+            String rawCommandLine
+    ) {}
+    public static Result parse(long selfId, Message[] segments) {
+        if (segments == null || segments.length == 0) {
+            return new Result(false, false, false, "", new String[0], "");
+        }
+        PrefixScan scan = scanPrefixes(selfId, segments);
+        String commandLine = scan.remainingText.trim();
+        String prefix = Config.getConfig().getCommandPrefix();
+        EventBus.LOGGER.debug("CommandParser: after prefix scan: atBot={}, hasReply={}, remaining={}", scan.atBot, scan.hasReply, commandLine);
+        if (!commandLine.startsWith(prefix)) {
+            // does not start with prefix => not a command
+            EventBus.LOGGER.debug("CommandParser: command prefix {} not found.", prefix);
+            return new Result(false, scan.atBot, scan.hasReply, "", new String[0], commandLine);
+        }
+        String withoutPrefix = commandLine.substring(prefix.length()).trim();
+        if (withoutPrefix.isEmpty()) {
+            // "/" only => not a valid command
+            EventBus.LOGGER.debug("CommandParser: command prefix only, no command found.");
+            return new Result(false, scan.atBot, scan.hasReply, "", new String[0], commandLine);
+        }
+        CommandLine cl = parseCommandLine(withoutPrefix);
+        return new Result(true, scan.atBot, scan.hasReply, cl.command, cl.args, withoutPrefix);
+    }
+    /** Holds prefix scan result. */
+    private record PrefixScan(boolean atBot, boolean hasReply, String remainingText) {}
+    /**
+     * Strip leading reply/at/whitespace text segments.
+     * Then concatenate subsequent text segments as remainingText. <br>
+     * If non-text segments appear before any meaningful text and allowNonTextAfterPrefix=false,
+     * we treat it as not a command (remainingText becomes empty).
+     */
+    private static PrefixScan scanPrefixes(long selfId, Message[] segments) {
+        boolean atBot = false;
+        boolean hasReply = false;
+        int idx = 0;
+        // Consume leading reply / at / whitespace text
+        while (idx < segments.length) {
+            Message seg = segments[idx];
+            String type = seg.type();
+            switch (type) {
+                case "reply" -> {
+                    hasReply = true;
+                    idx++;
+                }
+                case "at" -> {
+                    String qq = requireDataString(seg, "qq");
+                    if (qq.equals(String.valueOf(selfId))) {
+                        atBot = true;
+                    }
+                    idx++;
+                }
+                case "text" -> {
+                    String text = requireDataString(seg, "text");
+                    if (text.trim().isEmpty()) {
+                        idx++;
+                    }
+                }
+            }
+            // If we broke from switch by "break" inside case "text"/default, we need to stop outer while too.
+            if (idx < segments.length) {
+                String t = segments[idx].type();
+                if ("text".equals(t) && !requireDataString(segments[idx], "text").trim().isEmpty()) {
+                    break;
+                }
+            }
+        }
+        // Build remaining text from idx...end: concatenate text segments only.
+        String remaining = concatTextSegments(Arrays.copyOfRange(segments, idx, segments.length));
+        return new PrefixScan(atBot, hasReply, remaining);
+    }
+    private static String concatTextSegments(Message[] segments) {
+        StringBuilder sb = new StringBuilder();
+        for (Message seg : segments) {
+            if (seg == null) continue;
+            if ("text".equals(seg.type())) {
+                String text = requireDataString(seg, "text");
+                sb.append(text);
+            }
+        }
+        return sb.toString();
+    }
+    private static CommandLine parseCommandLine(String s) {
+        // minimal parser: split by whitespace, no quotes support
+        // You can upgrade later to support quoted args.
+        String trimmed = s.trim();
+        if (trimmed.isEmpty()) {
+            return new CommandLine("", new String[0]);
+        }
+        String[] parts = trimmed.split("\\s+");
+        String cmd = parts[0];
+        String[] args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
+        return new CommandLine(cmd, args);
+    }
+    private record CommandLine(String command, String[] args) {}
+    private static String requireDataString(Message seg, String key) {
+        try {
+            Object v = seg.data().get(key);
+            if (v == null) {
+                throw new OnebotProtocolException("Missing data field '" + key + "' for segment type=" + seg.type()
+                        + ", data=" + seg.data());
+            }
+            return v.toString();
+        } catch (RuntimeException e) {
+            // includes NPE, ClassCastException etc.
+            throw new OnebotProtocolException("Malformed segment data for key '" + key + "': type="
+                    + seg.type() + ", data=" + seg.data(), e);
+        }
+    }
+}

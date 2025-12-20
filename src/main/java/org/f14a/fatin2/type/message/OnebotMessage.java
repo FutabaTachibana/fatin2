@@ -22,7 +22,7 @@ public interface OnebotMessage extends AbstractOnebotMessage {
     @SerializedName("user_id")
     long userId();
     @SerializedName("message")
-    Message[] message();
+    Message[] messages();
 //    @Deprecated
 //    @SerializedName("raw_message")
 //    String rawMessage();
@@ -33,7 +33,7 @@ public interface OnebotMessage extends AbstractOnebotMessage {
 
     default String parse(){
         StringBuilder sb = new StringBuilder();
-        for(Message msg : this.message()) {
+        for(Message msg : this.messages()) {
             sb.append(msg.parse());
         }
         return sb.toString();

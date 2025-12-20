@@ -129,11 +129,13 @@ public class EventBus {
         }
         CommandEventListener.Scope scope = SCOPE_BY_EVENT.get(eventType);
         commandHandlers.computeIfAbsent(annotation.command(), k -> new CopyOnWriteArrayList<>())
-                .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt()));
+                .add(new CommandEventListener(listener, method, plugin, annotation.priority(),
+                        method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt(), annotation.permission()));
         count.getAndIncrement();
         Arrays.stream(annotation.alias()).toList().forEach(command -> {
             commandHandlers.computeIfAbsent(command, k -> new CopyOnWriteArrayList<>())
-                    .add(new CommandEventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt()));
+                    .add(new CommandEventListener(listener, method, plugin, annotation.priority(),
+                            method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt(), annotation.permission()));
             count.getAndIncrement();
         });
         return count.get();
@@ -213,14 +215,19 @@ public class EventBus {
         List<CommandEventListener> eventListeners = getCommandHandlers(event.getCommand());
         LOGGER.debug("Found {} handlers for command {}", eventListeners.size(), event.getCommand());
         for (CommandEventListener listener : eventListeners) {
+            // Skip if needAt is true but the bot is not mentioned
+            if (listener.needAt() && !event.isAtBot()) {
+                continue;
+            }
+            // Skip if scope does not match
+            if (!switch (listener.scope()) {
+                case BOTH -> true;
+                case PRIVATE -> event instanceof PrivateCommandEvent;
+                case GROUP -> event instanceof GroupCommandEvent;
+            }) {
+                continue;
+            }
             try {
-                if (!switch (listener.scope()) {
-                    case BOTH -> true;
-                    case PRIVATE -> event instanceof PrivateCommandEvent;
-                    case GROUP -> event instanceof GroupCommandEvent;
-                }) {
-                    continue;
-                }
                 if (listener.isCoroutine()) {
                     this.asyncService.submit(() -> {
                         try {

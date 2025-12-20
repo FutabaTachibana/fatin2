@@ -15,8 +15,8 @@ import java.util.Map;
  * Generator for constructing Message arrays in JSON format.<br>
  * A Message is an array of segments, where each segment contains:
  * <ul>
- * <li>"type": String
- * <li>"data": Map<String, String>
+ * <li>"type": String </li>
+ * <li>"data": Map<String, String> </li>
  * </ul>
  * You can use this class to generate WebSocket request JSON strings.
  * It uses the Builder pattern to allow flexible and readable JSON construction.

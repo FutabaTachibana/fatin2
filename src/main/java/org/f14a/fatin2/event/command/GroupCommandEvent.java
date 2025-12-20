@@ -4,33 +4,38 @@ import org.f14a.fatin2.event.message.GroupMessageEvent;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 
 public class GroupCommandEvent extends GroupMessageEvent implements CommandEvent {
-    private final String command;
-    private final String[] args;
+    private final CommandParser.Result result;
 
     public static GroupMessageEvent getCommandOrBasic(GroupOnebotMessage message) {
-        // TODO: analyze the logic
-        if (message.parse().startsWith("/")) {
-            String[] splits = message.parse().split(" ");
-            String command = splits[0].substring(1);
-            String[] args = new String[splits.length - 1];
-            System.arraycopy(splits, 1, args, 0, splits.length - 1);
-            return new GroupCommandEvent(message, command, args);
+        CommandParser.Result result = CommandParser.parse(message.selfId(), message.messages());
+        if (result.isCommand()) {
+            return new GroupCommandEvent(message, result);
         }
-        else {
-            return new GroupMessageEvent(message);
-        }
+        return new GroupMessageEvent(message);
     }
-    public GroupCommandEvent(GroupOnebotMessage message, String command, String[] args) {
+    public GroupCommandEvent(GroupOnebotMessage message, CommandParser.Result result) {
         super(message);
-        this.command = command;
-        this.args = args;
+        this.result = result;
+    }
+
+    @Override
+    public CommandParser.Result getResult() {
+        return result;
     }
     @Override
     public String getCommand() {
-        return command;
+        return result.command();
     }
     @Override
     public String[] getArgs() {
-        return args;
+        return result.args();
+    }
+    @Override
+    public boolean isAtBot() {
+        return result.atBot();
+    }
+    @Override
+    public boolean hasReply() {
+        return result.hasReply();
     }
 }

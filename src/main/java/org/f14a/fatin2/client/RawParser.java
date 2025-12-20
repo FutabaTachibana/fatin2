@@ -1,6 +1,8 @@
 package org.f14a.fatin2.client;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.command.GroupCommandEvent;
 import org.f14a.fatin2.event.command.PrivateCommandEvent;
@@ -24,14 +26,49 @@ import org.f14a.fatin2.type.request.AddOnebotRequest;
 import org.f14a.fatin2.type.request.FriendOnebotRequest;
 import org.f14a.fatin2.type.request.InviteOnebotRequest;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
 * A class contains a static method to parse raw JSON messages into Event objects.
 */
-public class RawParser {
+final class RawParser {
+    private static final Gson gson = new Gson();
+    private static final Map<String, Function<JsonObject, Event>> ROUTES = new HashMap<>();
+    static {
+        ROUTES.put("message:private", obj -> PrivateCommandEvent.getCommandOrBasic(gson.fromJson(obj, PrivateOnebotMessage.class)));
+        ROUTES.put("message:group", obj -> GroupCommandEvent.getCommandOrBasic(gson.fromJson(obj, GroupOnebotMessage.class)));
+        ROUTES.put("meta_event:heartbeat", obj -> new HeartbeatEvent(gson.fromJson(obj, OnebotHeartbeat.class)));
+        ROUTES.put("meta_event:lifecycle", obj -> new LifecycleEvent(gson.fromJson(obj, OnebotLifecycle.class)));
+        ROUTES.put("notice:group_upload", obj -> new GroupUploadEvent(gson.fromJson(obj, GroupUploadOnebotNotice.class)));
+        ROUTES.put("notice:group_admin", obj -> new GroupAdminEvent(gson.fromJson(obj, GroupAdminOnebotNotice.class)));
+        ROUTES.put("notice:group_decrease", obj -> new GroupDecreaseEvent(gson.fromJson(obj, GroupDecreaseOnebotNotice.class)));
+        ROUTES.put("notice:group_increase", obj -> new GroupIncreaseEvent(gson.fromJson(obj, GroupIncreaseOnebotNotice.class)));
+        ROUTES.put("notice:group_ban", obj -> new GroupBanEvent(gson.fromJson(obj, GroupBanOnebotNotice.class)));
+        ROUTES.put("notice:friend_add", obj -> new FriendAddEvent(gson.fromJson(obj, FriendAddOnebotNotice.class)));
+        ROUTES.put("notice:friend_recall", obj -> new FriendRecallEvent(gson.fromJson(obj, FriendRecallOnebotNotice.class)));
+        ROUTES.put("notice:group_recall", obj -> new GroupRecallEvent(gson.fromJson(obj, GroupRecallOnebotNotice.class)));
+        ROUTES.put("notice:poke", obj -> new PokeEvent(gson.fromJson(obj, PokeOnebotNotify.class)));
+        ROUTES.put("notice:lucky_king", obj -> new LuckyKingEvent(gson.fromJson(obj, LuckyKingOnebotNotify.class)));
+        ROUTES.put("notice:honor", obj -> new HonorEvent(gson.fromJson(obj, HonorOnebotNotify.class)));
+        ROUTES.put("request:friend", obj -> new FriendRequestEvent(gson.fromJson(obj, FriendOnebotRequest.class)));
+        ROUTES.put("request:group:add", obj -> new AddRequestEvent(gson.fromJson(obj, AddOnebotRequest.class)));
+        ROUTES.put("request:group:invite", obj -> new InviteRequestEvent(gson.fromJson(obj, InviteOnebotRequest.class)));
+        ROUTES.put("response", obj -> new ResponseEvent(gson.fromJson(obj, Response.class)));
+    }
+    public static Event parse(String message) {
+        JsonObject object = JsonParser.parseString(message).getAsJsonObject();
+        String routeKey = RouteKeyResolver.resolve(object);
+        Function<JsonObject, Event> parser = ROUTES.get(routeKey);
+        if (parser == null) {
+            throw new UnknownMessageTypeException("No parser found for route key: " + routeKey);
+        }
+        return parser.apply(object);
+    }
+
+    @Deprecated
     public static Event parseRaw(String message) {
-        Gson gson = new Gson();
         Map<?, ?> raw = gson.fromJson(message, Map.class);
         // Event type:
         // message | meta_event | notice | request

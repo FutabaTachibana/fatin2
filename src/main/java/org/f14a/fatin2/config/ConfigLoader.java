@@ -36,8 +36,8 @@ public class ConfigLoader {
             @SuppressWarnings("unchecked")
             Map<String, Object> pluginData = (Map<String, Object>) data.get("plugin");
             config.setPluginDirectory(data.getOrDefault("directory", DefaultConfig.PLUGIN_DIRECTORY));
-            if (!config.getCommandPrefix().startsWith(".") && !config.getCommandPrefix().startsWith("!")) {
-                config.setCommandPrefix("." + File.separator + config.getCommandPrefix());
+            if (!config.getPluginDirectory().startsWith(".") && !config.getPluginDirectory().startsWith("!")) {
+                config.setPluginDirectory("." + File.separator + config.getPluginDirectory());
                 Main.LOGGER.debug("Plugin directory reset to: {}", config.getPluginDirectory());
             }
             config.setPluginAutoReload(data.getOrDefault("auto_reload", DefaultConfig.PLUGIN_AUTO_RELOAD));
