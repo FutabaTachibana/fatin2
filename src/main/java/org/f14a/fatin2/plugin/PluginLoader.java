@@ -1,8 +1,6 @@
 package org.f14a.fatin2.plugin;
 
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.event.EventBus;
-import org.f14a.fatin2.plugin.integrated.EchoPlugin;
 import org.f14a.fatin2.type.exception.IllegalPluginException;
 import org.f14a.fatin2.type.exception.MainClassNotFoundException;
 import org.slf4j.Logger;
@@ -73,11 +71,11 @@ public class PluginLoader {
         }
     }
     private static void loadIntegratedPlugins() {
-        EchoPlugin echoPlugin = new EchoPlugin();
-        PluginWrapper wrapper = new PluginWrapper(echoPlugin, null, "Integrated");
-        echoPlugin.onLoad();
-        wrapper.enable();
-        LOGGER.info("Integrated Plugin loaded: {} v{} by {}", echoPlugin.getName(), echoPlugin.getVersion(), echoPlugin.getAuthor());
+//        EchoPlugin echoPlugin = new EchoPlugin();
+//        PluginWrapper wrapper = new PluginWrapper(echoPlugin, null, "Integrated");
+//        echoPlugin.onLoad();
+//        wrapper.enable();
+//        LOGGER.info("Integrated Plugin loaded: {} v{} by {}", echoPlugin.getName(), echoPlugin.getVersion(), echoPlugin.getAuthor());
     }
 
     public static void reloadPlugin(PluginWrapper wrapper) {

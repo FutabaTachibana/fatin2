@@ -20,7 +20,7 @@ public class GroupMessageEvent extends MessageEvent {
     }
 
     @Override
-    public int sendOnly(JsonArray message) {
-        return MessageSender.sendGroup(this.message.groupId(), message);
+    protected int sendOnly(JsonArray messages) {
+        return MessageSender.sendGroup(this.message.groupId(), messages);
     }
 }

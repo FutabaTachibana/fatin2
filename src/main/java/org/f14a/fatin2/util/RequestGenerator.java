@@ -26,12 +26,12 @@ public class RequestGenerator {
      * Uses the Builder pattern to allow flexible and readable JSON construction.
      */
     public static class RequestBuilder {
-        private final Map<String, Object> fields;
+        private final JsonObject fields;
         /**
          * Constructor initializes an empty fields map.
          */
         public RequestBuilder() {
-            this.fields = new LinkedHashMap<>();
+            this.fields = new JsonObject();
         }
         /**
          * Sets the group_id field.
@@ -39,7 +39,7 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder groupId(long groupId) {
-            this.fields.put("group_id", groupId);
+            this.fields.addProperty("group_id", groupId);
             return this;
         }
         /**
@@ -48,11 +48,11 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder userId(long userId) {
-            this.fields.put("user_id", userId);
+            this.fields.addProperty("user_id", userId);
             return this;
         }
         public RequestBuilder messageId(long messageId) {
-            this.fields.put("message_id", messageId);
+            this.fields.addProperty("message_id", messageId);
             return this;
         }
         /**
@@ -61,7 +61,7 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder message(JsonArray message) {
-            this.fields.put("message", message);
+            this.fields.add("message", message);
             return this;
         }
         /**
@@ -70,7 +70,7 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder flag(String flag) {
-            this.fields.put("flag", flag);
+            this.fields.addProperty("flag", flag);
             return this;
         }
         /**
@@ -79,7 +79,7 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder approve(boolean approve) {
-            this.fields.put("approve", approve);
+            this.fields.addProperty("approve", approve);
             return this;
         }
         /**
@@ -88,7 +88,7 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder reason(String reason) {
-            this.fields.put("reason", reason);
+            this.fields.addProperty("reason", reason);
             return this;
         }
         /**
@@ -97,7 +97,7 @@ public class RequestGenerator {
          * @return this builder instance for method chaining
          */
         public RequestBuilder remark(String remark) {
-            this.fields.put("remark", remark);
+            this.fields.addProperty("remark", remark);
             return this;
         }
 
@@ -106,7 +106,7 @@ public class RequestGenerator {
          * @return JSON formatted string
          */
         public JsonObject build() {
-            return gson.toJsonTree(fields).getAsJsonObject();
+            return this.fields;
         }
     }
 

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
+import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.MessageType;
 import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.util.MessageGenerator;
@@ -39,23 +40,49 @@ public abstract class MessageEvent extends Event {
         return true;
     }
 
+    // Exactly abstract method to send message subclasses must override.
+    abstract protected int sendOnly(JsonArray messages);
+    protected int sendOnly(JsonObject ... messages) {
+        return sendOnly(MessageGenerator.create(messages));
+    }
     /**
      * A simple method to send messages, it cannot end the handler but can finish the session.
-     * @param message the message created by MessageGenerator to send.
+     * @param messages the message created by MessageGenerator to send.
      * @return the echo id of the message has sent, you can use it to track the message status.
      */
-    public int send(JsonArray message) {
+    public int send(JsonArray messages) {
         finishSession();
-        return sendOnly(message);
+        return sendOnly(messages);
     }
+    /**
+     * A simple method to send messages, it cannot end the handler but can finish the session.
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
     public int send(JsonObject ... messages) {
         finishSession();
         return sendOnly(MessageGenerator.create(messages));
     }
-    // Exactly abstract method to send message subclasses must override.
-    abstract public int sendOnly(JsonArray message);
-    public int sendOnly(JsonObject ... messages) {
-        return sendOnly(MessageGenerator.create(messages));
+    /**
+     * Send messages and register a callback to handle the response.
+     * @param onFinish the callback to handle the response.
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
+    public int send(Consumer<Response> onFinish, JsonArray messages) {
+        int echo = send(messages);
+        CompletableFuture<Response> future = EventBus.getResponseManager().registerFuture(Integer.toString(echo), 30);
+        future.thenAccept(onFinish);
+        return echo;
+    }
+    /**
+     * Send messages and register a callback to handle the response.
+     * @param onFinish the callback to handle the response.
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
+    public int send(Consumer<Response> onFinish, JsonObject ... messages) {
+        return send(onFinish, MessageGenerator.create(messages));
     }
     /**
      * Wait for user input after sending a message, it will create a session and hang the handler until user reply or timeout.
@@ -63,11 +90,13 @@ public abstract class MessageEvent extends Event {
      * @param prompt the message created by MessageGenerator to send before waiting.
      * @return the user input message content, or null if timeout or error occurs.
      */
-    public String wait(JsonArray prompt) {
-        sendOnly(prompt);
+    public Message[] wait(JsonArray prompt) {
+        if (prompt != null) {
+            sendOnly(prompt);
+        }
         createSessionContext();
-        CompletableFuture<String> future = this.sessionContext.waitForInput();
-        String reply;
+        CompletableFuture<Message[]> future = this.sessionContext.waitForInput();
+        Message[] reply;
         try {
             reply = future.get();
         } catch (Exception e) {
@@ -75,23 +104,69 @@ public abstract class MessageEvent extends Event {
         }
         return reply;
     }
-    public String wait(JsonObject ... prompts) {
-        return wait(MessageGenerator.create(prompts));
-    }
-    public CompletableFuture<Response> sendFuture(JsonArray message) {
-        return EventBus.getResponseManager().registerFuture(String.valueOf(send(message)), 30);
-    }
-    public CompletableFuture<Response> sendFuture(JsonObject ... messages) {
-        return EventBus.getResponseManager().registerFuture(String.valueOf(send(messages)), 30);
+    /**
+     * Wait for user input after sending a message, it will create a session and hang the handler until user reply or timeout.
+     * It can be used only in coroutine handlers.
+     * @param prompt the message created by MessageGenerator to send before waiting.
+     * @return the user input message content, or null if timeout or error occurs.
+     */
+    public Message[] wait(JsonObject ... prompt) {
+        return wait(MessageGenerator.create(prompt));
     }
     /**
      * Wait for user input without sending any message.
      * @return the user input message content, or null if timeout or error occurs.
      */
-    public String waitSilent() {
+    public Message[] waitSilent() {
         return wait((JsonArray) null);
     }
-    protected void finishSession() {
+    // TODO: add wait(Consumer<Response> onFinish, JsonArray prompt) to track the message sent.
+    /**
+     * Send a message and get a CompletableFuture for the response.
+     * @param messages the message created by MessageGenerator to send before waiting.
+     * @return a CompletableFuture that will be completed with the Response.
+     */
+    public CompletableFuture<Response> sendFuture(JsonArray messages) {
+        return EventBus.getResponseManager().registerFuture(String.valueOf(send(messages)), 30);
+    }
+    /**
+     * Send a message and get a CompletableFuture for the response.
+     * @param messages the message created by MessageGenerator to send before waiting.
+     * @return a CompletableFuture that will be completed with the Response.
+     */
+    public CompletableFuture<Response> sendFuture(JsonObject ... messages) {
+        return EventBus.getResponseManager().registerFuture(String.valueOf(send(messages)), 30);
+    }
+    /**
+     * Send a message and wait for the response synchronously.
+     * It will block the current thread until the response is received or timeout occurs, so use it with @Coroutines annotation.
+     * @param messages the message created by MessageGenerator to send before waiting.
+     * @return the response received, including status and message id.
+     */
+    public Response sendAndWait(JsonArray messages) {
+        CompletableFuture<Response> future = sendFuture(messages);
+        try {
+            return future.get();
+        } catch (Exception e) {
+            EventBus.LOGGER.error("Error while waiting for response", e);
+            return null;
+        }
+    }
+    /**
+     * Send a message and wait for the response synchronously.
+     * It will block the current thread until the response is received or timeout occurs, so use it with @Coroutines annotation.
+     * @param messages the message created by MessageGenerator to send before waiting.
+     * @return the response received, including status and message id.
+     */
+    public Response sendAndWait(JsonObject ... messages) {
+        return sendAndWait(MessageGenerator.create(messages));
+    }
+
+    /**
+     * Finish the current session if exists.
+     * Commonly it is called automatically after send() methods, but if you use wait
+     */
+    public void finishSession() {
         if (this.sessionContext != null) {
             EventBus.getSessionManager().endSession(this.sessionContext.getSessionId());
             this.sessionContext = null;
@@ -124,7 +199,7 @@ public abstract class MessageEvent extends Event {
         // Do NOT dispatch to other handlers if in session
         if (context != null) {
             context.setCurrentEvent(this);
-            context.receiveInput(message.parse());
+            context.receiveInput(message.messages());
         } else {
             super.fire();
         }

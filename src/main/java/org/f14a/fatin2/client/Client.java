@@ -3,6 +3,7 @@ package org.f14a.fatin2.client;
 import com.google.gson.Gson;
 import org.f14a.fatin2.Main;
 import org.f14a.fatin2.config.Config;
+import org.f14a.fatin2.type.exception.OnebotProtocolException;
 import org.f14a.fatin2.type.exception.UnknownMessageTypeException;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -58,6 +59,8 @@ public class Client extends WebSocketClient {
                 RawParser.parse(message).fire();
             } catch (UnknownMessageTypeException e) {
                 Main.LOGGER.warn("Received unsupported message", e);
+            } catch (OnebotProtocolException e) {
+                Main.LOGGER.error("Failed to parse message due to protocol error", e);
             }
         } catch (Exception e) {
             Main.LOGGER.error("Failed to processing message: {}", message, e);

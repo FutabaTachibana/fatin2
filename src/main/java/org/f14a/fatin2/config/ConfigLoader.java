@@ -36,7 +36,7 @@ public class ConfigLoader {
             @SuppressWarnings("unchecked")
             Map<String, Object> pluginData = (Map<String, Object>) data.get("plugin");
             config.setPluginDirectory(data.getOrDefault("directory", DefaultConfig.PLUGIN_DIRECTORY));
-            if (!config.getPluginDirectory().startsWith(".") && !config.getPluginDirectory().startsWith("!")) {
+            if (!config.getPluginDirectory().startsWith(".")) {
                 config.setPluginDirectory("." + File.separator + config.getPluginDirectory());
                 Main.LOGGER.debug("Plugin directory reset to: {}", config.getPluginDirectory());
             }

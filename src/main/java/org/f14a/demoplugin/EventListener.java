@@ -42,10 +42,15 @@ public class EventListener {
     public void onGuessNumber(GroupCommandEvent event) {
         String reply;
         int number = RandomGenerator.getDefault().nextInt(1, 101);
-        reply = event.wait(MessageGenerator.text("请输入一个1-100的数字"));
-        while (Integer.parseInt(reply) != number) {
-            reply = event.wait(MessageGenerator.text(
-                    Integer.parseInt(reply) > number ? "太大了" : "太小了"));
+        reply = event.wait(MessageGenerator.text("请输入一个1-100的数字"))[0].parse();
+        try {
+            while (Integer.parseInt(reply) != number) {
+                reply = event.wait(MessageGenerator.text(
+                        Integer.parseInt(reply) > number ? "太大了" : "太小了"))[0].parse();
+            }
+        } catch (NumberFormatException e) {
+            event.send(MessageGenerator.text("游戏结束。"));
+            return;
         }
         event.send(MessageGenerator.text("恭喜你，成功猜中数字" + number));
     }
@@ -56,7 +61,21 @@ public class EventListener {
             event.send(MessageGenerator.text("有什么事情吗"));
         }
     }
-    // Example for action after sending successfully and message recall
+    // Example for action after sending successfully by callback and message reply
+    @OnCommand(command = "sendandreply", alias = {"sar"})
+    @Coroutines
+    public void onSendAndReply(GroupCommandEvent event) {
+        event.send(request -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            RequestSender.replyGroupMessage(event.getGroupId(), request.getMessageId(),
+                    MessageGenerator.text("这是对5秒前消息的回复"));
+        }, MessageGenerator.text("这条消息将在5秒后被回复"));
+    }
+    // Example for action after sending successfully by CompletableFuture and message recall
     @OnCommand(command = "sendandrecall")
     public void onSendAndRecall(CommandEvent event) {
         CompletableFuture<Response> future = event.sendFuture(MessageGenerator.text("这条消息将在5秒后被撤回"));
@@ -69,5 +88,17 @@ public class EventListener {
             }
             RequestSender.deleteMessage(response.getMessageId());
         });
+    }
+    // Example for command with arguments
+    @OnCommand(command = "cmd", needAt = true)
+    public void onCommandWithArgs(CommandEvent event) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("命令: ").append(event.getCommand()).append("\n");
+        sb.append("参数: \n");
+        String[] args = event.getArgs();
+        for (int i = 0; i < args.length; i++) {
+            sb.append("arg[").append(i).append("]: ").append(args[i]).append("\n");
+        }
+        event.send(MessageGenerator.text(sb.toString()));
     }
 }

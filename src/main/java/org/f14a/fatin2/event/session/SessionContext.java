@@ -2,6 +2,7 @@ package org.f14a.fatin2.event.session;
 
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.EventBus;
+import org.f14a.fatin2.type.Message;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +21,7 @@ public class SessionContext<T extends Event> {
     private long lastActiveTime;
     private int timeout; // in seconds
 
-    private CompletableFuture<String> waitingFuture;
+    private CompletableFuture<Message[]> waitingFuture;
     private boolean active;
 
     // Callbacks
@@ -37,7 +38,7 @@ public class SessionContext<T extends Event> {
         this.timeout = 60;
         this.active = true;
     }
-    public CompletableFuture<String> waitForInput() {
+    public CompletableFuture<Message[]> waitForInput() {
         this.lastActiveTime = System.currentTimeMillis();
         this.waitingFuture = new CompletableFuture<>();
 
@@ -50,7 +51,7 @@ public class SessionContext<T extends Event> {
         });
         return this.waitingFuture;
     }
-    public void receiveInput(String input) {
+    public void receiveInput(Message[] input) {
         this.lastActiveTime = System.currentTimeMillis();
         if (this.waitingFuture != null && !this.waitingFuture.isDone()) {
             this.waitingFuture.complete(input);

@@ -6,6 +6,7 @@ import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.exception.OnebotProtocolException;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -62,40 +63,44 @@ public class CommandParser {
     private static PrefixScan scanPrefixes(long selfId, Message[] segments) {
         boolean atBot = false;
         boolean hasReply = false;
-        int idx = 0;
+        int index = 0;
         // Consume leading reply / at / whitespace text
-        while (idx < segments.length) {
-            Message seg = segments[idx];
+        while (index < segments.length) {
+            Message seg = segments[index];
             String type = seg.type();
             switch (type) {
                 case "reply" -> {
                     hasReply = true;
-                    idx++;
+                    index++;
                 }
                 case "at" -> {
                     String qq = requireDataString(seg, "qq");
                     if (qq.equals(String.valueOf(selfId))) {
                         atBot = true;
                     }
-                    idx++;
+                    index++;
                 }
                 case "text" -> {
                     String text = requireDataString(seg, "text");
-                    if (text.trim().isEmpty()) {
-                        idx++;
+                    if (!text.trim().isEmpty()) {
+                        // Find meaningful text, stop here.
+                        break;
+                    }
+                    else {
+                        index++;
                     }
                 }
             }
             // If we broke from switch by "break" inside case "text"/default, we need to stop outer while too.
-            if (idx < segments.length) {
-                String t = segments[idx].type();
-                if ("text".equals(t) && !requireDataString(segments[idx], "text").trim().isEmpty()) {
+            if (index < segments.length) {
+                String t = segments[index].type();
+                if ("text".equals(t) && !requireDataString(segments[index], "text").trim().isEmpty()) {
                     break;
                 }
             }
         }
-        // Build remaining text from idx...end: concatenate text segments only.
-        String remaining = concatTextSegments(Arrays.copyOfRange(segments, idx, segments.length));
+        // Build remaining text from index...end: concatenate text segments only.
+        String remaining = concatTextSegments(Arrays.copyOfRange(segments, index, segments.length));
         return new PrefixScan(atBot, hasReply, remaining);
     }
     private static String concatTextSegments(Message[] segments) {
@@ -109,31 +114,31 @@ public class CommandParser {
         }
         return sb.toString();
     }
-    private static CommandLine parseCommandLine(String s) {
+    private static CommandLine parseCommandLine(String string) {
         // minimal parser: split by whitespace, no quotes support
         // You can upgrade later to support quoted args.
-        String trimmed = s.trim();
-        if (trimmed.isEmpty()) {
+        String remaining = string.trim();
+        if (remaining.isEmpty()) {
             return new CommandLine("", new String[0]);
         }
-        String[] parts = trimmed.split("\\s+");
-        String cmd = parts[0];
-        String[] args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
-        return new CommandLine(cmd, args);
+        List<String> tokens = CommandLineTokenizer.tokenize(remaining);
+        String command = tokens.getFirst();
+        String[] args = tokens.subList(1, tokens.size()).toArray(new String[0]);
+        return new CommandLine(command, args);
     }
     private record CommandLine(String command, String[] args) {}
-    private static String requireDataString(Message seg, String key) {
+    private static String requireDataString(Message segment, String key) {
         try {
-            Object v = seg.data().get(key);
+            Object v = segment.data().get(key);
             if (v == null) {
-                throw new OnebotProtocolException("Missing data field '" + key + "' for segment type=" + seg.type()
-                        + ", data=" + seg.data());
+                throw new OnebotProtocolException("Missing data field '" + key
+                        + "' for segment type=" + segment.type() + ", data=" + segment.data());
             }
             return v.toString();
         } catch (RuntimeException e) {
             // includes NPE, ClassCastException etc.
-            throw new OnebotProtocolException("Malformed segment data for key '" + key + "': type="
-                    + seg.type() + ", data=" + seg.data(), e);
+            throw new OnebotProtocolException("Malformed segment data for key '"
+                    + key + "': type=" + segment.type() + ", data=" + segment.data(), e);
         }
     }
 }

@@ -41,12 +41,12 @@ public class MessageGenerator {
      * Uses a fluent API to add message segments.
      */
     public static class MessageBuilder {
-        private final List<Map<String, Object>> segments;
+        private final JsonArray segments;
         /**
          * Constructor initializes an empty segments list.
          */
         public MessageBuilder() {
-            this.segments = new ArrayList<>();
+            this.segments = new JsonArray();
         }
         /**
          * Adds a message segment with the specified type and data.
@@ -58,7 +58,11 @@ public class MessageGenerator {
             Map<String, Object> segment = new HashMap<>();
             segment.put("type", type);
             segment.put("data", data);
-            this.segments.add(segment);
+            this.segments.add(gson.toJsonTree(segment));
+            return this;
+        }
+        public MessageBuilder addSegment(JsonObject message) {
+            this.segments.add(message);
             return this;
         }
         /**
@@ -92,17 +96,17 @@ public class MessageGenerator {
         }
         /**
          * Builds and returns the JSON string representation of the message array.
-         * @return JSON formatted string
+         * @return JSON array of message segments
          */
         public JsonArray build() {
-            return gson.toJsonTree(segments).getAsJsonArray();
+            return this.segments;
         }
         /**
          * Returns the segments list (for testing or advanced usage).
-         * @return the list of segments
+         * @return JSON array of message segments
          */
-        public List<Map<String, Object>> getSegments() {
-            return segments;
+        public JsonArray getSegments() {
+            return this.segments;
         }
     }
 

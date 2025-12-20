@@ -32,16 +32,18 @@ public @interface OnCommand {
      */
     boolean needAt() default false;
     /**
-     * Permission level required to invoke this command. <br>
+     * Permission level required to invoke this command, by default it is set to 0 (Everyone). <br>
      * If you don't enable integrated permission plugin or custom permission plugin, this setting has no effect.
      * <ul>
-     * <li>-1 The person is banned </li>
-     * <li>0 Everyone </li>
-     * <li>1 Everyone </li>
-     * <li>2 Group Admins </li>
-     * <li>3 Group Owner </li>
      * <li>4 Bot Admins </li>
+     * <li>3 Group Owner </li>
+     * <li>2 Group Admins </li>
+     * <li>1 Everyone </li>
+     * <li>0 Everyone </li>
+     * <li>-1 Banned Users </li>
      * </ul>
+     * Users have level -1 permission means they are forbidden to use the bot,
+     * however a command with level -1 permission can still be used by them.
      */
     int permission() default 0;
 }

@@ -1,6 +1,7 @@
 package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.Main;
 import org.f14a.fatin2.client.Client;
@@ -84,5 +85,21 @@ public class RequestSender {
         Main.LOGGER.debug("Deleting message: {}", request);
         Client.getInstance().send(request);
         return echo;
+    }
+    public static int replyGroupMessage(long groupId, long messageId, JsonArray messages) {
+        MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
+        messages.forEach(msg -> mb.addSegment(msg.getAsJsonObject()));
+        return MessageSender.sendGroup(groupId, mb.build());
+    }
+    public static int replyGroupMessage(long groupId, long messageId, JsonObject ... messages) {
+        return replyGroupMessage(groupId, messageId, MessageGenerator.create(messages));
+    }
+    public static int replyPrivateMessage(long userId, long messageId, JsonArray messages) {
+        MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
+        messages.forEach(msg -> mb.addSegment(msg.getAsJsonObject()));
+        return MessageSender.sendPrivate(userId, mb.build());
+    }
+    public static int replyPrivateMessage(long userId, long messageId, JsonObject ... messages) {
+        return replyPrivateMessage(userId, messageId, MessageGenerator.create(messages));
     }
 }
