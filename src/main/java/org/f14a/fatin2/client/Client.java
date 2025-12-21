@@ -14,26 +14,54 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client extends WebSocketClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
-    private static Client instance;
+    private static volatile Client instance;
     public static Client getInstance() {
         return Client.instance;
     }
 
-    private static final int RECONNECT_INTERVAL = 10; // seconds
+    /**
+     * Atomically swap the global active client.
+     * Old client will be closed best-effort.
+     */
+    private static void setInstance(Client newInstance) {
+        Client old = Client.instance;
+        Client.instance = newInstance;
+        if (old != null && old != newInstance) {
+            try {
+                // Avoid triggering reconnect loop for old client
+                old.closed = true;
+                old.closeConnection(1000, "Replaced by a new client");
+            } catch (Exception e) {
+                LOGGER.debug("Failed to close previous websocket client", e);
+            }
+        }
+    }
+
+    private static final int BASE_RECONNECT_INTERVAL_SECONDS = 10;
+    private static final int MAX_RECONNECT_INTERVAL_SECONDS = 300;
 
     private final Gson GSON = new Gson();
     private final String accessToken;
+
     private ScheduledExecutorService reconnectExecutor;
+    private ScheduledFuture<?> reconnectFuture;
+    private final AtomicBoolean reconnecting = new AtomicBoolean(false);
+    private volatile int reconnectAttempts = 0;
+
+    /** True if close() was called intentionally. */
     private volatile boolean closed = false;
 
     public Client(URI serverUri, String accessToken) {
         super(serverUri, createHeaders(accessToken));
         this.accessToken = accessToken;
-        Client.instance = this;
+        Client.setInstance(this);
     }
 
     private static Map<String, String> createHeaders(String accessToken) {
@@ -50,6 +78,7 @@ public class Client extends WebSocketClient {
         LOGGER.info("Connected to {}", Config.getConfig().getWebSocketUrl());
         LOGGER.debug("Server status: {}", handshake.getHttpStatusMessage());
         this.closed = false;
+        stopReconnectLoop();
     }
 
     @Override
@@ -71,41 +100,103 @@ public class Client extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        if(closed) {
+        if (closed) {
             LOGGER.info("Connection closed.");
-        }
-        else {
+            stopReconnectLoop();
+        } else {
             LOGGER.warn("Connection lost. Reason: {} - {}, remote = {}", code, reason, remote);
-            // Attempt to reconnect
-            scheduleReconnect();
+            startReconnectLoop();
         }
     }
 
     @Override
     public void onError(Exception e) {
+        // InterruptedException is common when the library aborts close/reset during reconnect attempts
+        if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+            LOGGER.warn("WebSocket operation interrupted", e);
+            return;
+        }
         LOGGER.error("WebSocket error occurred", e);
     }
 
     @Override
     public void close() {
         this.closed = true;
-        if (reconnectExecutor != null && !reconnectExecutor.isShutdown()) {
-            reconnectExecutor.shutdownNow();
-        }
+        stopReconnectLoop();
         super.close();
     }
 
-    private void scheduleReconnect() {
+    private void startReconnectLoop() {
+        if (!reconnecting.compareAndSet(false, true)) {
+            return; // already reconnecting
+        }
+        // create executor if needed
         if (this.reconnectExecutor == null || this.reconnectExecutor.isShutdown()) {
-            this.reconnectExecutor = Executors.newScheduledThreadPool(1);
-            this.reconnectExecutor.schedule(() -> {
-                LOGGER.info("Attempting to reconnect...");
-                try {
-                    super.reconnect();
-                } catch (Exception e) {
-                    LOGGER.error("Reconnection attempt failed", e);
-                }
-            }, RECONNECT_INTERVAL, TimeUnit.SECONDS);
+            this.reconnectExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "ws-reconnect");
+                t.setDaemon(true);
+                return t;
+            });
+        }
+        // schedule first attempt immediately
+        scheduleNextReconnect(0);
+    }
+
+    private void stopReconnectLoop() {
+        reconnecting.set(false);
+        reconnectAttempts = 0;
+        if (reconnectFuture != null) {
+            reconnectFuture.cancel(true);
+            reconnectFuture = null;
+        }
+        if (reconnectExecutor != null && !reconnectExecutor.isShutdown()) {
+            reconnectExecutor.shutdownNow();
+        }
+    }
+
+    private int nextBackoffSeconds() {
+        // exponential backoff with jitter
+        int exp = (int) Math.min(30, reconnectAttempts); // cap exponent
+        long base = (long) BASE_RECONNECT_INTERVAL_SECONDS * (1L << Math.min(exp, 10)); // cap shift
+        long capped = Math.min(base, MAX_RECONNECT_INTERVAL_SECONDS);
+        // jitter +/-20%
+        long jitter = (long) (capped * 0.2);
+        long min = Math.max(0, capped - jitter);
+        long max = capped + jitter;
+        return (int) ThreadLocalRandom.current().nextLong(min, max + 1);
+    }
+
+    private void scheduleNextReconnect(int delaySeconds) {
+        if (reconnectExecutor == null || reconnectExecutor.isShutdown()) {
+            reconnecting.set(false);
+            return;
+        }
+        reconnectFuture = reconnectExecutor.schedule(this::doReconnectAttempt, delaySeconds, TimeUnit.SECONDS);
+    }
+
+    private void doReconnectAttempt() {
+        if (closed) {
+            stopReconnectLoop();
+            return;
+        }
+        LOGGER.info("Attempting to reconnect... (attempt #{})", reconnectAttempts + 1);
+        try {
+            // IMPORTANT: WebSocketClient objects are not reusable.
+            // Create a fresh client per attempt.
+            URI uri = getURI();
+            Client newClient = new Client(uri, this.accessToken);
+            newClient.closed = false;
+            newClient.connect();
+            // success will be detected by onOpen() and stopReconnectLoop()
+            reconnectAttempts++;
+            int delay = nextBackoffSeconds();
+            scheduleNextReconnect(delay);
+        } catch (Exception e) {
+            reconnectAttempts++;
+            LOGGER.error("Reconnection attempt failed", e);
+            int delay = nextBackoffSeconds();
+            scheduleNextReconnect(delay);
         }
     }
 }
