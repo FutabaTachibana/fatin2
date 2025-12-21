@@ -7,7 +7,13 @@ command_prefix: "/"
 # Debug mode
 debug: false
 plugin:
-  # directory without dot or slash(backslash in Windows) means relative path to working directory.
+  # directory without dot or slash(backslash in Windows) means relative path to working directory
   directory: plugins
   # watch plugin directory for changes and reload automatically
   auto_reload: true
+  # whether to load plugins bundled with the bot
+  integrated:
+    # integrated permission manager, set false if you want to use other permission manager
+    permission: true
+    # it will generate help of command by its description(if exists)
+    help_generator: true
