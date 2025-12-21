@@ -17,7 +17,7 @@ public class PrivateMessageEvent extends MessageEvent {
     }
 
     @Override
-    protected int sendOnly(JsonArray messages) {
+    public int send(JsonArray messages) {
         return MessageSender.sendPrivate(this.message.userId(), messages);
     }
 

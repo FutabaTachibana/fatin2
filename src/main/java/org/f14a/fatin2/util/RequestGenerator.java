@@ -33,6 +33,14 @@ public class RequestGenerator {
         public RequestBuilder() {
             this.fields = new JsonObject();
         }
+        public RequestBuilder add(String key, String value) {
+            this.fields.addProperty(key, value);
+            return this;
+        }
+        public RequestBuilder add(String key, JsonElement value) {
+            this.fields.add(key, value);
+            return this;
+        }
         /**
          * Sets the group_id field.
          * @param groupId the group identifier
@@ -62,6 +70,15 @@ public class RequestGenerator {
          */
         public RequestBuilder message(JsonArray message) {
             this.fields.add("message", message);
+            return this;
+        }
+        /**
+         * Sets the messages field.
+         * @param messages the message content
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder messages(JsonArray messages) {
+            this.fields.add("messages", messages);
             return this;
         }
         /**

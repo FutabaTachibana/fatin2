@@ -41,27 +41,19 @@ public abstract class MessageEvent extends Event {
     }
 
     // Exactly abstract method to send message subclasses must override.
-    abstract protected int sendOnly(JsonArray messages);
-    protected int sendOnly(JsonObject ... messages) {
-        return sendOnly(MessageGenerator.create(messages));
-    }
     /**
-     * A simple method to send messages, it cannot end the handler but can finish the session.
+     * A simple method to send messages.
      * @param messages the message created by MessageGenerator to send.
      * @return the echo id of the message has sent, you can use it to track the message status.
      */
-    public int send(JsonArray messages) {
-        finishSession();
-        return sendOnly(messages);
-    }
+    abstract public int send(JsonArray messages);
     /**
-     * A simple method to send messages, it cannot end the handler but can finish the session.
+     * A simple method to send messages.
      * @param messages the message created by MessageGenerator to send.
      * @return the echo id of the message has sent, you can use it to track the message status.
      */
     public int send(JsonObject ... messages) {
-        finishSession();
-        return sendOnly(MessageGenerator.create(messages));
+        return send(MessageGenerator.create(messages));
     }
     /**
      * Send messages and register a callback to handle the response.
@@ -92,7 +84,7 @@ public abstract class MessageEvent extends Event {
      */
     public Message[] wait(JsonArray prompt) {
         if (prompt != null) {
-            sendOnly(prompt);
+            send(prompt);
         }
         createSessionContext();
         CompletableFuture<Message[]> future = this.sessionContext.waitForInput();
@@ -120,7 +112,33 @@ public abstract class MessageEvent extends Event {
     public Message[] waitSilent() {
         return wait((JsonArray) null);
     }
-    // TODO: add wait(Consumer<Response> onFinish, JsonArray prompt) to track the message sent.
+    /**
+     * Send messages and finish the session. Use it after wait().
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
+    public int finish(JsonArray messages) {
+        finish();
+        return send(messages);
+    }
+    /**
+     * Send messages and finish the session. Use it after wait().
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
+    public int finish(JsonObject ... messages) {
+        finish();
+        return send(messages);
+    }
+    /**
+     * Finish the current session if exists.
+     */
+    public void finish() {
+        if (this.sessionContext != null) {
+            EventBus.getSessionManager().endSession(this.sessionContext.getSessionId());
+            this.sessionContext = null;
+        }
+    }
     /**
      * Send a message and get a CompletableFuture for the response.
      * @param messages the message created by MessageGenerator to send before waiting.
@@ -163,28 +181,34 @@ public abstract class MessageEvent extends Event {
     }
 
     /**
-     * Finish the current session if exists.
-     * Commonly it is called automatically after send() methods, but if you use wait
+     * Set the timeout for the session in seconds.
+     * @param seconds the timeout in seconds.
      */
-    public void finishSession() {
-        if (this.sessionContext != null) {
-            EventBus.getSessionManager().endSession(this.sessionContext.getSessionId());
-            this.sessionContext = null;
-        }
-    }
     public void setTimeOut(int seconds) {
         createSessionContext();
         this.sessionContext.setTimeout(seconds);
     }
+    /**
+     * Set the callback function when the session times out.
+     * @param callback the callback function.
+     */
     public void setOnTimeout(Consumer<MessageEvent> callback) {
         createSessionContext();
         this.sessionContext.setOnTimeout(callback);
     }
+    /**
+     * Set the callback function when the session finishes.
+     * @param callback the callback function.
+     */
     public void setOnFinish(Consumer<MessageEvent> callback) {
         createSessionContext();
         this.sessionContext.setOnFinish(callback);
     }
-    public MessageEvent getSessionEvent() {
+    /**
+     * Get the MessageEvent of the current session, it differs to this event in coroutine handlers.
+     * @return the MessageEvent of the current session.
+     */
+    public MessageEvent getCurrentEvent() {
         createSessionContext();
         return this.sessionContext.getCurrentEvent();
     }

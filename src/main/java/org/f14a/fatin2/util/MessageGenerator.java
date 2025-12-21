@@ -2,13 +2,12 @@ package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.type.Faces;
 import org.f14a.fatin2.type.Message;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,13 +60,24 @@ public class MessageGenerator {
             this.segments.add(gson.toJsonTree(segment));
             return this;
         }
+        public MessageBuilder addSegment(String type, JsonElement data) {
+            Map<String, Object> segment = new HashMap<>();
+            segment.put("type", type);
+            segment.put("data", data);
+            this.segments.add(gson.toJsonTree(segment));
+            return this;
+        }
+        /**
+         * Adds a message segment with the specified type and data.
+         * @param message the segment as a JsonObject, it may be created by static methods of MessageGenerator
+         * @return this builder instance for method chaining
+         */
         public MessageBuilder addSegment(JsonObject message) {
             this.segments.add(message);
             return this;
         }
         /**
          * Starts building a custom segment with the specified type.
-         * Returns a SegmentBuilder for adding data fields.
          * @param type the segment type
          * @return a SegmentBuilder instance
          */
@@ -75,37 +85,25 @@ public class MessageGenerator {
             return new SegmentBuilder(this, type);
         }
         public MessageBuilder text(String text) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("text", text);
-            return addSegment("text", data);
+            return addSegment("text", Map.of("text", text));
         }
         public MessageBuilder at(long userId) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("qq", Long.toString(userId));
-            return addSegment("at", data);
+            return addSegment("at", Map.of("qq", Long.toString(userId)));
         }
         public MessageBuilder face(Faces faces){
-            Map<String, Object> data = new HashMap<>();
-            data.put("id", Integer.toString(faces.slot()));
-            return addSegment("face", data);
+            return addSegment("face", Map.of("id", Integer.toString(faces.slot())));
         }
         public MessageBuilder reply(long messageId){
-            Map<String, Object> data = new HashMap<>();
-            data.put("id", Long.toString(messageId));
-            return addSegment("reply", data);
+            return addSegment("reply", Map.of("id", Long.toString(messageId)));
+        }
+        public MessageBuilder node(JsonObject node) {
+            return addSegment("node", node);
         }
         /**
          * Builds and returns the JSON string representation of the message array.
          * @return JSON array of message segments
          */
         public JsonArray build() {
-            return this.segments;
-        }
-        /**
-         * Returns the segments list (for testing or advanced usage).
-         * @return JSON array of message segments
-         */
-        public JsonArray getSegments() {
             return this.segments;
         }
     }

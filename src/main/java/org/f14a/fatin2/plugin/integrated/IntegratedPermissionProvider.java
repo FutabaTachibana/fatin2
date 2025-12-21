@@ -1,10 +1,10 @@
 package org.f14a.fatin2.plugin.integrated;
 
+import org.f14a.fatin2.event.command.CommandEvent;
 import org.f14a.fatin2.event.command.PermissionProvider;
 import org.f14a.fatin2.type.Sender;
 import org.f14a.fatin2.type.message.OnebotMessage;
 
-import java.util.Objects;
 import java.util.Set;
 
 public class IntegratedPermissionProvider implements PermissionProvider {
@@ -16,7 +16,8 @@ public class IntegratedPermissionProvider implements PermissionProvider {
     }
 
     @Override
-    public boolean hasPermission(OnebotMessage message, int requiredPermission) {
+    public boolean hasPermission(CommandEvent event, int requiredPermission) {
+        OnebotMessage message = event.getMessage();
         long userId = message.userId();
         int permissionLevel = 0;
         if (botAdmins.contains(userId)) {

@@ -21,13 +21,13 @@ public interface CommandEvent {
     MessageType getMessageType();
 
     /**
-     * A simple method to send messages, it cannot end the handler but can finish the session.
+     * A simple method to send messages.
      * @param messages the message created by MessageGenerator to send.
      * @return the echo id of the message has sent, you can use it to track the message status.
      */
     int send(JsonArray messages);
     /**
-     * A simple method to send messages, it cannot end the handler but can finish the session.
+     * A simple method to send messages.
      * @param messages the message created by MessageGenerator to send.
      * @return the echo id of the message has sent, you can use it to track the message status.
      */
@@ -64,7 +64,23 @@ public interface CommandEvent {
      * Wait for user input without sending any message.
      * @return the user input message content, or null if timeout or error occurs.
      */
-    String waitSilent();
+    Message[] waitSilent();
+    /**
+     * Send messages and finish the session. Use it after wait().
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
+    int finish(JsonArray messages);
+    /**
+     * Send messages and finish the session. Use it after wait().
+     * @param messages the message created by MessageGenerator to send.
+     * @return the echo id of the message has sent, you can use it to track the message status.
+     */
+    int finish(JsonObject... messages);
+    /**
+     * Finish the current session if exists.
+     */
+    void finish();
     /**
      * Send a message and get a CompletableFuture for the response.
      * @param messages the message created by MessageGenerator to send before waiting.
@@ -91,10 +107,26 @@ public interface CommandEvent {
      * @return the response received, including status and message id.
      */
     Response sendAndWait(JsonObject... messages);
-    void finishSession();
+
+    /**
+     * Set the timeout for the session in seconds.
+     * @param seconds the timeout in seconds.
+     */
     void setTimeOut(int seconds);
+    /**
+     * Set the callback function when the session times out.
+     * @param callback the callback function.
+     */
     void setOnTimeout(Consumer<MessageEvent> callback);
+    /**
+     * Set the callback function when the session finishes.
+     * @param callback the callback function.
+     */
     void setOnFinish(Consumer<MessageEvent> callback);
-    MessageEvent getSessionEvent();
+    /**
+     * Get the MessageEvent of the current session, it differs to this event in coroutine handlers.
+     * @return the MessageEvent of the current session.
+     */
+    MessageEvent getCurrentEvent();
 
 }

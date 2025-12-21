@@ -5,6 +5,7 @@ import org.f14a.fatin2.event.response.ResponseManager;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.event.session.SessionManager;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.type.message.OnebotMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,8 @@ public class EventBus {
     public static ResponseManager getResponseManager() {
         return getInstance().responseManager;
     }
+    private final PermissionProvider permissionProvider;
+    private boolean registerPermissionProvider = false;
 
     public EventBus() {
         EventBus.instance = this;
@@ -63,6 +66,12 @@ public class EventBus {
         this.virtualAsyncService = Executors.newVirtualThreadPerTaskExecutor();
         this.sessionManager = new SessionManager();
         this.responseManager = new ResponseManager();
+        this.permissionProvider = new PermissionProvider() {
+            @Override
+            public boolean hasPermission(CommandEvent event, int requiredPermission) {
+                return true; // Default implementation, always returns true
+            }
+        };
         LOGGER.debug("Event Bus initialized with thread pool");
     }
 
@@ -139,6 +148,17 @@ public class EventBus {
             count.getAndIncrement();
         });
         return count.get();
+    }
+    public boolean registerPermissionProvider(PermissionProvider permissionProvider) {
+        if (this.registerPermissionProvider) {
+            LOGGER.error("PermissionProvider has already been registered. Ignoring subsequent registration.");
+            return false;
+        }
+        else {
+            this.registerPermissionProvider = true;
+            LOGGER.info("PermissionProvider registered successfully.");
+            return true;
+        }
     }
     public void unregister(Fatin2Plugin plugin) {
         // Unregister from common event handlers
@@ -225,6 +245,10 @@ public class EventBus {
                 case PRIVATE -> event instanceof PrivateCommandEvent;
                 case GROUP -> event instanceof GroupCommandEvent;
             }) {
+                continue;
+            }
+            // Check permission
+            if (!this.permissionProvider.hasPermission(event, listener.permission())) {
                 continue;
             }
             try {

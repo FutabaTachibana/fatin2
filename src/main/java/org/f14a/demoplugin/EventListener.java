@@ -4,11 +4,14 @@ import org.f14a.fatin2.event.EventHandler;
 import org.f14a.fatin2.event.command.CommandEvent;
 import org.f14a.fatin2.event.command.GroupCommandEvent;
 import org.f14a.fatin2.event.command.OnCommand;
+import org.f14a.fatin2.event.command.PrivateCommandEvent;
 import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.Response;
 import org.f14a.fatin2.util.MessageGenerator;
+import org.f14a.fatin2.util.MessageSender;
+import org.f14a.fatin2.util.NodeGenerator;
 import org.f14a.fatin2.util.RequestSender;
 
 import java.util.Arrays;
@@ -100,5 +103,29 @@ public class EventListener {
             sb.append("arg[").append(i).append("]: ").append(args[i]).append("\n");
         }
         event.send(MessageGenerator.text(sb.toString()));
+    }
+    // Example for forward message
+    @OnCommand(command = "forward")
+    public void onForwardMessage(CommandEvent event) {
+        String[] args = event.getArgs();
+        long userId;
+        try {
+            userId = Long.parseLong(args[0]);
+        } catch (NumberFormatException e) {
+            event.send(MessageGenerator.text("请提供有效的用户ID作为第一个参数"));
+            return;
+        }
+        userId = event.getMessage().userId();
+        MessageGenerator.MessageBuilder mb = MessageGenerator.builder();
+        for (int i = 1; i < args.length; i++) {
+            mb.node(NodeGenerator.builder().userId(userId).nickname("人").content(MessageGenerator.text(args[i])).build());
+        }
+        if (event instanceof PrivateCommandEvent) {
+            MessageSender.sendPrivateForward(userId, mb.build());
+        }
+        else if (event instanceof GroupCommandEvent) {
+            long groupId = ((GroupCommandEvent) event).getGroupId();
+            MessageSender.sendGroupForward(groupId, mb.build());
+        }
     }
 }
