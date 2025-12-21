@@ -19,16 +19,14 @@ public class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        // Load Config
-        // Choose Command Line Args first
-        String configPath = args.length > 0 ? args[0] : "config.yml";
+        // Load config from working directory (config.yml)
         CountDownLatch stopLatch = new CountDownLatch(1);
-        EventBus eventBus =null;
+        EventBus eventBus = null;
         PluginManager pluginManager = null;
         Client client = null;
         try {
-            LOGGER.info("Loading config from: {}", configPath);
-            Config config = ConfigLoader.load(configPath);
+            LOGGER.info("Loading config from working directory (config.yml)");
+            Config config = ConfigLoader.load();
             System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
             // Init event bus
             eventBus = new EventBus();

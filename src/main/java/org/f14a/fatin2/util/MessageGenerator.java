@@ -72,7 +72,7 @@ public class MessageGenerator {
          * @param message the segment as a JsonObject, it may be created by static methods of MessageGenerator
          * @return this builder instance for method chaining
          */
-        public MessageBuilder addSegment(JsonObject message) {
+        public MessageBuilder addSegment(JsonElement message) {
             this.segments.add(message);
             return this;
         }

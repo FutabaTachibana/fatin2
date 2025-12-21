@@ -1,11 +1,11 @@
 package org.f14a.fatin2.config;
 
-public class DefaultConfig {
-    static final String WEBSOCKET_URL = "ws://localhost:8080/ws";
-    static final String ACCESS_TOKEN = "";
-    static final String COMMAND_PREFIX = "/";
-    static final boolean DEBUG = false;
-    static final int MAX_SESSION_DURATION = 60;
-    static final String PLUGIN_DIRECTORY = "plugins";
-    static final boolean PLUGIN_AUTO_RELOAD = false;
+/**
+ * @deprecated Defaults are now sourced from the bundled resources/config.yml.
+ * This class is kept only for backward compatibility and will be removed in a future release.
+ */
+@Deprecated
+public final class DefaultConfig {
+    private DefaultConfig() {
+    }
 }

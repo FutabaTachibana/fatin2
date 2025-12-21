@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.client.Client;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,7 @@ public class MessageSender {
     }
     public static int replyGroupMessage(long groupId, long messageId, JsonArray messages) {
         MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
-        messages.forEach(msg -> mb.addSegment(msg.getAsJsonObject()));
+        messages.forEach(mb::addSegment);
         return MessageSender.sendGroup(groupId, mb.build());
     }
     public static int replyGroupMessage(long groupId, long messageId, JsonObject ... messages) {
@@ -90,7 +91,7 @@ public class MessageSender {
     }
     public static int replyPrivateMessage(long userId, long messageId, JsonArray messages) {
         MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
-        messages.forEach(msg -> mb.addSegment(msg.getAsJsonObject()));
+        messages.forEach(mb::addSegment);
         return MessageSender.sendPrivate(userId, mb.build());
     }
     public static int replyPrivateMessage(long userId, long messageId, JsonObject ... messages) {
