@@ -5,9 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * You can use this class to generate WebSocket request JSON strings. <br>
  * It uses the Builder pattern to allow flexible and readable JSON construction.
@@ -20,7 +17,7 @@ import java.util.Map;
  * </pre></Blockquote>
  */
 public class RequestGenerator {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     /**
      * Builder class for constructing WebSocket request JSON strings. <br>
      * Uses the Builder pattern to allow flexible and readable JSON construction.

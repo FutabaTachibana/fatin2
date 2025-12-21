@@ -1,6 +1,5 @@
 package org.f14a.fatin2.config;
 
-import org.f14a.fatin2.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -10,9 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class ConfigLoader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoader.class);
     public static Config load(String path) throws Exception {
         Yaml yaml = new Yaml();
         InputStream input;
@@ -20,7 +19,7 @@ public class ConfigLoader {
         try {
             input = new FileInputStream(path);
         } catch (FileNotFoundException e) {
-            Main.LOGGER.warn("Configuration file not found at {}. Using default configuration.", path);
+            LOGGER.warn("Configuration file not found at {}. Using default configuration.", path);
             return new Config();
         }
 
@@ -38,7 +37,7 @@ public class ConfigLoader {
             config.setPluginDirectory(data.getOrDefault("directory", DefaultConfig.PLUGIN_DIRECTORY));
             if (!config.getPluginDirectory().startsWith(".")) {
                 config.setPluginDirectory("." + File.separator + config.getPluginDirectory());
-                Main.LOGGER.debug("Plugin directory reset to: {}", config.getPluginDirectory());
+                LOGGER.debug("Plugin directory reset to: {}", config.getPluginDirectory());
             }
             config.setPluginAutoReload(data.getOrDefault("auto_reload", DefaultConfig.PLUGIN_AUTO_RELOAD));
         }

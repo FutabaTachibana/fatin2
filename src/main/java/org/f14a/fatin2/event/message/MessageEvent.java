@@ -2,21 +2,24 @@ package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
 import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.MessageType;
 import org.f14a.fatin2.type.Response;
-import org.f14a.fatin2.util.MessageGenerator;
-import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
 import org.f14a.fatin2.type.message.OnebotMessage;
+import org.f14a.fatin2.util.MessageGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public abstract class MessageEvent extends Event {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageEvent.class);
     private final OnebotMessage message;
 
     private final MessageType messageType;
@@ -166,7 +169,7 @@ public abstract class MessageEvent extends Event {
         try {
             return future.get();
         } catch (Exception e) {
-            EventBus.LOGGER.error("Error while waiting for response", e);
+            LOGGER.error("Error while waiting for response", e);
             return null;
         }
     }

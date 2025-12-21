@@ -74,7 +74,7 @@ public class EventListener {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            RequestSender.replyGroupMessage(event.getGroupId(), request.getMessageId(),
+            MessageSender.replyGroupMessage(event.getGroupId(), request.getMessageId(),
                     MessageGenerator.text("这是对5秒前消息的回复"));
         }, MessageGenerator.text("这条消息将在5秒后被回复"));
     }

@@ -34,7 +34,7 @@ import java.util.Map;
  * </pre></Blockquote>
  */
 public class MessageGenerator {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     /**
      * Builder class for constructing a Message array.
      * Uses a fluent API to add message segments.
@@ -57,14 +57,14 @@ public class MessageGenerator {
             Map<String, Object> segment = new HashMap<>();
             segment.put("type", type);
             segment.put("data", data);
-            this.segments.add(gson.toJsonTree(segment));
+            this.segments.add(GSON.toJsonTree(segment));
             return this;
         }
         public MessageBuilder addSegment(String type, JsonElement data) {
             Map<String, Object> segment = new HashMap<>();
             segment.put("type", type);
             segment.put("data", data);
-            this.segments.add(gson.toJsonTree(segment));
+            this.segments.add(GSON.toJsonTree(segment));
             return this;
         }
         /**
@@ -181,30 +181,30 @@ public class MessageGenerator {
     public static JsonArray create(Message ... messages) {
         JsonArray arr = new JsonArray();
         for (Message msg : messages) {
-            arr.add(gson.toJsonTree(msg));
+            arr.add(GSON.toJsonTree(msg));
         }
         return arr;
     }
     public static JsonObject text(String text) {
-        return gson.toJsonTree(Map.of(
+        return GSON.toJsonTree(Map.of(
                 "type", "text",
                 "data", Map.of("text", text)
         )).getAsJsonObject();
     }
     public static JsonObject at(long userId) {
-        return gson.toJsonTree(Map.of(
+        return GSON.toJsonTree(Map.of(
                 "type", "at",
                 "data", Map.of("qq", Long.toString(userId))
         )).getAsJsonObject();
     }
     public static JsonObject face(Faces faces){
-        return gson.toJsonTree(Map.of(
+        return GSON.toJsonTree(Map.of(
                 "type", "face",
                 "data", Map.of("id", Integer.toString(faces.slot()))
         )).getAsJsonObject();
     }
     public static JsonObject reply(long messageId) {
-        return gson.toJsonTree(Map.of(
+        return GSON.toJsonTree(Map.of(
                 "type", "reply",
                 "data", Map.of("id", Long.toString(messageId))
         )).getAsJsonObject();

@@ -14,7 +14,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 public class PluginLoader {
-    public static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginLoader.class);
 
     public static void loadAllPlugins(File dir) {
         // Load integrated plugins

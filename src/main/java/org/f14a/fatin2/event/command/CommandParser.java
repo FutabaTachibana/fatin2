@@ -1,13 +1,13 @@
 package org.f14a.fatin2.event.command;
 
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.type.Message;
 import org.f14a.fatin2.type.exception.OnebotProtocolException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Parse OneBot message segments (Message[]) into command invocation. <br>
@@ -20,6 +20,7 @@ import java.util.Objects;
  * It does NOT depend on Message.parse() (display text), so it is stable against formatting changes.
  */
 public class CommandParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandParser.class);
     private CommandParser() {
     }
     public record Result(
@@ -37,16 +38,16 @@ public class CommandParser {
         PrefixScan scan = scanPrefixes(selfId, segments);
         String commandLine = scan.remainingText.trim();
         String prefix = Config.getConfig().getCommandPrefix();
-        EventBus.LOGGER.debug("CommandParser: after prefix scan: atBot={}, hasReply={}, remaining={}", scan.atBot, scan.hasReply, commandLine);
+        LOGGER.debug("CommandParser: after prefix scan: atBot={}, hasReply={}, remaining={}", scan.atBot, scan.hasReply, commandLine);
         if (!commandLine.startsWith(prefix)) {
             // does not start with prefix => not a command
-            EventBus.LOGGER.debug("CommandParser: command prefix {} not found.", prefix);
+            LOGGER.debug("CommandParser: command prefix {} not found.", prefix);
             return new Result(false, scan.atBot, scan.hasReply, "", new String[0], commandLine);
         }
         String withoutPrefix = commandLine.substring(prefix.length()).trim();
         if (withoutPrefix.isEmpty()) {
             // "/" only => not a valid command
-            EventBus.LOGGER.debug("CommandParser: command prefix only, no command found.");
+            LOGGER.debug("CommandParser: command prefix only, no command found.");
             return new Result(false, scan.atBot, scan.hasReply, "", new String[0], commandLine);
         }
         CommandLine cl = parseCommandLine(withoutPrefix);

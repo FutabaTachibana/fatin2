@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class NodeGenerator {
-    private static Gson gson = new Gson();
+    private static Gson GSON = new Gson();
     public static class NodeBuilder {
         private final JsonObject node;
         public NodeBuilder() {

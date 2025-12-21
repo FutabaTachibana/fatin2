@@ -1,10 +1,10 @@
 package org.f14a.fatin2.util;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.f14a.fatin2.Main;
 import org.f14a.fatin2.client.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -12,7 +12,8 @@ import java.util.Map;
  * A utility class for applying request.
  */
 public class RequestSender {
-    private static final Gson gson = new Gson();
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestSender.class);
+    private static final Gson GSON = new Gson();
     /**
      * Handle group request.
      * @param flag the request flag, which sources from AddRequestEvent or InviteRequestEvent.
@@ -23,12 +24,12 @@ public class RequestSender {
     public static int approveGroup(String flag, boolean approve, String reason) {
         JsonObject jsonObject = RequestGenerator.builder().flag(flag).approve(approve).reason(reason).build();
         int echo = jsonObject.hashCode();
-        String request = gson.toJson(Map.of(
+        String request = GSON.toJson(Map.of(
                 "action", "set_group_add_request",
                 "params", jsonObject,
                 "echo", Integer.toString(echo)
         ));
-        Main.LOGGER.debug("Handling group request: {}", request);
+        LOGGER.debug("Handling group request: {}", request);
         Client.getInstance().send(request);
         return echo;
     }
@@ -51,12 +52,12 @@ public class RequestSender {
     public static int approveFriend(String flag, boolean approve, String remark) {
         JsonObject jsonObject = RequestGenerator.builder().flag(flag).approve(approve).remark(remark).build();
         int echo = jsonObject.hashCode();
-        String request = gson.toJson(Map.of(
+        String request = GSON.toJson(Map.of(
                 "action", "set_friend_add_request",
                 "params", jsonObject,
                 "echo", Integer.toString(echo)
         ));
-        Main.LOGGER.debug("Handling friend request: {}", request);
+        LOGGER.debug("Handling friend request: {}", request);
         Client.getInstance().send(request);
         return echo;
     }
@@ -77,29 +78,13 @@ public class RequestSender {
     public static int deleteMessage(long messageId) {
         JsonObject jsonObject = RequestGenerator.builder().messageId(messageId).build();
         int echo = jsonObject.hashCode();
-        String request = gson.toJson(Map.of(
+        String request = GSON.toJson(Map.of(
                 "action", "delete_msg",
                 "params", jsonObject,
                 "echo", Integer.toString(echo)
         ));
-        Main.LOGGER.debug("Deleting message: {}", request);
+        LOGGER.debug("Deleting message: {}", request);
         Client.getInstance().send(request);
         return echo;
-    }
-    public static int replyGroupMessage(long groupId, long messageId, JsonArray messages) {
-        MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
-        messages.forEach(msg -> mb.addSegment(msg.getAsJsonObject()));
-        return MessageSender.sendGroup(groupId, mb.build());
-    }
-    public static int replyGroupMessage(long groupId, long messageId, JsonObject ... messages) {
-        return replyGroupMessage(groupId, messageId, MessageGenerator.create(messages));
-    }
-    public static int replyPrivateMessage(long userId, long messageId, JsonArray messages) {
-        MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
-        messages.forEach(msg -> mb.addSegment(msg.getAsJsonObject()));
-        return MessageSender.sendPrivate(userId, mb.build());
-    }
-    public static int replyPrivateMessage(long userId, long messageId, JsonObject ... messages) {
-        return replyPrivateMessage(userId, messageId, MessageGenerator.create(messages));
     }
 }

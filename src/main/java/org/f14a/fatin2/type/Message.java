@@ -10,7 +10,7 @@ public record Message(
         @SerializedName("type") String type,
         @SerializedName("data") Map<String, Object> data
 ) {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     public String parse() {
         try {
             return switch (this.type) {
@@ -30,7 +30,7 @@ public record Message(
     }
     @Override
     public String toString() {
-        return gson.toJson(this);
+        return GSON.toJson(this);
     }
     // TODO: Implement unformatted text parsing
 }

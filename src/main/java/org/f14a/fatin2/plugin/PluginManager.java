@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PluginManager {
-    public static final Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
     private static PluginManager instance;
     public static PluginManager getInstance() {
         return PluginManager.instance;

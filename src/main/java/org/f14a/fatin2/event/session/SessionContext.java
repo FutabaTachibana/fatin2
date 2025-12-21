@@ -1,8 +1,9 @@
 package org.f14a.fatin2.event.session;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.type.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
  * @param <T> the type of event
  */
 public class SessionContext<T extends Event> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
     private final String sessionId;
     private final long userId;
     private final long scope;
@@ -44,7 +46,7 @@ public class SessionContext<T extends Event> {
 
         this.waitingFuture.orTimeout(this.timeout, TimeUnit.SECONDS).exceptionally(ex -> {
             if (ex instanceof TimeoutException) {
-                EventBus.LOGGER.info("Session {} timed out", this.sessionId);
+                LOGGER.info("Session {} timed out", this.sessionId);
                 handleTimeout();
             }
             return null;

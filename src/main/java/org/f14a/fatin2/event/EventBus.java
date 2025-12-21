@@ -5,7 +5,6 @@ import org.f14a.fatin2.event.response.ResponseManager;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.event.session.SessionManager;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
-import org.f14a.fatin2.type.message.OnebotMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EventBus {
-    public static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
     private static final Map<Class<?>, CommandEventListener.Scope> SCOPE_BY_EVENT = Map.of(
             CommandEvent.class, CommandEventListener.Scope.BOTH,
             PrivateCommandEvent.class, CommandEventListener.Scope.PRIVATE,
@@ -226,7 +225,7 @@ public class EventBus {
                     break;
                 }
             } catch (Exception e) {
-                EventBus.LOGGER.error("Error invoking event handler method: {} with listener {}",
+                LOGGER.error("Error invoking event handler method: {} with listener {}",
                         listener.method().getName(), listener.listener().getClass().getName(), e);
             }
         }
@@ -264,7 +263,7 @@ public class EventBus {
                     listener.method().invoke(listener.listener(), event);
                 }
             } catch (Exception e) {
-                EventBus.LOGGER.error("Error invoking command handler method: {} with listener {}",
+                LOGGER.error("Error invoking command handler method: {} with listener {}",
                         listener.method().getName(), listener.listener().getClass().getName(), e);
             }
         }

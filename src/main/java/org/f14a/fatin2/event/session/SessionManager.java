@@ -1,12 +1,14 @@
 package org.f14a.fatin2.event.session;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.event.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.*;
 
 public class SessionManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
     private final Map<String, SessionContext<?>> sessions;
     private final Map<String, String> userSessions;
 
@@ -24,7 +26,7 @@ public class SessionManager {
                 this::cleanupExpiredSessions, 30, 30, TimeUnit.SECONDS
         );
 
-        EventBus.LOGGER.info("SessionManager initialized");
+        LOGGER.info("SessionManager initialized");
     }
 
     /**
@@ -44,7 +46,7 @@ public class SessionManager {
         SessionContext<T> context = new SessionContext<>(sessionId, userId, scope);
         this.sessions.put(sessionId, context);
         this.userSessions.put(userKey, sessionId);
-        EventBus.LOGGER.debug("Created new session {} for user {}", sessionId, userKey);
+        LOGGER.debug("Created new session {} for user {}", sessionId, userKey);
         return context;
     }
 
@@ -70,7 +72,7 @@ public class SessionManager {
             String userKey = context.getUserId() + "@" + context.getScope();
             this.userSessions.remove(userKey);
             userSessions.remove(userKey);
-            EventBus.LOGGER.debug("Ended session {}", sessionId);
+            LOGGER.debug("Ended session {}", sessionId);
         }
     }
     // Cleanup of expired sessions lazily called every fixed interval
@@ -84,22 +86,22 @@ public class SessionManager {
             }
         }
         if (clean > 0) {
-            EventBus.LOGGER.info("Cleaned up {} expired sessions", clean);
+            LOGGER.info("Cleaned up {} expired sessions", clean);
         }
     }
     public void shutdown() {
-        EventBus.LOGGER.info("Shutting down SessionManager...");
+        LOGGER.info("Shutting down SessionManager...");
         this.cleanupExecutor.shutdown();
         this.sessions.keySet().forEach(this::endSession);
         try {
             if (!this.cleanupExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                EventBus.LOGGER.warn("Cleanup executor did not terminate in the specified time.");
+                LOGGER.warn("Cleanup executor did not terminate in the specified time.");
                 this.cleanupExecutor.shutdownNow();
             }
         } catch (InterruptedException e) {
-            EventBus.LOGGER.error("Interrupted while waiting for cleanup executor to terminate", e);
+            LOGGER.error("Interrupted while waiting for cleanup executor to terminate", e);
             this.cleanupExecutor.shutdownNow();
         }
-        EventBus.LOGGER.debug("SessionManager shut down complete.");
+        LOGGER.debug("SessionManager shut down complete.");
     }
 }

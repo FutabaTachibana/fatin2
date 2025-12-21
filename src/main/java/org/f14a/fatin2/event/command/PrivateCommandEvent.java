@@ -1,16 +1,18 @@
 package org.f14a.fatin2.event.command;
 
-import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.message.PrivateMessageEvent;
 import org.f14a.fatin2.type.message.PrivateOnebotMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PrivateCommandEvent extends PrivateMessageEvent implements CommandEvent {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrivateCommandEvent.class);
     private final CommandParser.Result result;
 
     public static PrivateMessageEvent getCommandOrBasic(PrivateOnebotMessage message) {
         CommandParser.Result result = CommandParser.parse(message.selfId(), message.messages());
         if (result.isCommand()) {
-            EventBus.LOGGER.debug("PrivateCommandEvent: Command parsed: {}", result.rawCommandLine());
+            LOGGER.debug("PrivateCommandEvent: Command parsed: {}", result.rawCommandLine());
             return new PrivateCommandEvent(message, result);
         }
         return new PrivateMessageEvent(message);

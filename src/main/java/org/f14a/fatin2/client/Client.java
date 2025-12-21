@@ -1,12 +1,13 @@
 package org.f14a.fatin2.client;
 
 import com.google.gson.Gson;
-import org.f14a.fatin2.Main;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.type.exception.OnebotProtocolException;
 import org.f14a.fatin2.type.exception.UnknownMessageTypeException;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Client extends WebSocketClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
     private static Client instance;
     public static Client getInstance() {
         return Client.instance;
@@ -23,7 +25,7 @@ public class Client extends WebSocketClient {
 
     private static final int RECONNECT_INTERVAL = 10; // seconds
 
-    private final Gson gson = new Gson();
+    private final Gson GSON = new Gson();
     private final String accessToken;
     private ScheduledExecutorService reconnectExecutor;
     private volatile boolean closed = false;
@@ -45,35 +47,35 @@ public class Client extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshake) {
-        Main.LOGGER.info("Connected to {}", Config.getConfig().getWebSocketUrl());
-        Main.LOGGER.debug("Server status: {}", handshake.getHttpStatusMessage());
+        LOGGER.info("Connected to {}", Config.getConfig().getWebSocketUrl());
+        LOGGER.debug("Server status: {}", handshake.getHttpStatusMessage());
         this.closed = false;
     }
 
     @Override
     public void onMessage(String message) {
         try {
-            Main.LOGGER.debug("Received message: {}", message);
+            LOGGER.debug("Received message: {}", message);
             // Parse
             try {
                 RawParser.parse(message).fire();
             } catch (UnknownMessageTypeException e) {
-                Main.LOGGER.warn("Received unsupported message", e);
+                LOGGER.warn("Received unsupported message", e);
             } catch (OnebotProtocolException e) {
-                Main.LOGGER.error("Failed to parse message due to protocol error", e);
+                LOGGER.error("Failed to parse message due to protocol error", e);
             }
         } catch (Exception e) {
-            Main.LOGGER.error("Failed to processing message: {}", message, e);
+            LOGGER.error("Failed to processing message: {}", message, e);
         }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
         if(closed) {
-            Main.LOGGER.info("Connection closed.");
+            LOGGER.info("Connection closed.");
         }
         else {
-            Main.LOGGER.warn("Connection lost. Reason: {} - {}, remote = {}", code, reason, remote);
+            LOGGER.warn("Connection lost. Reason: {} - {}, remote = {}", code, reason, remote);
             // Attempt to reconnect
             scheduleReconnect();
         }
@@ -81,7 +83,7 @@ public class Client extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        Main.LOGGER.error("WebSocket error occurred", e);
+        LOGGER.error("WebSocket error occurred", e);
     }
 
     @Override
@@ -97,11 +99,11 @@ public class Client extends WebSocketClient {
         if (this.reconnectExecutor == null || this.reconnectExecutor.isShutdown()) {
             this.reconnectExecutor = Executors.newScheduledThreadPool(1);
             this.reconnectExecutor.schedule(() -> {
-                Main.LOGGER.info("Attempting to reconnect...");
+                LOGGER.info("Attempting to reconnect...");
                 try {
                     super.reconnect();
                 } catch (Exception e) {
-                    Main.LOGGER.error("Reconnection attempt failed", e);
+                    LOGGER.error("Reconnection attempt failed", e);
                 }
             }, RECONNECT_INTERVAL, TimeUnit.SECONDS);
         }

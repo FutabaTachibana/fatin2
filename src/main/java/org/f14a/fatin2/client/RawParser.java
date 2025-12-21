@@ -6,8 +6,6 @@ import com.google.gson.JsonParser;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.command.GroupCommandEvent;
 import org.f14a.fatin2.event.command.PrivateCommandEvent;
-import org.f14a.fatin2.event.message.GroupMessageEvent;
-import org.f14a.fatin2.event.message.PrivateMessageEvent;
 import org.f14a.fatin2.event.meta.HeartbeatEvent;
 import org.f14a.fatin2.event.meta.LifecycleEvent;
 import org.f14a.fatin2.event.notice.*;
@@ -34,28 +32,28 @@ import java.util.function.Function;
 * A class contains a static method to parse raw JSON messages into Event objects.
 */
 final class RawParser {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     private static final Map<String, Function<JsonObject, Event>> ROUTES = new HashMap<>();
     static {
-        ROUTES.put("message:private", obj -> PrivateCommandEvent.getCommandOrBasic(gson.fromJson(obj, PrivateOnebotMessage.class)));
-        ROUTES.put("message:group", obj -> GroupCommandEvent.getCommandOrBasic(gson.fromJson(obj, GroupOnebotMessage.class)));
-        ROUTES.put("meta_event:heartbeat", obj -> new HeartbeatEvent(gson.fromJson(obj, OnebotHeartbeat.class)));
-        ROUTES.put("meta_event:lifecycle", obj -> new LifecycleEvent(gson.fromJson(obj, OnebotLifecycle.class)));
-        ROUTES.put("notice:group_upload", obj -> new GroupUploadEvent(gson.fromJson(obj, GroupUploadOnebotNotice.class)));
-        ROUTES.put("notice:group_admin", obj -> new GroupAdminEvent(gson.fromJson(obj, GroupAdminOnebotNotice.class)));
-        ROUTES.put("notice:group_decrease", obj -> new GroupDecreaseEvent(gson.fromJson(obj, GroupDecreaseOnebotNotice.class)));
-        ROUTES.put("notice:group_increase", obj -> new GroupIncreaseEvent(gson.fromJson(obj, GroupIncreaseOnebotNotice.class)));
-        ROUTES.put("notice:group_ban", obj -> new GroupBanEvent(gson.fromJson(obj, GroupBanOnebotNotice.class)));
-        ROUTES.put("notice:friend_add", obj -> new FriendAddEvent(gson.fromJson(obj, FriendAddOnebotNotice.class)));
-        ROUTES.put("notice:friend_recall", obj -> new FriendRecallEvent(gson.fromJson(obj, FriendRecallOnebotNotice.class)));
-        ROUTES.put("notice:group_recall", obj -> new GroupRecallEvent(gson.fromJson(obj, GroupRecallOnebotNotice.class)));
-        ROUTES.put("notice:poke", obj -> new PokeEvent(gson.fromJson(obj, PokeOnebotNotify.class)));
-        ROUTES.put("notice:lucky_king", obj -> new LuckyKingEvent(gson.fromJson(obj, LuckyKingOnebotNotify.class)));
-        ROUTES.put("notice:honor", obj -> new HonorEvent(gson.fromJson(obj, HonorOnebotNotify.class)));
-        ROUTES.put("request:friend", obj -> new FriendRequestEvent(gson.fromJson(obj, FriendOnebotRequest.class)));
-        ROUTES.put("request:group:add", obj -> new AddRequestEvent(gson.fromJson(obj, AddOnebotRequest.class)));
-        ROUTES.put("request:group:invite", obj -> new InviteRequestEvent(gson.fromJson(obj, InviteOnebotRequest.class)));
-        ROUTES.put("response", obj -> new ResponseEvent(gson.fromJson(obj, Response.class)));
+        ROUTES.put("message:private", obj -> PrivateCommandEvent.getCommandOrBasic(GSON.fromJson(obj, PrivateOnebotMessage.class)));
+        ROUTES.put("message:group", obj -> GroupCommandEvent.getCommandOrBasic(GSON.fromJson(obj, GroupOnebotMessage.class)));
+        ROUTES.put("meta_event:heartbeat", obj -> new HeartbeatEvent(GSON.fromJson(obj, OnebotHeartbeat.class)));
+        ROUTES.put("meta_event:lifecycle", obj -> new LifecycleEvent(GSON.fromJson(obj, OnebotLifecycle.class)));
+        ROUTES.put("notice:group_upload", obj -> new GroupUploadEvent(GSON.fromJson(obj, GroupUploadOnebotNotice.class)));
+        ROUTES.put("notice:group_admin", obj -> new GroupAdminEvent(GSON.fromJson(obj, GroupAdminOnebotNotice.class)));
+        ROUTES.put("notice:group_decrease", obj -> new GroupDecreaseEvent(GSON.fromJson(obj, GroupDecreaseOnebotNotice.class)));
+        ROUTES.put("notice:group_increase", obj -> new GroupIncreaseEvent(GSON.fromJson(obj, GroupIncreaseOnebotNotice.class)));
+        ROUTES.put("notice:group_ban", obj -> new GroupBanEvent(GSON.fromJson(obj, GroupBanOnebotNotice.class)));
+        ROUTES.put("notice:friend_add", obj -> new FriendAddEvent(GSON.fromJson(obj, FriendAddOnebotNotice.class)));
+        ROUTES.put("notice:friend_recall", obj -> new FriendRecallEvent(GSON.fromJson(obj, FriendRecallOnebotNotice.class)));
+        ROUTES.put("notice:group_recall", obj -> new GroupRecallEvent(GSON.fromJson(obj, GroupRecallOnebotNotice.class)));
+        ROUTES.put("notice:poke", obj -> new PokeEvent(GSON.fromJson(obj, PokeOnebotNotify.class)));
+        ROUTES.put("notice:lucky_king", obj -> new LuckyKingEvent(GSON.fromJson(obj, LuckyKingOnebotNotify.class)));
+        ROUTES.put("notice:honor", obj -> new HonorEvent(GSON.fromJson(obj, HonorOnebotNotify.class)));
+        ROUTES.put("request:friend", obj -> new FriendRequestEvent(GSON.fromJson(obj, FriendOnebotRequest.class)));
+        ROUTES.put("request:group:add", obj -> new AddRequestEvent(GSON.fromJson(obj, AddOnebotRequest.class)));
+        ROUTES.put("request:group:invite", obj -> new InviteRequestEvent(GSON.fromJson(obj, InviteOnebotRequest.class)));
+        ROUTES.put("response", obj -> new ResponseEvent(GSON.fromJson(obj, Response.class)));
     }
     public static Event parse(String message) {
         JsonObject object = JsonParser.parseString(message).getAsJsonObject();
@@ -69,7 +67,7 @@ final class RawParser {
 
     @Deprecated
     public static Event parseRaw(String message) {
-        Map<?, ?> raw = gson.fromJson(message, Map.class);
+        Map<?, ?> raw = GSON.fromJson(message, Map.class);
         // Event type:
         // message | meta_event | notice | request
         if (raw.containsKey("post_type")) {
@@ -78,9 +76,9 @@ final class RawParser {
                 case "message" -> {
                     String messageType = (String) raw.get("message_type");
                     if ("private".equals(messageType)) {
-                        return PrivateCommandEvent.getCommandOrBasic(gson.fromJson(message, PrivateOnebotMessage.class));
+                        return PrivateCommandEvent.getCommandOrBasic(GSON.fromJson(message, PrivateOnebotMessage.class));
                     } else if ("group".equals(messageType)) {
-                        return GroupCommandEvent.getCommandOrBasic(gson.fromJson(message, GroupOnebotMessage.class));
+                        return GroupCommandEvent.getCommandOrBasic(GSON.fromJson(message, GroupOnebotMessage.class));
                     } else {
                         throw new UnknownMessageTypeException("Unknown message_type: " + messageType);
                     }
@@ -88,9 +86,9 @@ final class RawParser {
                 case "meta_event" -> {
                     String metaEventType = (String) raw.get("meta_event_type");
                     if("heartbeat".equals(metaEventType)) {
-                        return new HeartbeatEvent(gson.fromJson(message, OnebotHeartbeat.class));
+                        return new HeartbeatEvent(GSON.fromJson(message, OnebotHeartbeat.class));
                     } else if ("lifecycle".equals(metaEventType)) {
-                        return new LifecycleEvent(gson.fromJson(message, OnebotLifecycle.class));
+                        return new LifecycleEvent(GSON.fromJson(message, OnebotLifecycle.class));
                     } else {
                         throw new UnknownMessageTypeException("Unknown meta_event_type: " + metaEventType);
                     }
@@ -98,17 +96,17 @@ final class RawParser {
                 case "notice" -> {
                     String noticeType = (String) raw.get("notice_type");
                     return switch (noticeType) {
-                        case "group_upload" -> new GroupUploadEvent(gson.fromJson(message, GroupUploadOnebotNotice.class));
-                        case "group_admin" -> new GroupAdminEvent(gson.fromJson(message, GroupAdminOnebotNotice.class));
-                        case "group_decrease" -> new GroupDecreaseEvent(gson.fromJson(message, GroupDecreaseOnebotNotice.class));
-                        case "group_increase" -> new GroupIncreaseEvent(gson.fromJson(message, GroupIncreaseOnebotNotice.class));
-                        case "group_ban" ->  new GroupBanEvent(gson.fromJson(message, GroupBanOnebotNotice.class));
-                        case "friend_add" -> new FriendAddEvent(gson.fromJson(message, FriendAddOnebotNotice.class));
-                        case "friend_recall" -> new FriendRecallEvent(gson.fromJson(message, FriendRecallOnebotNotice.class));
-                        case "group_recall" -> new GroupRecallEvent(gson.fromJson(message, GroupRecallOnebotNotice.class));
-                        case "poke" -> new PokeEvent(gson.fromJson(message, PokeOnebotNotify.class));
-                        case "lucky_king" -> new LuckyKingEvent(gson.fromJson(message, LuckyKingOnebotNotify.class));
-                        case "honor" -> new HonorEvent(gson.fromJson(message, HonorOnebotNotify.class));
+                        case "group_upload" -> new GroupUploadEvent(GSON.fromJson(message, GroupUploadOnebotNotice.class));
+                        case "group_admin" -> new GroupAdminEvent(GSON.fromJson(message, GroupAdminOnebotNotice.class));
+                        case "group_decrease" -> new GroupDecreaseEvent(GSON.fromJson(message, GroupDecreaseOnebotNotice.class));
+                        case "group_increase" -> new GroupIncreaseEvent(GSON.fromJson(message, GroupIncreaseOnebotNotice.class));
+                        case "group_ban" ->  new GroupBanEvent(GSON.fromJson(message, GroupBanOnebotNotice.class));
+                        case "friend_add" -> new FriendAddEvent(GSON.fromJson(message, FriendAddOnebotNotice.class));
+                        case "friend_recall" -> new FriendRecallEvent(GSON.fromJson(message, FriendRecallOnebotNotice.class));
+                        case "group_recall" -> new GroupRecallEvent(GSON.fromJson(message, GroupRecallOnebotNotice.class));
+                        case "poke" -> new PokeEvent(GSON.fromJson(message, PokeOnebotNotify.class));
+                        case "lucky_king" -> new LuckyKingEvent(GSON.fromJson(message, LuckyKingOnebotNotify.class));
+                        case "honor" -> new HonorEvent(GSON.fromJson(message, HonorOnebotNotify.class));
                         case "group_msg_emoji_like" -> null;
                         case "essence" -> null;
                         case "group_card" -> null;
@@ -118,13 +116,13 @@ final class RawParser {
                 case "request" -> {
                     String requestType = (String) raw.get("request_type");
                     return switch (requestType) {
-                        case "friend" -> new FriendRequestEvent(gson.fromJson(message, FriendOnebotRequest.class));
+                        case "friend" -> new FriendRequestEvent(GSON.fromJson(message, FriendOnebotRequest.class));
                         case "group" -> {
                             String subType = (String) raw.get("sub_type");
                             if ("add".equals(subType)) {
-                                yield new AddRequestEvent(gson.fromJson(message, AddOnebotRequest.class));
+                                yield new AddRequestEvent(GSON.fromJson(message, AddOnebotRequest.class));
                             } else if ("invite".equals(subType)) {
-                                yield new InviteRequestEvent(gson.fromJson(message, InviteOnebotRequest.class));
+                                yield new InviteRequestEvent(GSON.fromJson(message, InviteOnebotRequest.class));
                             } else {
                                 throw new UnknownMessageTypeException("Unknown sub_type: " + subType);
                             }
@@ -135,7 +133,7 @@ final class RawParser {
                 default -> throw new UnknownMessageTypeException("Unknown post_type: " + postType);
             }
         } else if (raw.containsKey("retcode")) {
-            return new ResponseEvent(gson.fromJson(message, Response.class));
+            return new ResponseEvent(GSON.fromJson(message, Response.class));
         }
         return null;
     }

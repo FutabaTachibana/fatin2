@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
 * Entry of the application
 */
 public class Main {
-    public static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         // Load Config

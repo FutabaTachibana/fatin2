@@ -1,7 +1,6 @@
 package org.f14a.fatin2.event.meta;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.type.meta.OnebotHeartbeat;
 
 public class HeartbeatEvent extends Event {
