@@ -14,12 +14,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OnCommand {
     /**
-     * The priority of this event handler.
-     */
-    EventPriority priority() default EventPriority.NORMAL;
-    /**
-     * The command string to listen for. <br>
-     * This is the string after the command prefix. <br>
+     * The command string to listen for.
+     * <p>
+     * This is the string after the command prefix.
+     * <p>
      * For example, if the command prefix is "/" and you want to listen for "/help", set command="help".
      */
     String command();
@@ -32,7 +30,8 @@ public @interface OnCommand {
      */
     boolean needAt() default false;
     /**
-     * Permission level required to invoke this command, by default it is set to 0 (Everyone). <br>
+     * Permission level required to invoke this command, by default it is set to 0 (Everyone).
+     * <p>
      * If you don't enable integrated permission plugin or custom permission plugin, this setting has no effect.
      * <ul>
      * <li>4 Bot Admins </li>
@@ -46,4 +45,5 @@ public @interface OnCommand {
      * however a command with level -1 permission can still be used by them.
      */
     int permission() default 0;
+    String description() default "";
 }

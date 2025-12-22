@@ -10,7 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Parse OneBot message segments (Message[]) into command invocation. <br>
+ * Parse OneBot message segments (Message[]) into command invocation.
+ * <p>
  * This parser is protocol-aware:
  * <ul>
  * <li> It can ignore leading [reply] segments</li>

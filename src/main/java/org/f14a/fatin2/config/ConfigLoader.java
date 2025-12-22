@@ -26,12 +26,6 @@ public class ConfigLoader {
         return load(Path.of(CONFIG_FILE_NAME), "/" + CONFIG_FILE_NAME);
     }
 
-    /** Backward compatible API: ignore input path and load from working directory. */
-    @Deprecated
-    public static Config load(String ignoredPath) throws IOException {
-        return load();
-    }
-
     // Entry point while testing with custom paths
     static Config load(Path target, String resourceTemplatePath) throws IOException {
         ensureConfigFileExists(target, resourceTemplatePath);

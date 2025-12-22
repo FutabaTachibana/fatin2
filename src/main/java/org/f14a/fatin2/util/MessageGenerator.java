@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Generator for constructing Message arrays in JSON format.<br>
+ * Generator for constructing Message arrays in JSON format.
+ * <p>
  * A Message is an array of segments, where each segment contains:
  * <ul>
  * <li>"type": String </li>

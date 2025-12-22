@@ -8,13 +8,13 @@ public interface Fatin2Plugin {
     // Call when the plugin is disabled
     void onDisable();
     String getName();
+    String getDisplayName();
     default String getVersion() {
         return "1.0.0";
     }
     default String getAuthor() {
         return "Anonymous";
     }
-
     default String getDescription() {
         return "No description provided.";
     }

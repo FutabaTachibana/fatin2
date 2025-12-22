@@ -1,13 +1,15 @@
 package org.f14a.fatin2.plugin.integrated;
 
+import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.command.CommandEvent;
-import org.f14a.fatin2.event.command.PermissionProvider;
+import org.f14a.fatin2.event.command.CommandEventListener;
+import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.f14a.fatin2.type.Sender;
 import org.f14a.fatin2.type.message.OnebotMessage;
 
 import java.util.Set;
 
-public class IntegratedPermissionProvider implements PermissionProvider {
+public class IntegratedPermissionProvider implements Fatin2Plugin {
     private final Set<Long> botAdmins;
     private final Set<Long> bannedUsers;
     public IntegratedPermissionProvider(Set<Long> botAdmins, Set<Long> banners) {
@@ -15,8 +17,7 @@ public class IntegratedPermissionProvider implements PermissionProvider {
         this.bannedUsers = banners;
     }
 
-    @Override
-    public boolean hasPermission(CommandEvent event, int requiredPermission) {
+    public boolean hasPermission(CommandEvent event, CommandEventListener listener) {
         OnebotMessage message = event.getMessage();
         long userId = message.userId();
         int permissionLevel = 0;
@@ -33,6 +34,29 @@ public class IntegratedPermissionProvider implements PermissionProvider {
                 permissionLevel = 2;
             }
         }
-        return permissionLevel >= requiredPermission;
+        return permissionLevel >= listener.permission();
+    }
+    @Override
+    public void onLoad() { }
+
+    @Override
+    public void onEnable() {
+        EventBus.getInstance().registerPermissionProvider(this::hasPermission);
+        // TODO: Load bot admins and banned users from perms.yml
+    }
+
+    @Override
+    public void onDisable() {
+        EventBus.getInstance().unregisterPermissionProvider();
+    }
+
+    @Override
+    public String getName() {
+        return "integrated-permission";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Integrated Permission";
     }
 }

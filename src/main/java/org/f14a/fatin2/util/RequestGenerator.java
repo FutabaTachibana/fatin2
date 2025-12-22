@@ -6,7 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * You can use this class to generate WebSocket request JSON strings. <br>
+ * You can use this class to generate WebSocket request JSON strings.
+ * <p>
  * It uses the Builder pattern to allow flexible and readable JSON construction.
  * <Blockquote><pre>
  * RequestGenerator.builder().userId(114514L).message(
@@ -19,7 +20,8 @@ import com.google.gson.JsonObject;
 public class RequestGenerator {
     private static final Gson GSON = new Gson();
     /**
-     * Builder class for constructing WebSocket request JSON strings. <br>
+     * Builder class for constructing WebSocket request JSON strings.
+     * <p>
      * Uses the Builder pattern to allow flexible and readable JSON construction.
      */
     public static class RequestBuilder {

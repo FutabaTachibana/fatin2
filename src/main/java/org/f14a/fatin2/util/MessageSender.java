@@ -69,8 +69,9 @@ public class MessageSender {
     // Unavailable now
     public static int sendGroupForward(long groupId, JsonArray messages){
         JsonObject jsonObject = RequestGenerator.builder().groupId(groupId).messages(messages)
-                .add("news", GSON.toJsonTree(List.of(Map.of("text", "news")))).add("prompt", "prompt")
-                .add("summary", "summary").add("source", "source").build();
+//                .add("news", GSON.toJsonTree(List.of(Map.of("text", "news")))).add("prompt", "prompt")
+//                .add("summary", "summary").add("source", "source")
+                .build();
         int echo = jsonObject.hashCode();
         String request = GSON.toJson(Map.of(
                 "action", "send_group_forward_msg",

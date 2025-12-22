@@ -21,7 +21,7 @@ import java.util.random.RandomGenerator;
 
 public class EventListener {
     // Example for command handling
-    @OnCommand(command = "echo")
+    @OnCommand(command = "echo", description = "复述你说的话")
     public void onEcho(CommandEvent event) {
         // Do NOT edit the original message array directly
         Message[] messages = Arrays.copyOf(event.getMessage().messages(), event.getMessage().messages().length);
@@ -40,7 +40,7 @@ public class EventListener {
         event.send(MessageGenerator.create(messages));
     }
     // Example for coroutine handling and session management
-    @OnCommand(command = "guess")
+    @OnCommand(command = "guess", description = "猜数字游戏")
     @Coroutines
     public void onGuessNumber(GroupCommandEvent event) {
         String reply;
@@ -65,7 +65,7 @@ public class EventListener {
         }
     }
     // Example for action after sending successfully by callback and message reply
-    @OnCommand(command = "sendandreply", alias = {"sar"})
+    @OnCommand(command = "sendandreply", alias = {"sar"}, description = "发送并回复示例")
     @Coroutines
     public void onSendAndReply(GroupCommandEvent event) {
         event.send(request -> {
@@ -79,7 +79,7 @@ public class EventListener {
         }, MessageGenerator.text("这条消息将在5秒后被回复"));
     }
     // Example for action after sending successfully by CompletableFuture and message recall
-    @OnCommand(command = "sendandrecall")
+    @OnCommand(command = "sendandrecall", description = "发送并撤回示例")
     public void onSendAndRecall(CommandEvent event) {
         CompletableFuture<Response> future = event.sendFuture(MessageGenerator.text("这条消息将在5秒后被撤回"));
         future.thenAccept(response -> {
@@ -93,7 +93,7 @@ public class EventListener {
         });
     }
     // Example for command with arguments
-    @OnCommand(command = "cmd", needAt = true)
+    @OnCommand(command = "cmd", needAt = true, description = "带参数的命令示例")
     public void onCommandWithArgs(CommandEvent event) {
         StringBuilder sb = new StringBuilder();
         sb.append("命令: ").append(event.getCommand()).append("\n");
@@ -105,7 +105,7 @@ public class EventListener {
         event.send(MessageGenerator.text(sb.toString()));
     }
     // Example for forward message
-    @OnCommand(command = "forward")
+    @OnCommand(command = "forward", description = "转发消息示例")
     public void onForwardMessage(CommandEvent event) {
         String[] args = event.getArgs();
         long userId;

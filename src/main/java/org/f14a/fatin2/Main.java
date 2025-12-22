@@ -38,11 +38,10 @@ public class Main {
             // Keep references for shutdown hook
             EventBus finalEventBus = eventBus;
             PluginManager finalPluginManager = pluginManager;
-            Client finalClient = client;
             // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down Fatin2...");
-                safeClose(finalPluginManager, finalEventBus, finalClient);
+                safeClose(finalPluginManager, finalEventBus, Client.getInstance());
                 stopLatch.countDown();
             }, "Shutdown-Hook-Thread"));
 

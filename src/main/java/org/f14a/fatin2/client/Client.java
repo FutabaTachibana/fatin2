@@ -156,8 +156,10 @@ public class Client extends WebSocketClient {
     }
 
     /**
-     * Calculate the next backoff interval in seconds, it will increase exponentially with jitter. <br>
+     * Calculate the next backoff interval in seconds, it will increase exponentially with jitter.
+     * <p>
      * [capped - jitter, capped + jitter], where capped = min(BASE_RECONNECT_INTERVAL_SECONDS * 2^exp, MAX_RECONNECT_INTERVAL_SECONDS),
+     * <p>
      * exp = min(reconnectAttempts, 30), jitter = 20% of capped
      * @return the seconds to wait before the next reconnect attempt
      */

@@ -1,0 +1,4 @@
+bot_admin:
+  - 1145141919810 # Replace with actual admin user IDs
+blacklist:
+  - 1919810 # Replace with actual blacklisted user IDs

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 
 public class EventBus {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
@@ -26,7 +27,7 @@ public class EventBus {
     private final ExecutorService asyncService;
     private final ExecutorService virtualAsyncService;
     private final ConcurrentMap<Class<? extends Event>, CopyOnWriteArrayList<EventListener>> handlers = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, CopyOnWriteArrayList<CommandEventListener>> commandHandlers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, CommandEventListener> commandHandlers = new ConcurrentHashMap<>();
 
     private static EventBus instance;
     public static EventBus getInstance() {
@@ -40,8 +41,7 @@ public class EventBus {
     public static ResponseManager getResponseManager() {
         return getInstance().responseManager;
     }
-    private final PermissionProvider permissionProvider;
-    private boolean registerPermissionProvider = false;
+    private BiPredicate<CommandEvent, CommandEventListener> permissionProvider;
 
     public EventBus() {
         EventBus.instance = this;
@@ -65,12 +65,6 @@ public class EventBus {
         this.virtualAsyncService = Executors.newVirtualThreadPerTaskExecutor();
         this.sessionManager = new SessionManager();
         this.responseManager = new ResponseManager();
-        this.permissionProvider = new PermissionProvider() {
-            @Override
-            public boolean hasPermission(CommandEvent event, int requiredPermission) {
-                return true; // Default implementation, always returns true
-            }
-        };
         LOGGER.debug("Event Bus initialized with thread pool");
     }
 
@@ -92,7 +86,6 @@ public class EventBus {
             }
         }
         handlers.values().forEach(Collections::sort);
-        commandHandlers.values().forEach(Collections::sort);
         LOGGER.debug("Registered {} event handlers for plugin {}", countH, plugin.getName());
         LOGGER.debug("Registered {} command handlers for plugin {}", countC, plugin.getName());
     }
@@ -136,28 +129,40 @@ public class EventBus {
             return 0;
         }
         CommandEventListener.Scope scope = SCOPE_BY_EVENT.get(eventType);
-        commandHandlers.computeIfAbsent(annotation.command(), k -> new CopyOnWriteArrayList<>())
-                .add(new CommandEventListener(listener, method, plugin, annotation.priority(),
-                        method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt(), annotation.permission()));
+        CommandEventListener wrappedListener = new CommandEventListener(listener, method, plugin,
+                method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt(),
+                annotation.permission(), annotation.description());
+        addCommand(annotation.command(), wrappedListener, annotation, plugin);
         count.getAndIncrement();
         Arrays.stream(annotation.alias()).toList().forEach(command -> {
-            commandHandlers.computeIfAbsent(command, k -> new CopyOnWriteArrayList<>())
-                    .add(new CommandEventListener(listener, method, plugin, annotation.priority(),
-                            method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt(), annotation.permission()));
+            addCommand(command, wrappedListener, annotation, plugin);
             count.getAndIncrement();
         });
         return count.get();
     }
-    public boolean registerPermissionProvider(PermissionProvider permissionProvider) {
-        if (this.registerPermissionProvider) {
+    private void addCommand(String command, CommandEventListener listener, OnCommand annotation, Fatin2Plugin plugin) {
+        if (commandHandlers.containsKey(command)) {
+            String newCommand = plugin.getName() + ":" + command;
+            commandHandlers.put(newCommand, listener);
+            LOGGER.warn("Command {} is already registered. Registered command as {} instead.", command, newCommand);
+        } else {
+            commandHandlers.put(command, listener);
+        }
+    }
+    public boolean registerPermissionProvider(BiPredicate<CommandEvent, CommandEventListener> permissionProvider) {
+        if (this.permissionProvider != null ) {
             LOGGER.error("PermissionProvider has already been registered. Ignoring subsequent registration.");
             return false;
         }
         else {
-            this.registerPermissionProvider = true;
+            this.permissionProvider = permissionProvider;
             LOGGER.info("PermissionProvider registered successfully.");
             return true;
         }
+    }
+    public void unregisterPermissionProvider() {
+        this.permissionProvider = null;
+        LOGGER.info("PermissionProvider unregistered successfully.");
     }
     public void unregister(Fatin2Plugin plugin) {
         // Unregister from common event handlers
@@ -165,26 +170,34 @@ public class EventBus {
             listenerList.removeIf(listener -> listener.plugin() == plugin);
         }
         // unregister from command handlers
-        for (List<CommandEventListener> listenerList : commandHandlers.values()) {
-            listenerList.removeIf(listener -> listener.plugin() == plugin);
+        for (Map.Entry<String, CommandEventListener> entry : commandHandlers.entrySet()) {
+            if (entry.getValue().plugin() == plugin) {
+                commandHandlers.remove(entry.getKey());
+            }
         }
     }
 
     private List<EventListener> getHandlers(Class<? extends Event> eventClass) {
         return handlers.getOrDefault(eventClass, new CopyOnWriteArrayList<>());
     }
-    private List<CommandEventListener> getCommandHandlers(String command) {
-        return commandHandlers.getOrDefault(command, new CopyOnWriteArrayList<>());
+    public Map<Class<? extends Event>, List<EventListener>> getAllHandlers() {
+        return Collections.unmodifiableMap(handlers);
+    }
+    private CommandEventListener getCommandHandlers(String command) {
+        return commandHandlers.getOrDefault(command, null);
+    }
+    public Map<String, CommandEventListener> getAllCommandHandlers() {
+        return Collections.unmodifiableMap(commandHandlers);
     }
 
     public void post(Event event) {
-        if (event instanceof CommandEvent) {
-            postCommand((CommandEvent) event);
-        }
         if (event.isAsync()) {
             postAsync(event);
         } else {
             postSync(event);
+        }
+        if (event instanceof CommandEvent) {
+            postCommand((CommandEvent) event);
         }
     }
     private void postAsync(Event event) {
@@ -231,41 +244,43 @@ public class EventBus {
         }
     }
     private void postCommand(CommandEvent event) {
-        List<CommandEventListener> eventListeners = getCommandHandlers(event.getCommand());
-        LOGGER.debug("Found {} handlers for command {}", eventListeners.size(), event.getCommand());
-        for (CommandEventListener listener : eventListeners) {
-            // Skip if needAt is true but the bot is not mentioned
-            if (listener.needAt() && !event.isAtBot()) {
-                continue;
+        CommandEventListener listener = getCommandHandlers(event.getCommand());
+        if (listener == null) {
+            LOGGER.debug("No handlers found for command {}", event.getCommand());
+            return;
+        }
+        LOGGER.debug("Found handler for command {}", event.getCommand());
+        // Skip if needAt is true but the bot is not mentioned
+        if (listener.needAt() && !event.isAtBot()) {
+            return;
+        }
+        // Skip if scope does not match
+        if (!switch (listener.scope()) {
+            case BOTH -> true;
+            case PRIVATE -> event instanceof PrivateCommandEvent;
+            case GROUP -> event instanceof GroupCommandEvent;
+        }) {
+            return;
+        }
+        // Check permission
+        if (this.permissionProvider != null && !this.permissionProvider.test(event, listener)) {
+            return;
+        }
+        try {
+            if (listener.isCoroutine()) {
+                this.asyncService.submit(() -> {
+                    try {
+                        listener.method().invoke(listener.listener(), event);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } else {
+                listener.method().invoke(listener.listener(), event);
             }
-            // Skip if scope does not match
-            if (!switch (listener.scope()) {
-                case BOTH -> true;
-                case PRIVATE -> event instanceof PrivateCommandEvent;
-                case GROUP -> event instanceof GroupCommandEvent;
-            }) {
-                continue;
-            }
-            // Check permission
-            if (!this.permissionProvider.hasPermission(event, listener.permission())) {
-                continue;
-            }
-            try {
-                if (listener.isCoroutine()) {
-                    this.asyncService.submit(() -> {
-                        try {
-                            listener.method().invoke(listener.listener(), event);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                } else {
-                    listener.method().invoke(listener.listener(), event);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error invoking command handler method: {} with listener {}",
-                        listener.method().getName(), listener.listener().getClass().getName(), e);
-            }
+        } catch (Exception e) {
+            LOGGER.error("Error invoking command handler method: {} with listener {}",
+                    listener.method().getName(), listener.listener().getClass().getName(), e);
         }
     }
     public void shutdown() {

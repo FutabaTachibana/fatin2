@@ -1,5 +1,6 @@
 package org.f14a.fatin2.event.command;
 
+@Deprecated
 public interface PermissionProvider {
     /**
      * Return true if the message has permission to execute the command.

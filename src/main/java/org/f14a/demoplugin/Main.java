@@ -20,9 +20,15 @@ public class Main implements Fatin2Plugin {
 
     }
     // What do you name for this plugin
+    // It should be unique among all plugins
     @Override
     public String getName() {
-        return "Echo";
+        return "echo";
+    }
+    // Display name of your plugin
+    @Override
+    public String getDisplayName() {
+        return "Echo Plugin";
     }
     // The name of yours
     @Override
