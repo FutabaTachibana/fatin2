@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigLoaderTest {
 
-    private static final Path CONFIG_PATH = Path.of("test/config.yml");
+    private static final Path CONFIG_PATH = Path.of(CONFIG_FILE_NAME);
 
     @AfterEach
     void cleanup() throws IOException {

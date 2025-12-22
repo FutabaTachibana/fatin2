@@ -206,6 +206,9 @@ task runBot(type: JavaExec) {
         args project.args.split('\\s+')
     }
 }
+test {
+    workingDir = file("$projectDir/test")
+}
 
 // Clean up the plugin JAR on clean task
 clean {
