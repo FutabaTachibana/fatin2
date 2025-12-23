@@ -5,9 +5,11 @@ plugins {
 }
 
 group = 'org.f14a.fatin2'
-version = '2.0.0'
+// Versions are defined in gradle.properties:
+// - version (host app)
+// - version_demoplugin, version_tachibana (internal plugins)
 
-// Java版本配置
+// Java version
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -45,55 +47,41 @@ application {
     mainClass = 'org.f14a.fatin2.Main'
 }
 
-// Define a separate source set for the plugin
+// --- Custom source sets for internal plugins (built as separate jars) ---
 sourceSets {
-    plugin {
+    demoplugin {
         java {
             srcDir 'src/main/java'
             include 'org/f14a/demoplugin/**'
         }
-        compileClasspath += sourceSets.main.output
+        // Inherit host dependencies so plugins can compile against shared libs (e.g., Gson)
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+    }
+    tachibana {
+        java {
+            srcDir 'src/main/java'
+            include 'org/f14a/tachibana/**'
+        }
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
     }
 }
 
-// Dependencies for the plugin source set
+// Compile-only dependency on the host app APIs
 dependencies {
-    pluginCompileOnly sourceSets.main.output
+    demopluginCompileOnly sourceSets.main.output
+    tachibanaCompileOnly sourceSets.main.output
 }
 
-// Create a fat JAR (also known as uber JAR)
-task fatJar(type: Jar) {
-    archiveBaseName.set('fatin2')
-    archiveVersion.set(version)
-    archiveClassifier.set('all')
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    manifest {
-        attributes(
-            'Main-Class': application.mainClass.get(),
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Built-By': System.getProperty('user.name'),
-            'Built-JDK': System.getProperty('java.version')
-        )
-    }
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-
-    with jar
-
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-}
-
-// Standard JAR without dependencies
+// --- Main application artifacts ---
+// Adding new plugin source sets won’t require manually excluding packages.
 jar {
     archiveBaseName.set('fatin2')
-    archiveVersion.set(version)
-    archiveClassifier.set('')
+    archiveVersion.set(project.version.toString())
+    // Standard Jar output named as: fatin2-{version}-standard.jar
+    archiveClassifier.set('standard')
 
-    exclude 'org/f14a/demoplugin/**'
+    // Only package the main application code
+    include 'org/f14a/fatin2/**'
 
     manifest {
         attributes(
@@ -104,13 +92,16 @@ jar {
     }
 }
 
-// Shadow JAR
+// Shadow jar should be the primary runnable distribution.
 shadowJar {
     archiveBaseName.set('fatin2')
-    archiveVersion.set(version)
-    archiveClassifier.set('shadow')
+    archiveVersion.set(project.version.toString())
+    // Requirement: shadowJar output named as: fatin2-{version}.jar
+    archiveClassifier.set('')
 
-    exclude 'org/f14a/demoplugin/**'
+    // Only include the host application classes; dependencies will still be bundled.
+    // This prevents internal plugin classes from being shipped inside the main artifact.
+    include 'org/f14a/fatin2/**'
 
     manifest {
         attributes(
@@ -121,100 +112,99 @@ shadowJar {
     }
 }
 
-// Build the demo plugin JAR
-task buildPlugin(type: Jar) {
-    group = 'plugin'
+// Ensure normal build produces both host artifacts.
+// Internal plugin jars are intentionally NOT part of the default build lifecycle.
+// (This allows you to iterate on plugins independently; a plugin compile error won’t break the host release build.)
+build.dependsOn jar, shadowJar
+
+// --- Plugin jars ---
+// These tasks are opt-in. Run them explicitly when you want to build internal plugins.
+// Example:
+//   ./gradlew buildDemoplugin
+//   ./gradlew buildTachibana
+// Demo plugin jar (copied into run/plugins for local dev)
+tasks.register('buildDemoplugin', Jar) {
+    group = 'demoplugin'
     description = 'Build the demo plugin JAR'
 
     archiveBaseName.set('demoplugin')
-    archiveVersion.set(version)
+    archiveVersion.set(version_demoplugin)
     archiveClassifier.set('')
 
-    // 只包含demoplugin的类
-    from(sourceSets.main.output) {
-        include 'org/f14a/demoplugin/**'
-    }
+    from(sourceSets.demoplugin.output)
 
-    // Set the output directory to the plugins folder
     destinationDirectory.set(file("$projectDir/run/plugins"))
 
     manifest {
         attributes(
             'Name': 'DemoPlugin',
-            'Version': project.version,
-            'Main-Class': 'org.f14a.demoplugin.Main'
+            'Version': version_demoplugin,
+            'Plugin-Main-Class': 'org.f14a.demoplugin.Main'
         )
     }
 
-    // Make sure the run/plugins directory exists
     doFirst {
         file("$projectDir/run/plugins").mkdirs()
     }
 }
 
-// Run the bot with the demo plugin
-task runPlugin(type: JavaExec) {
-    group = 'plugin'
-    description = 'Run the bot with the demo plugin'
+// Tachibana plugin jar
+tasks.register('buildTachibana', Jar) {
+    group = 'tachibana'
+    description = 'Build the tachibana plugin JAR'
 
-    dependsOn buildPlugin, classes
+    archiveBaseName.set('tachibana')
+    archiveVersion.set(version_tachibana)
+    archiveClassifier.set('')
 
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'org.f14a.fatin2.Main'
-    workingDir = file("$projectDir/run")
+    from(sourceSets.tachibana.output)
 
-    // Make sure the run/plugins directory exists
+    destinationDirectory.set(file("$projectDir/run/plugins"))
+
+    manifest {
+        attributes(
+            'Name': 'Tachibana',
+            'Version': version_tachibana,
+            'Plugin-Main-Class': 'org.f14a.tachibana.Main'
+        )
+    }
+
     doFirst {
-        file("$projectDir/run").mkdirs()
         file("$projectDir/run/plugins").mkdirs()
     }
-
-    if (project.hasProperty('args')) {
-        args project.args.split('\\s+')
-    }
 }
 
-// Do not forget to build both JARs during the build process
-build.dependsOn jar, shadowJar
-
-// Add a task to build all artifacts
-task buildAll {
-    group = 'build'
-    description = 'Build all artifacts including fat JAR'
-    dependsOn build, fatJar
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-}
-
-task runBot(type: JavaExec) {
+// Utility task to run the bot (without automatically building plugins)
+tasks.register('runBot', JavaExec) {
     group = 'application'
     description = 'Run the Fatin2 bot'
 
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'org.f14a.fatin2.Main'
+    mainClass = application.mainClass.get()
     workingDir = file("$projectDir/run")
 
-    // Create run directory if it doesn't exist
     doFirst {
         file("$projectDir/run").mkdirs()
     }
 
     if (project.hasProperty('args')) {
-        args project.args.split('\\s+')
+        args project.property('args').toString().split('\\s+')
     }
 }
+
+// Clean up generated plugin jars on clean
+clean {
+    delete "$projectDir/run/plugins/demoplugin-${version_demoplugin}.jar"
+    delete "$projectDir/run/plugins/tachibana-${version_tachibana}.jar"
+}
+
+// Test configuration
 test {
     workingDir = file("$projectDir/test")
-}
-
-// Clean up the plugin JAR on clean task
-clean {
-    delete "$projectDir/run/plugins/demoplugin-${version}.jar"
-}
-
-test {
     useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 }
