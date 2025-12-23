@@ -35,7 +35,7 @@ public class PluginLoader {
         }
         if (config.isEnablePermission()) {
             // Something to load bot admins and banned users from config can be added here
-            PluginManager.getInstance().loadIntegratedPlugin(new IntegratedPermissionProvider(Set.of(), Set.of()));
+            PluginManager.getInstance().loadIntegratedPlugin(new IntegratedPermissionProvider());
         }
 
         // Load external plugins

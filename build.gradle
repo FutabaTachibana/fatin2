@@ -99,9 +99,8 @@ shadowJar {
     // Requirement: shadowJar output named as: fatin2-{version}.jar
     archiveClassifier.set('')
 
-    // Only include the host application classes; dependencies will still be bundled.
-    // This prevents internal plugin classes from being shipped inside the main artifact.
-    include 'org/f14a/fatin2/**'
+    exclude('org/f14a/demoplugin/**')
+    exclude('org/f14a/tachibana/**')
 
     manifest {
         attributes(

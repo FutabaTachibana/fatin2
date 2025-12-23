@@ -48,6 +48,14 @@ public class PluginManager {
     public Map<String, PluginWrapper> getPlugins() {
         return this.plugins;
     }
+    public PluginWrapper getPluginWrapper(Fatin2Plugin plugin) {
+        for (PluginWrapper wrapper : this.plugins.values()) {
+            if (wrapper.getPlugin() == plugin) {
+                return wrapper;
+            }
+        }
+        return null;
+    }
 
     /**
      * Unified entrypoints for plugin operations.

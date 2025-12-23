@@ -6,7 +6,6 @@ import org.f14a.fatin2.plugin.integrated.IntegratedPermissionProvider;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +18,7 @@ class PluginBasicsTest {
         assertFalse(help.getName().isBlank());
         assertTrue(help.getName().matches("^[a-zA-Z0-9_-]+$"));
 
-        Fatin2Plugin perm = new IntegratedPermissionProvider(Set.of(), Set.of());
+        Fatin2Plugin perm = new IntegratedPermissionProvider();
         assertNotNull(perm.getName());
         assertFalse(perm.getName().isBlank());
         assertTrue(perm.getName().matches("^[a-zA-Z0-9_-]+$"));

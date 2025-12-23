@@ -48,7 +48,7 @@ public class IntegratedHelpGenerator implements Fatin2Plugin {
         commands.sort(Map.Entry.comparingByKey());
         LOGGER.info("Generating {} commands for help...", commands.size());
     }
-    @OnCommand(command = "help", alias = {"?"}, description = "Show this message")
+    @OnCommand(command = "help", alias = {"?"}, description = "显示这条消息")
     public void OnHelp(CommandEvent event) {
         StringBuilder sb = new StringBuilder();
         String prefix = Config.getConfig().getCommandPrefix();
@@ -60,7 +60,7 @@ public class IntegratedHelpGenerator implements Fatin2Plugin {
             ).append("\n");
         }
         String string = sb.toString().trim();
-        if (string.length() > 500) {
+        if (string.length() > 1000) {
             // TODO: forward quickly
         }
         else {
