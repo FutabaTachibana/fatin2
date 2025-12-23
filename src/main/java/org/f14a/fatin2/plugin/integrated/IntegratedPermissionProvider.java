@@ -59,7 +59,12 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
                 permissionLevel = 2;
             }
         }
-        return permissionLevel >= listener.permission();
+        boolean result = permissionLevel >= listener.permission();
+        // Send feedback if no permission.
+        if (!result) {
+            event.send(MessageGenerator.text("你没有执行此命令的权限"));
+        }
+        return result;
     }
 
     @Override
@@ -122,6 +127,21 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
         return "Integrated Permission";
     }
 
+    @Override
+    public String getVersion() {
+        return "integrated";
+    }
+
+    @Override
+    public String getAuthor() {
+        return "Fatin2";
+    }
+
+    @Override
+    public String getDescription() {
+        return "内置的权限管理插件。";
+    }
+
     @OnCommand(command = "list_admins", description = "列出机器人管理员")
     public void onListAdmins(CommandEvent event) {
         StringBuilder sb = new StringBuilder();
@@ -131,11 +151,9 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
         }
         String string = sb.toString().trim();
         if (string.length() > 1000) {
-            // TODO: forward quickly
+            event.setSendForward(true);
         }
-        else {
-            event.send(MessageGenerator.text(string));
-        }
+        event.send(MessageGenerator.text(string));
     }
 
     @OnCommand(command = "list_banned", description = "列出被封禁用户")
@@ -147,11 +165,9 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
         }
         String string = sb.toString().trim();
         if (string.length() > 1000) {
-            // TODO: forward quickly
+            event.setSendForward(true);
         }
-        else {
-            event.send(MessageGenerator.text(string));
-        }
+        event.send(MessageGenerator.text(string));
     }
 
     @OnCommand(command = "set_admin", permission = 4, description = "设置机器人管理员")
@@ -351,4 +367,3 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
         bannedUsersRemoved.clear();
     }
 }
-

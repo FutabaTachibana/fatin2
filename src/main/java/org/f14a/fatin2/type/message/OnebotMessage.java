@@ -18,7 +18,7 @@ public interface OnebotMessage extends AbstractOnebotMessage {
     @SerializedName("sub_type")
     String subType();
     @SerializedName("message_id")
-    String messageId();
+    int messageId();
     @SerializedName("user_id")
     long userId();
     @SerializedName("message")

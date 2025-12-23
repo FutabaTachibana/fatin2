@@ -15,10 +15,10 @@ public record Response(
     public boolean isSuccess() {
         return "ok".equalsIgnoreCase(this.status) && this.retcode == 0;
     }
-    public long getMessageId() {
+    public int getMessageId() {
         if (this.data instanceof JsonObject dataObject && dataObject.has("message_id")) {
-            return dataObject.get("message_id").getAsLong();
+            return dataObject.get("message_id").getAsInt();
         }
-        return 0L;
+        return 0;
     }
 }

@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 public record CommandEventListener (
         Object listener, Method method, Fatin2Plugin plugin,
         boolean isCoroutine, Scope scope, boolean needAt,
-        int permission, String description
+        int permission, String description, String usage
 ) {
     public enum Scope {
         PRIVATE,

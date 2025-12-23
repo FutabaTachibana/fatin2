@@ -128,5 +128,35 @@ public interface CommandEvent {
      * @return the MessageEvent of the current session.
      */
     MessageEvent getCurrentEvent();
+    /**
+     * Set whether the message will be sent as a forward message, it is suitable for long messages.
+     * @param sendForward true to send as a forward message, false otherwise.
+     */
+    void setSendForward(boolean sendForward);
+    /**
+     * Set whether the message will be sent as a reply.
+     * @param sendReply true to send as a reply, false otherwise.
+     */
+    void setSendReply(boolean sendReply);
+    /**
+     * Set whether the message will be sent at sender.
+     * @param sendAt true to send at sender, false otherwise.
+     */
+    void setSendAt(boolean sendAt);
+    /**
+     * Return true if the message will be sent as a forward message.
+     * @return true if the message will be sent as a forward message.
+     */
+    boolean isSendForward();
+    /**
+     * Return true if the message wille be sent as a reply.
+     * @return true if the message will be sent as a reply.
+     */
+    boolean isSendReply();
+    /**
+     * Return true if the message will be sent at sender.
+     * @return true if the message will be sent at sender.
+     */
+    boolean isSendAt();
 
 }

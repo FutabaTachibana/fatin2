@@ -3,6 +3,7 @@ package org.f14a.fatin2.event.message;
 import com.google.gson.JsonArray;
 import org.f14a.fatin2.type.MessageType;
 import org.f14a.fatin2.type.message.GroupOnebotMessage;
+import org.f14a.fatin2.util.MessageGenerator;
 import org.f14a.fatin2.util.MessageSender;
 
 public class GroupMessageEvent extends MessageEvent {
@@ -21,6 +22,16 @@ public class GroupMessageEvent extends MessageEvent {
 
     @Override
     public int send(JsonArray messages) {
-        return MessageSender.sendGroup(this.message.groupId(), messages);
+        if (isSendForward()) {
+            return MessageSender.sendGroupForward(this.message.groupId(), messages);
+        } else if (isSendReply()) {
+            return MessageSender.replyGroupMessage(this.message.groupId(), this.message.userId(), this.message.messageId(), messages);
+        } else if (isSendAt()) {
+            JsonArray newArray = MessageGenerator.builder().at(this.message.userId()).build();
+            newArray.addAll(messages);
+            return MessageSender.sendGroup(this.message.groupId(), newArray);
+        } else {
+            return MessageSender.sendGroup(this.message.groupId(), messages);
+        }
     }
 }

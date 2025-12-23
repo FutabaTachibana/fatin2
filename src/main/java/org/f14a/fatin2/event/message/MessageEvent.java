@@ -20,10 +20,14 @@ import java.util.function.Consumer;
 
 public abstract class MessageEvent extends Event {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageEvent.class);
-    private final OnebotMessage message;
 
+    private final OnebotMessage message;
     private final MessageType messageType;
+
     private SessionContext<MessageEvent> sessionContext;
+    private boolean sendForward = false;
+    private boolean sendReply = false;
+    private boolean sendAt = false;
 
     public MessageEvent(OnebotMessage message, MessageType messageType) {
         this.message = message;
@@ -214,6 +218,48 @@ public abstract class MessageEvent extends Event {
     public MessageEvent getCurrentEvent() {
         createSessionContext();
         return this.sessionContext.getCurrentEvent();
+    }
+    /**
+     * Set whether the message will be sent as a forward message, it is suitable for long messages.
+     * @param sendForward true to send as a forward message, false otherwise.
+     */
+    public void setSendForward(boolean sendForward) {
+        this.sendForward = sendForward;
+    }
+    /**
+     * Set whether the message will be sent as a reply.
+     * @param sendReply true to send as a reply, false otherwise.
+     */
+    public void setSendReply(boolean sendReply) {
+        this.sendReply = sendReply;
+    }
+    /**
+     * Set whether the message will be sent at sender.
+     * @param sendAt true to send at sender, false otherwise.
+     */
+    public void setSendAt(boolean sendAt) {
+        this.sendAt = sendAt;
+    }
+    /**
+     * Return true if the message will be sent as a forward message.
+     * @return true if the message will be sent as a forward message.
+     */
+    public boolean isSendForward() {
+        return sendForward;
+    }
+    /**
+     * Return true if the message wille be sent as a reply.
+     * @return true if the message will be sent as a reply.
+     */
+    public boolean isSendReply() {
+        return sendReply;
+    }
+    /**
+     * Return true if the message will be sent at sender.
+     * @return true if the message will be sent at sender.
+     */
+    public boolean isSendAt() {
+        return sendAt;
     }
 
     @Override

@@ -94,7 +94,7 @@ public class MessageGenerator {
         public MessageBuilder face(Faces faces){
             return addSegment("face", Map.of("id", Integer.toString(faces.slot())));
         }
-        public MessageBuilder reply(long messageId){
+        public MessageBuilder reply(int messageId){
             return addSegment("reply", Map.of("id", Long.toString(messageId)));
         }
         public MessageBuilder node(JsonObject node) {
@@ -204,7 +204,7 @@ public class MessageGenerator {
                 "data", Map.of("id", Integer.toString(faces.slot()))
         )).getAsJsonObject();
     }
-    public static JsonObject reply(long messageId) {
+    public static JsonObject reply(int messageId) {
         return GSON.toJsonTree(Map.of(
                 "type", "reply",
                 "data", Map.of("id", Long.toString(messageId))

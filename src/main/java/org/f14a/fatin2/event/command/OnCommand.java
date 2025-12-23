@@ -45,5 +45,12 @@ public @interface OnCommand {
      * however a command with level -1 permission can still be used by them.
      */
     int permission() default 0;
+    /**
+     * Description of the command, it will display when user use help command.
+     */
     String description() default "";
+    /**
+     * Usage of the command, it will display when user use help command.
+     */
+    String usage() default "";
 }

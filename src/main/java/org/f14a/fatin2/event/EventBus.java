@@ -5,6 +5,7 @@ import org.f14a.fatin2.event.response.ResponseManager;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.event.session.SessionManager;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class EventBus {
                 new ThreadFactory() {
                     private int count = 0;
                     @Override
-                    public Thread newThread(Runnable r) {
+                    public Thread newThread(@NotNull Runnable r) {
                         Thread thread = new Thread(r, "Message-Handler-" + (count++));
                         thread.setDaemon(false);
                         return thread;
@@ -131,7 +132,7 @@ public class EventBus {
         CommandEventListener.Scope scope = SCOPE_BY_EVENT.get(eventType);
         CommandEventListener wrappedListener = new CommandEventListener(listener, method, plugin,
                 method.isAnnotationPresent(Coroutines.class), scope, annotation.needAt(),
-                annotation.permission(), annotation.description());
+                annotation.permission(), annotation.description(), annotation.usage());
         addCommand(annotation.command(), wrappedListener, annotation, plugin);
         count.getAndIncrement();
         Arrays.stream(annotation.alias()).toList().forEach(command -> {

@@ -35,4 +35,14 @@ public class Main implements Fatin2Plugin {
     public String getAuthor() {
         return "Fatin2";
     }
+
+    @Override
+    public String getVersion() {
+        return "1.0.0";
+    }
+
+    @Override
+    public String getDescription() {
+        return "A demo plugin that echoes messages back to the sender.";
+    }
 }

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.*;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,11 +47,20 @@ public class PluginManager {
         }
     }
     public Map<String, PluginWrapper> getPlugins() {
-        return this.plugins;
+        return Collections.unmodifiableMap(this.plugins);
     }
     public PluginWrapper getPluginWrapper(Fatin2Plugin plugin) {
         for (PluginWrapper wrapper : this.plugins.values()) {
             if (wrapper.getPlugin() == plugin) {
+                return wrapper;
+            }
+        }
+        return null;
+    }
+    public PluginWrapper getPluginWrapper(String pluginName) {
+        for (PluginWrapper wrapper : this.plugins.values()) {
+            Fatin2Plugin plugin = wrapper.getPlugin();
+            if (plugin.getDisplayName().equals(pluginName) || plugin.getName().equals(pluginName)) {
                 return wrapper;
             }
         }

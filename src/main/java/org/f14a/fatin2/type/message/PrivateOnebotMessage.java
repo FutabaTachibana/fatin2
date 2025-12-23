@@ -10,7 +10,7 @@ public record PrivateOnebotMessage(
         @SerializedName("self_id") long selfId,
         @SerializedName("message_type") String messageType,
         @SerializedName("sub_type") String subType,
-        @SerializedName("message_id") String messageId,
+        @SerializedName("message_id") int messageId,
         @SerializedName("user_id") long userId,
         @SerializedName("message") Message[] messages,
         @SerializedName("font") int font,

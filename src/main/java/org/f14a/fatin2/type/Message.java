@@ -32,5 +32,4 @@ public record Message(
     public String toString() {
         return GSON.toJson(this);
     }
-    // TODO: Implement unformatted text parsing
 }

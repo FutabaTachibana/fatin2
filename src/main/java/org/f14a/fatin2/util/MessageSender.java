@@ -4,11 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.client.Client;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,20 +80,36 @@ public class MessageSender {
         Client.getInstance().send(request);
         return echo;
     }
-    public static int replyGroupMessage(long groupId, long messageId, JsonArray messages) {
-        MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
-        messages.forEach(mb::addSegment);
-        return MessageSender.sendGroup(groupId, mb.build());
+    public static int replyPrivateMessage(long userId, int messageId, JsonArray messages) {
+        JsonArray newArray = MessageGenerator.builder().reply(messageId).at(userId).build();
+        newArray.addAll(messages);
+        return MessageSender.sendPrivate(userId, newArray);
     }
-    public static int replyGroupMessage(long groupId, long messageId, JsonObject ... messages) {
-        return replyGroupMessage(groupId, messageId, MessageGenerator.create(messages));
-    }
-    public static int replyPrivateMessage(long userId, long messageId, JsonArray messages) {
-        MessageGenerator.MessageBuilder mb = MessageGenerator.builder().reply(messageId);
-        messages.forEach(mb::addSegment);
-        return MessageSender.sendPrivate(userId, mb.build());
-    }
-    public static int replyPrivateMessage(long userId, long messageId, JsonObject ... messages) {
+    public static int replyPrivateMessage(long userId, int messageId, JsonObject ... messages) {
         return replyPrivateMessage(userId, messageId, MessageGenerator.create(messages));
+    }
+    public static int replyPrivateMessageWithoutAt(long userId, int messageId, JsonArray messages) {
+        JsonArray newArray = MessageGenerator.builder().reply(messageId).build();
+        newArray.addAll(messages);
+        return MessageSender.sendPrivate(userId, newArray);
+    }
+    public static int replyPrivateMessageWithoutAt(long userId, int messageId, JsonObject ... messages) {
+        return replyPrivateMessageWithoutAt(userId, messageId, MessageGenerator.create(messages));
+    }
+    public static int replyGroupMessage(long groupId, long userId, int messageId, JsonArray messages) {
+        JsonArray newArray = MessageGenerator.builder().reply(messageId).at(userId).build();
+        newArray.addAll(messages);
+        return MessageSender.sendGroup(groupId, newArray);
+    }
+    public static int replyGroupMessage(long groupId, long userId, int messageId, JsonObject ... messages) {
+        return replyGroupMessage(groupId, userId, messageId, MessageGenerator.create(messages));
+    }
+    public static int replyGroupMessageWithoutAt(long groupId, int messageId, JsonArray messages) {
+        JsonArray newArray = MessageGenerator.builder().reply(messageId).build();
+        newArray.addAll(messages);
+        return MessageSender.sendGroup(groupId, newArray);
+    }
+    public static int replyGroupMessageWithoutAt(long groupId, int messageId, JsonObject ... messages) {
+        return replyGroupMessageWithoutAt(groupId, messageId, MessageGenerator.create(messages));
     }
 }

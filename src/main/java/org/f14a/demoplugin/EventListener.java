@@ -68,13 +68,13 @@ public class EventListener {
     @OnCommand(command = "sendandreply", alias = {"sar"}, description = "发送并回复示例")
     @Coroutines
     public void onSendAndReply(GroupCommandEvent event) {
-        event.send(request -> {
+        event.send(response -> {
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            MessageSender.replyGroupMessage(event.getGroupId(), request.getMessageId(),
+            MessageSender.replyGroupMessage(event.getGroupId(), event.getMessage().userId(), response.getMessageId(),
                     MessageGenerator.text("这是对5秒前消息的回复"));
         }, MessageGenerator.text("这条消息将在5秒后被回复"));
     }
