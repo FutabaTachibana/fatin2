@@ -51,9 +51,26 @@ public class MessageSender {
         Client.getInstance().send(request);
         return echo;
     }
-    // Unavailable in OneBot v11
-    public static int sendPrivateForward(long userId, JsonArray messages){
-        JsonObject jsonObject = RequestGenerator.builder().userId(userId).messages(messages).build();
+
+    /**
+     * Send a private forward message.
+     * <p>
+     * Fake forward messages are unavailable yet,
+     * and some fields like "news", "prompt", "summary", "source" are not implemented yet.
+     * @param userId the user id to send the message to.
+     * @param userIdOfSender the user id of the sender.
+     * @param nicknameOfSender the nickname of the sender.
+     * @param messages the messages to be forwarded.
+     * @return the echo of the request, for tracking the message status.
+     */
+    public static int sendPrivateForward(long userId, long userIdOfSender, String nicknameOfSender, JsonArray messages) {
+        JsonArray node = MessageGenerator.builder().node(
+                NodeGenerator.builder().userId(userIdOfSender).nickname(nicknameOfSender).content(messages).build()
+        ).build();
+        JsonObject jsonObject = RequestGenerator.builder().userId(userId).messages(node)
+//                .add("news", GSON.toJsonTree(List.of(Map.of("text", "news")))).add("prompt", "prompt")
+//                .add("summary", "summary").add("source", "source")
+                .build();
         int echo = jsonObject.hashCode();
         String request = GSON.toJson(Map.of(
                 "action", "send_private_forward_msg",
@@ -64,9 +81,22 @@ public class MessageSender {
         Client.getInstance().send(request);
         return echo;
     }
-    // Unavailable now
-    public static int sendGroupForward(long groupId, JsonArray messages){
-        JsonObject jsonObject = RequestGenerator.builder().groupId(groupId).messages(messages)
+    /**
+     * Send a private forward message.
+     * <p>
+     * Fake forward messages are unavailable yet,
+     * and some fields like "news", "prompt", "summary", "source" are not implemented yet.
+     * @param groupId the group id to send the message to.
+     * @param userIdOfSender the user id of the sender.
+     * @param nicknameOfSender the nickname of the sender.
+     * @param messages the messages to be forwarded.
+     * @return the echo of the request, for tracking the message status.
+     */
+    public static int sendGroupForward(long groupId, long userIdOfSender, String nicknameOfSender, JsonArray messages){
+        JsonArray node = MessageGenerator.builder().node(
+                NodeGenerator.builder().userId(userIdOfSender).nickname(nicknameOfSender).content(messages).build()
+        ).build();
+        JsonObject jsonObject = RequestGenerator.builder().groupId(groupId).messages(node)
 //                .add("news", GSON.toJsonTree(List.of(Map.of("text", "news")))).add("prompt", "prompt")
 //                .add("summary", "summary").add("source", "source")
                 .build();

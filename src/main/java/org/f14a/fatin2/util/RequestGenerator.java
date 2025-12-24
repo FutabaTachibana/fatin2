@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.type.Faces;
 
 /**
  * You can use this class to generate WebSocket request JSON strings.
@@ -41,7 +42,7 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Sets the group_id field.
+         * Sets the <code>group_id</code> field.
          * @param groupId the group identifier
          * @return this builder instance for method chaining
          */
@@ -50,7 +51,7 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Sets the user_id field.
+         * Sets the <code>user_id</code> field.
          * @param userId the user identifier
          * @return this builder instance for method chaining
          */
@@ -58,12 +59,17 @@ public class RequestGenerator {
             this.fields.addProperty("user_id", userId);
             return this;
         }
-        public RequestBuilder messageId(long messageId) {
+        /**
+         * Sets the <code>message_id</code> field.
+         * @param messageId the message identifier
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder messageId(int messageId) {
             this.fields.addProperty("message_id", messageId);
             return this;
         }
         /**
-         * Sets the message field.
+         * Sets the <code>message</code> field.
          * @param message the message content
          * @return this builder instance for method chaining
          */
@@ -72,8 +78,8 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Sets the messages field.
-         * @param messages the message content
+         * Sets the <code>messages</code> field.
+         * @param messages the messages content
          * @return this builder instance for method chaining
          */
         public RequestBuilder messages(JsonArray messages) {
@@ -81,7 +87,43 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Adds a custom field with any type of value.
+         * Sets the <code>enable</code> field.
+         * @param enable whether to enable (something)
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder enable(boolean enable) {
+            this.fields.addProperty("enable", enable);
+            return this;
+        }
+        /**
+         * Sets the <code>special_title</code> field.
+         * @param specialTitle the special title to set
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder specialTitle(String specialTitle) {
+            this.fields.addProperty("special_title", specialTitle);
+            return this;
+        }
+        /**
+         * Sets the <code>reject_add_request</code> field.
+         * @param rejectAddRequest whether to reject the add request
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder rejectAddRequest(boolean rejectAddRequest) {
+            this.fields.addProperty("reject_add_request", rejectAddRequest);
+            return this;
+        }
+        /**
+         * Sets the <code>duration</code> field.
+         * @param durationSeconds the duration in seconds
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder duration(int durationSeconds) {
+            this.fields.addProperty("duration", durationSeconds);
+            return this;
+        }
+        /**
+         * Sets the <code>flag</code> field.
          * @param flag the flag markup request
          * @return this builder instance for method chaining
          */
@@ -90,7 +132,7 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Adds a custom field with any type of value.
+         * Sets the <code>approve</code> field.
          * @param approve if you approve the request
          * @return this builder instance for method chaining
          */
@@ -99,7 +141,7 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Adds a custom field with any type of value.
+         * Sets the <code>reason</code> field.
          * @param reason the reason for declining
          * @return this builder instance for method chaining
          */
@@ -108,12 +150,57 @@ public class RequestGenerator {
             return this;
         }
         /**
-         * Adds a custom field with any type of value.
+         * Sets the <code>remark</code> field.
          * @param remark remark after adding friend
          * @return this builder instance for method chaining
          */
         public RequestBuilder remark(String remark) {
             this.fields.addProperty("remark", remark);
+            return this;
+        }
+        /**
+         * Sets the <code>emoji_id</code> field.
+         * @param emojiId the emoji identifier
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder emojiId(Faces emojiId) {
+            this.fields.addProperty("emoji_id", emojiId.slot());
+            return this;
+        }
+        /**
+         * Sets the <code>emoji_id</code> field.
+         * @param emojiId the emoji identifier
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder emojiId(int emojiId) {
+            this.fields.addProperty("emoji_id", emojiId);
+            return this;
+        }
+        /**
+         * Sets the <code>set</code> field.
+         * @param set whether to set (something)
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder set(boolean set) {
+            this.fields.addProperty("set", set);
+            return this;
+        }
+        /**
+         * Sets the <code>group_name</code> field.
+         * @param groupName the group name
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder groupName(String groupName) {
+            this.fields.addProperty("group_name", groupName);
+            return this;
+        }
+        /**
+         * Sets the <code>card</code> field.
+         * @param card the card name
+         * @return this builder instance for method chaining
+         */
+        public RequestBuilder card(String card) {
+            this.fields.addProperty("card", card);
             return this;
         }
 

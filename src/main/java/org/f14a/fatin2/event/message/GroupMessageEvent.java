@@ -23,7 +23,7 @@ public class GroupMessageEvent extends MessageEvent {
     @Override
     public int send(JsonArray messages) {
         if (isSendForward()) {
-            return MessageSender.sendGroupForward(this.message.groupId(), messages);
+            return MessageSender.sendGroupForward(this.message.groupId(), this.message.selfId(), "bot", messages);
         } else if (isSendReply()) {
             return MessageSender.replyGroupMessage(this.message.groupId(), this.message.userId(), this.message.messageId(), messages);
         } else if (isSendAt()) {

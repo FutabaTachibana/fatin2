@@ -118,14 +118,14 @@ public class EventListener {
         userId = event.getMessage().userId();
         MessageGenerator.MessageBuilder mb = MessageGenerator.builder();
         for (int i = 1; i < args.length; i++) {
-            mb.node(NodeGenerator.builder().userId(userId).nickname("人").content(MessageGenerator.text(args[i])).build());
+            mb.text(args[i]);
         }
         if (event instanceof PrivateCommandEvent) {
-            MessageSender.sendPrivateForward(userId, mb.build());
+            MessageSender.sendPrivateForward(event.getMessage().userId(), userId, "人", mb.build());
         }
         else if (event instanceof GroupCommandEvent) {
             long groupId = ((GroupCommandEvent) event).getGroupId();
-            MessageSender.sendGroupForward(groupId, mb.build());
+            MessageSender.sendGroupForward(groupId, userId, "人", mb.build());
         }
     }
 }

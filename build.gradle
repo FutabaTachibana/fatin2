@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id 'java'
     id 'application'
@@ -54,22 +56,46 @@ sourceSets {
             srcDir 'src/main/java'
             include 'org/f14a/demoplugin/**'
         }
-        // Inherit host dependencies so plugins can compile against shared libs (e.g., Gson)
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        // Allow plugin sources to reference the host API + host dependencies at compile time.
+        // NOTE: This does *not* mean they will be packaged into the plugin JAR.
+        // IMPORTANT for IDEs: use the source set's own configurations (demopluginCompileClasspath, etc.)
+        // so IntelliJ can model dependencies correctly.
+        compileClasspath += sourceSets.main.output + configurations.demopluginCompileClasspath
+        runtimeClasspath += output + compileClasspath + configurations.demopluginRuntimeClasspath
     }
     tachibana {
         java {
             srcDir 'src/main/java'
             include 'org/f14a/tachibana/**'
         }
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        compileClasspath += sourceSets.main.output + configurations.tachibanaCompileClasspath
+        runtimeClasspath += output + compileClasspath + configurations.tachibanaRuntimeClasspath
     }
 }
 
+// --- Plugin dependency model ---
+// Each plugin gets its own dependency bucket.
+// - *CompileOnly* is for the host API (classes from main source set)
+// - *Implementation/RuntimeOnly* are plugin-specific deps that should be bundled into the plugin JAR
+//
+// Why this matters:
+// - Using a plain `Jar` task only packages *your classes*.
+// - If you want a plugin to carry dependencies the host doesn't ship, you must build a shaded jar.
+configurations {
+    // Make pluginImplementation participate in plugin runtime resolution.
+    // This improves IDE import resolution and ensures plugin shadow tasks can resolve deps.
+    demopluginRuntimeClasspath.extendsFrom(demopluginImplementation)
+    tachibanaRuntimeClasspath.extendsFrom(tachibanaImplementation)
+}
+
 // Compile-only dependency on the host app APIs
+// (plugins can call host code, but the host classes must NOT be duplicated into plugin jars)
 dependencies {
     demopluginCompileOnly sourceSets.main.output
     tachibanaCompileOnly sourceSets.main.output
+
+    // Plugin-only deps (bundled into the plugin shaded jar)
+    tachibanaImplementation 'com.github.oshi:oshi-core:6.9.2'
 }
 
 // --- Main application artifacts ---
@@ -118,19 +144,22 @@ build.dependsOn jar, shadowJar
 
 // --- Plugin jars ---
 // These tasks are opt-in. Run them explicitly when you want to build internal plugins.
-// Example:
-//   ./gradlew buildDemoplugin
-//   ./gradlew buildTachibana
-// Demo plugin jar (copied into run/plugins for local dev)
-tasks.register('buildDemoplugin', Jar) {
+//
+// IMPORTANT:
+// Use ShadowJar (fat jar) for plugins that need their own dependencies.
+// A plain Jar task won't include external libraries.
+
+// Demo plugin shaded jar (copied into run/plugins for local dev)
+tasks.register('buildDemoplugin', ShadowJar) {
     group = 'demoplugin'
-    description = 'Build the demo plugin JAR'
+    description = 'Build the demo plugin shaded JAR (includes plugin dependencies)'
 
     archiveBaseName.set('demoplugin')
     archiveVersion.set(version_demoplugin)
     archiveClassifier.set('')
 
     from(sourceSets.demoplugin.output)
+    configurations = [project.configurations.demopluginRuntimeClasspath]
 
     destinationDirectory.set(file("$projectDir/run/plugins"))
 
@@ -147,16 +176,17 @@ tasks.register('buildDemoplugin', Jar) {
     }
 }
 
-// Tachibana plugin jar
-tasks.register('buildTachibana', Jar) {
+// Tachibana plugin shaded jar (bundles OSHI + transitive deps)
+tasks.register('buildTachibana', ShadowJar) {
     group = 'tachibana'
-    description = 'Build the tachibana plugin JAR'
+    description = 'Build the Tachibana plugin shaded JAR (includes plugin dependencies)'
 
     archiveBaseName.set('tachibana')
     archiveVersion.set(version_tachibana)
     archiveClassifier.set('')
 
     from(sourceSets.tachibana.output)
+    configurations = [project.configurations.tachibanaRuntimeClasspath]
 
     destinationDirectory.set(file("$projectDir/run/plugins"))
 
@@ -167,6 +197,10 @@ tasks.register('buildTachibana', Jar) {
             'Plugin-Main-Class': 'org.f14a.tachibana.Main'
         )
     }
+
+    // Avoid shading host-provided dependencies if you want (optional).
+    // For example, if the host already provides SLF4J/Logback, shading a second copy can cause conflicts.
+    // exclude(dependency('org.slf4j:slf4j-api:.*'))
 
     doFirst {
         file("$projectDir/run/plugins").mkdirs()

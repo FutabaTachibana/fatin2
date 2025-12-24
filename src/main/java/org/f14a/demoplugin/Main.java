@@ -7,12 +7,12 @@ public class Main implements Fatin2Plugin {
     // This method is called when the plugin is loaded
     @Override
     public void onLoad() {
-        EventBus.getInstance().register(new EventListener(), this);
+
     }
     // This method is called when the plugin is enabled
     @Override
     public void onEnable() {
-
+        EventBus.getInstance().register(new EventListener(), this);
     }
     // This method is called when the plugin is disabled, including during shutdown
     @Override

@@ -20,7 +20,7 @@ public class PrivateMessageEvent extends MessageEvent {
     @Override
     public int send(JsonArray messages) {
         if (isSendForward()) {
-            return MessageSender.sendPrivateForward(this.message.userId(), messages);
+            return MessageSender.sendPrivateForward(this.message.userId(), this.message.selfId(), "bot", messages);
         }if (isSendReply()) {
             return MessageSender.replyPrivateMessage(this.message.userId(), this.message.messageId(), messages);
         } else if (isSendAt()) {
