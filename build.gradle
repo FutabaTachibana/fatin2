@@ -137,6 +137,11 @@ clean {
 test {
     workingDir = file("$projectDir/test")
     useJUnitPlatform()
+
+    // Show test stdout/stderr (useful for diagnosing logging issues)
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
