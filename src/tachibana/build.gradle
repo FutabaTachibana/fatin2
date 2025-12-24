@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+}
+
+group = 'org.f14a.fatin2'
+version = rootProject.findProperty('version_tachibana')
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Plugin depends on host APIs, but must not package host classes.
+dependencies {
+    // Host API available for compilation only.
+    compileOnly project(':')
+
+    // Host libraries available for compilation only (do not package into plugin).
+    compileOnly files(project(':').sourceSets.main.compileClasspath)
+    compileOnly files(project(':').sourceSets.main.runtimeClasspath)
+
+    // Plugin-only deps (bundled into the plugin shaded jar)
+    implementation 'com.github.oshi:oshi-core:6.9.2'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+}
+
+shadowJar {
+    archiveBaseName.set('tachibana')
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set('')
+
+    // Only bundle plugin deps, never host.
+    // (compileOnly host API won't be included anyway)
+
+    destinationDirectory.set(rootProject.file('run/plugins'))
+
+    manifest {
+        attributes(
+            'Name': 'Tachibana',
+            'Version': project.version.toString(),
+            'Plugin-Main-Class': 'org.f14a.tachibana.Main'
+        )
+    }
+
+    doFirst {
+        destinationDirectory.get().asFile.mkdirs()
+    }
+}
+
+tasks.register('buildPlugin') {
+    group = 'tachibana'
+    description = 'Build the Tachibana plugin shaded JAR into run/plugins'
+    dependsOn tasks.shadowJar
+}

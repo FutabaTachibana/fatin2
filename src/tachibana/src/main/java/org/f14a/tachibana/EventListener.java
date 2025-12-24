@@ -8,10 +8,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.util.Set;
 
 public class EventListener {
-    private static final Set<Long> infoAllowedGroups = Set.of();
-    static {
-        infoAllowedGroups.add(893213294L);
-    }
+    private static final Set<Long> infoAllowedGroups = Set.of(893213294L);
 
     @OnCommand(command = "info", description = "显示系统信息", usage = "info")
     public void onInfo(GroupCommandEvent event) {
@@ -29,7 +26,6 @@ public class EventListener {
                 .append(System.getProperty("java.version")).append(" ")
                 .append(System.getProperty("java.vendor")).append(" ")
                 .append(System.getProperty("java.vm.name")).append("\n");
-
 
 
         sb.append("CPU 核心数: ").append(os.getAvailableProcessors()).append("\n");

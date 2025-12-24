@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+}
+
+group = 'org.f14a.fatin2'
+version = rootProject.findProperty('version_demoplugin')
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Demo plugin depends on host APIs, but must not package host classes.
+dependencies {
+    // Host API available for compilation only.
+    compileOnly project(':')
+
+    // Host libraries available for compilation only (do not package into plugin).
+    // Use file collections to avoid 'Adding a Configuration as a dependency' (Gradle 8+).
+    compileOnly files(project(':').sourceSets.main.compileClasspath)
+    compileOnly files(project(':').sourceSets.main.runtimeClasspath)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+}
+
+shadowJar {
+    archiveBaseName.set('demoplugin')
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set('')
+
+    destinationDirectory.set(rootProject.file('run/plugins'))
+
+    manifest {
+        attributes(
+            'Name': 'DemoPlugin',
+            'Version': project.version.toString(),
+            'Plugin-Main-Class': 'org.f14a.demoplugin.Main'
+        )
+    }
+
+    doFirst {
+        destinationDirectory.get().asFile.mkdirs()
+    }
+}
+
+tasks.register('buildPlugin') {
+    group = 'demoplugin'
+    description = 'Build the demo plugin shaded JAR into run/plugins'
+    dependsOn tasks.shadowJar
+}
