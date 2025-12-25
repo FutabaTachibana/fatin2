@@ -35,10 +35,14 @@ jobs:
           VERSION="${TAG#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Publish to Maven Central
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: clean publishToSonatype closeAndReleaseSonatypeStagingRepository
+
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x ./gradlew
+
+      - name: Publish to Maven Central
+        run: ./gradlew --no-daemon clean publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           VERSION_NAME: ${{ steps.version.outputs.version }}
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
