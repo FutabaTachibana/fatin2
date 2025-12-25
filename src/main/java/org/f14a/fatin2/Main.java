@@ -16,19 +16,7 @@ import java.util.concurrent.CountDownLatch;
 * Entry of the application
 */
 public class Main {
-    private static Logger initLogger() {
-        // IMPORTANT: Set the system property before any SLF4J/Logback initialization.
-        // Accessing LoggerFactory (including static logger fields) triggers Logback config loading.
-        try {
-            Config config = ConfigLoader.load();
-            System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
-        } catch (Exception ignored) {
-            // If config can't be loaded yet, keep default (INFO from logback.xml)
-        }
-        return LoggerFactory.getLogger(Main.class);
-    }
-
-    private static final Logger LOGGER = initLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         // Load config from working directory (config.yml)
@@ -37,7 +25,9 @@ public class Main {
         PluginManager pluginManager = null;
         Client client = null;
         try {
-            Config config = Config.getConfig();
+            LOGGER.info("Loading config from working directory (config.yml)");
+            Config config = ConfigLoader.load();
+            System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
             // Init event bus
             eventBus = new EventBus();
             // Load plugins

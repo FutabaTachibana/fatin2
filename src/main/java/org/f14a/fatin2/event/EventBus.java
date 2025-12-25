@@ -265,6 +265,8 @@ public class EventBus {
         }
         // Check permission
         if (this.permissionProvider != null && !this.permissionProvider.test(event, listener)) {
+            // Call no permission event
+            new PermissionDeniedEvent(event, listener).fire();
             return;
         }
         try {

@@ -39,10 +39,9 @@ public class EventListener {
         }
         event.send(MessageGenerator.create(messages));
     }
-
     // Example for coroutine handling and session management
-    @Coroutines
     @OnCommand(command = "guess", description = "猜数字游戏")
+    @Coroutines
     public void onGuessNumber(GroupCommandEvent event) {
         String reply;
         int number = RandomGenerator.getDefault().nextInt(1, 101);
@@ -58,7 +57,6 @@ public class EventListener {
         }
         event.send(MessageGenerator.text("恭喜你，成功猜中数字" + number));
     }
-
     // Example for raw message handling
     @EventHandler
     public void onCallMe(MessageEvent event) {
@@ -66,9 +64,9 @@ public class EventListener {
             event.send(MessageGenerator.text("有什么事情吗"));
         }
     }
-
     // Example for action after sending successfully by callback and message reply
     @OnCommand(command = "sendandreply", alias = {"sar"}, description = "发送并回复示例")
+    @Coroutines
     public void onSendAndReply(GroupCommandEvent event) {
         event.send(response -> {
             try {
@@ -80,7 +78,6 @@ public class EventListener {
                     MessageGenerator.text("这是对5秒前消息的回复"));
         }, MessageGenerator.text("这条消息将在5秒后被回复"));
     }
-
     // Example for action after sending successfully by CompletableFuture and message recall
     @OnCommand(command = "sendandrecall", description = "发送并撤回示例")
     public void onSendAndRecall(CommandEvent event) {
@@ -95,7 +92,6 @@ public class EventListener {
             RequestSender.deleteMessage(response.getMessageId());
         });
     }
-
     // Example for command with arguments
     @OnCommand(command = "cmd", needAt = true, description = "带参数的命令示例")
     public void onCommandWithArgs(CommandEvent event) {
@@ -108,7 +104,6 @@ public class EventListener {
         }
         event.send(MessageGenerator.text(sb.toString()));
     }
-
     // Example for forward message
     @OnCommand(command = "forward", description = "转发消息示例")
     public void onForwardMessage(CommandEvent event) {

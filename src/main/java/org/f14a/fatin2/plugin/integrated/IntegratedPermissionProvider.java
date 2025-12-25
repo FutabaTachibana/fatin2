@@ -1,9 +1,11 @@
 package org.f14a.fatin2.plugin.integrated;
 
 import org.f14a.fatin2.event.EventBus;
+import org.f14a.fatin2.event.EventHandler;
 import org.f14a.fatin2.event.command.CommandEvent;
 import org.f14a.fatin2.event.command.CommandEventListener;
 import org.f14a.fatin2.event.command.OnCommand;
+import org.f14a.fatin2.event.command.PermissionDeniedEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.f14a.fatin2.type.Sender;
 import org.f14a.fatin2.type.exception.PluginInternalException;
@@ -59,12 +61,7 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
                 permissionLevel = 2;
             }
         }
-        boolean result = permissionLevel >= listener.permission();
-        // Send feedback if no permission.
-        if (!result) {
-            event.send(MessageGenerator.text("你没有执行此命令的权限"));
-        }
-        return result;
+        return permissionLevel >= listener.permission();
     }
 
     @Override
@@ -140,6 +137,11 @@ public class IntegratedPermissionProvider implements Fatin2Plugin {
     @Override
     public String getDescription() {
         return "内置的权限管理插件。";
+    }
+
+    @EventHandler
+    public void onPermissionDenied(PermissionDeniedEvent event) {
+        event.getCurrentEvent().send(MessageGenerator.text("你没有执行此命令的权限"));
     }
 
     @OnCommand(command = "list_admins", description = "列出机器人管理员")

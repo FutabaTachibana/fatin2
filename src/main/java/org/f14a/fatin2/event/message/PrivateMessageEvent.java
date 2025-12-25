@@ -19,17 +19,20 @@ public class PrivateMessageEvent extends MessageEvent {
 
     @Override
     public int send(JsonArray messages) {
+        int echo = 0;
         if (isSendForward()) {
-            return MessageSender.sendPrivateForward(this.message.userId(), this.message.selfId(), "bot", messages);
+            echo = MessageSender.sendPrivateForward(this.message.userId(), this.message.selfId(), "bot", messages);
         }if (isSendReply()) {
-            return MessageSender.replyPrivateMessage(this.message.userId(), this.message.messageId(), messages);
+            echo = MessageSender.replyPrivateMessage(this.message.userId(), this.message.messageId(), messages);
         } else if (isSendAt()) {
             JsonArray newArray = MessageGenerator.builder().at(this.message.userId()).build();
             newArray.addAll(messages);
-            return MessageSender.sendPrivate(this.message.userId(), newArray);
+            echo = MessageSender.sendPrivate(this.message.userId(), newArray);
         } else {
-            return MessageSender.sendPrivate(this.message.userId(), messages);
+            echo = MessageSender.sendPrivate(this.message.userId(), messages);
         }
+        resetOptions();
+        return echo;
     }
 
 }

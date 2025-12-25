@@ -22,16 +22,19 @@ public class GroupMessageEvent extends MessageEvent {
 
     @Override
     public int send(JsonArray messages) {
+        int echo = 0;
         if (isSendForward()) {
-            return MessageSender.sendGroupForward(this.message.groupId(), this.message.selfId(), "bot", messages);
+            echo = MessageSender.sendGroupForward(this.message.groupId(), this.message.selfId(), "bot", messages);
         } else if (isSendReply()) {
-            return MessageSender.replyGroupMessage(this.message.groupId(), this.message.userId(), this.message.messageId(), messages);
+            echo = MessageSender.replyGroupMessage(this.message.groupId(), this.message.userId(), this.message.messageId(), messages);
         } else if (isSendAt()) {
             JsonArray newArray = MessageGenerator.builder().at(this.message.userId()).build();
             newArray.addAll(messages);
-            return MessageSender.sendGroup(this.message.groupId(), newArray);
+            echo = MessageSender.sendGroup(this.message.groupId(), newArray);
         } else {
-            return MessageSender.sendGroup(this.message.groupId(), messages);
+            echo = MessageSender.sendGroup(this.message.groupId(), messages);
         }
+        resetOptions();
+        return echo;
     }
 }

@@ -50,7 +50,6 @@ final class RawParser {
         ROUTES.put("notice:poke", obj -> new PokeEvent(GSON.fromJson(obj, PokeOnebotNotify.class)));
         ROUTES.put("notice:lucky_king", obj -> new LuckyKingEvent(GSON.fromJson(obj, LuckyKingOnebotNotify.class)));
         ROUTES.put("notice:honor", obj -> new HonorEvent(GSON.fromJson(obj, HonorOnebotNotify.class)));
-        ROUTES.put("notice:group_card", obj -> new GroupCardEvent(GSON.fromJson(obj, GroupCardOnebotNotice.class)));
         ROUTES.put("request:friend", obj -> new FriendRequestEvent(GSON.fromJson(obj, FriendOnebotRequest.class)));
         ROUTES.put("request:group:add", obj -> new AddRequestEvent(GSON.fromJson(obj, AddOnebotRequest.class)));
         ROUTES.put("request:group:invite", obj -> new InviteRequestEvent(GSON.fromJson(obj, InviteOnebotRequest.class)));

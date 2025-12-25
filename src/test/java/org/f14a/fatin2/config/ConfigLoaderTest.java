@@ -43,21 +43,18 @@ class ConfigLoaderTest {
 
     @Test
     void load_toleratesTypeMismatchAndFallsBackToDefaults() throws Exception {
-        // This test only runs if a working-dir config.yml exists; we temporarily overwrite it.
-        if (!Files.exists(CONFIG_PATH)) {
-            // Make sure it exists first (from resources)
-            ConfigLoader.load(CONFIG_PATH, "/" + CONFIG_FILE_NAME);
-        }
-
-        String original = Files.readString(CONFIG_PATH, StandardCharsets.UTF_8);
+        String original = null;
         try {
             Files.writeString(CONFIG_PATH, "debug: not_a_bool\nplugin: 123\nwebsocket_url: 123\n", StandardCharsets.UTF_8);
             Config config = ConfigLoader.load(CONFIG_PATH, "/" + CONFIG_FILE_NAME);
             assertNotNull(config);
             // websocket_url 123 becomes "123"; debug should fallback to default (from resources)
             assertEquals("123", config.getWebSocketUrl());
+            original = Files.readString(CONFIG_PATH, StandardCharsets.UTF_8);
         } finally {
-            Files.writeString(CONFIG_PATH, original, StandardCharsets.UTF_8);
+            if (original != null) {
+                Files.writeString(CONFIG_PATH, original, StandardCharsets.UTF_8);
+            }
         }
     }
 }

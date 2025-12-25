@@ -261,6 +261,14 @@ public abstract class MessageEvent extends Event {
     public boolean isSendAt() {
         return sendAt;
     }
+    /**
+     * Reset all sending options to default (false).
+     */
+    public void resetOptions() {
+        this.sendAt = false;
+        this.sendForward = false;
+        this.sendReply = false;
+    }
 
     @Override
     public void fire() {
