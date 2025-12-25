@@ -37,8 +37,8 @@ jobs:
 
       - name: Publish to Maven Central
         uses: gradle/actions/setup-gradle@v4
-
-      - run: ./gradlew --no-daemon clean publishToSonatype closeAndReleaseSonatypeStagingRepository
+        with:
+          arguments: clean publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           VERSION_NAME: ${{ steps.version.outputs.version }}
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
