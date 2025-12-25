@@ -4,7 +4,6 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'maven-publish'
     id 'signing'
-    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 group = 'org.f14a'
@@ -200,17 +199,4 @@ signing {
     def signingPassword = System.getenv("GPG_PASSPHRASE")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications. mavenJava
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            username = System.getenv("MAVEN_CENTRAL_USERNAME")
-            password = System.getenv("MAVEN_CENTRAL_PASSWORD")
-
-            // Central Sonatype Nexus API URLs
-            nexusUrl = uri("https://central.sonatype.com/api/v1/publisher/")
-            snapshotRepositoryUrl = uri("https://central.sonatype.com/api/v1/publisher/")
-        }
-    }
 }
