@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -39,8 +39,27 @@ jobs:
       - name: Grant execute permission for Gradle Wrapper
         run: chmod +x ./gradlew
 
+      # Build
+      - name: Build with Gradle
+        run: ./gradlew --no-daemon clean shadowJar sourcesJar javadocJar
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+
+      # Create GitHub Release
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            build/libs/*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to Maven Central
-        run: ./gradlew --no-daemon clean build publishToMavenLocal -x test
+        run: ./gradlew --no-daemon clean build publishToMavenLocal
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -53,7 +72,10 @@ jobs:
           
           echo "Creating bundle from $REPO_PATH"
           cd "$REPO_PATH"
-          jar -cvf /tmp/bundle.jar *
+          jar -cvf /tmp/bundle.jar \
+            *.pom *.pom.asc \
+            *.jar *.jar.asc \
+            *.module *.module.asc 2>/dev/null || true
           
           echo "Uploading bundle to Maven Central Portal..."
           curl --fail-with-body \
