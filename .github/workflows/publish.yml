@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - master
 
 permissions:
   contents: read
@@ -24,7 +26,7 @@ jobs:
           cache: 'gradle'
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v4
+        uses: gradle/actions/wrapper-validation@v4
 
       - name: Compute version name
         id: version
