@@ -155,6 +155,10 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 }
 
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    (options as StandardJavadocDocletOptions).addStringOption('Xdoclint:all,-missing', '-quiet')
+
 publishing {
     publications {
         mavenJava(MavenPublication) {

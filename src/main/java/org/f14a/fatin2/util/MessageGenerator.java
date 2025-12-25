@@ -15,8 +15,8 @@ import java.util.Map;
  * <p>
  * A Message is an array of segments, where each segment contains:
  * <ul>
- * <li>"type": String </li>
- * <li>"data": Map<String, String> </li>
+ * <li>{@code "type": String}</li>
+ * <li>{@code "data": Map<String, String>}</li>
  * </ul>
  * You can use this class to generate WebSocket request JSON strings.
  * It uses the Builder pattern to allow flexible and readable JSON construction.
@@ -216,14 +216,14 @@ public class MessageGenerator {
      * );
      * </pre></Blockquote>
      * Available static methods:
-     * <ui>
+     * <ul>
      * <li> text(String text)
      * <li> at(long userId)
      * <li> face(Faces faces)
      * <li> reply(long messageId)
      * <li> image(String file)
      * <li> file(String file, String name)
-     * </ui>
+     * </ul>
      * @param messages a series of message some static methods return, e.g. MessageGenerator.text("Hello")
      * @return JSON formatted string
      */
