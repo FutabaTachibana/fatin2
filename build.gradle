@@ -7,6 +7,7 @@ plugins {
 }
 
 group = 'org.f14a'
+version = System.getenv("RELEASE_VERSION") ?: project.version
 // Versions are defined in gradle.properties:
 // - version (host app)
 // - version_demoplugin, version_tachibana (internal plugins)
@@ -140,6 +141,9 @@ clean {
 
 // Test configuration
 test {
+    doFirst {
+        file("$projectDir/test").mkdirs()
+    }
     workingDir = file("$projectDir/test")
     useJUnitPlatform()
 
