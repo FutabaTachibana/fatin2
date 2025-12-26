@@ -196,24 +196,8 @@ publishing {
 
     repositories {
         maven {
-            name = "centralStaging"
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-
-            credentials {
-                // Sonatype requires a USER TOKEN for deployments (token username + token password).
-                // Prefer token-specific env vars if provided.
-                username = System.getenv('SONATYPE_TOKEN_USERNAME')
-                        ?: System.getenv('MAVEN_CENTRAL_USERNAME')
-                        ?: System.getenv('JRELEASER_MAVENCENTRAL_USERNAME')
-                password = System.getenv('SONATYPE_TOKEN_PASSWORD')
-                        ?: System.getenv('MAVEN_CENTRAL_PASSWORD')
-                        ?: System.getenv('JRELEASER_MAVENCENTRAL_PASSWORD')
-            }
-
-            // Force Basic authentication even if the server advertises otherwise.
-            authentication {
-                basic(BasicAuthentication)
-            }
+            name = "localStaging"
+            url = layout.buildDirectory.dir("staging-deploy")
         }
     }
 }
