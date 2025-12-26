@@ -10,7 +10,7 @@ group = 'org.f14a'
 version = System.getenv("RELEASE_VERSION") ?: project.version
 // Versions are defined in gradle.properties:
 // - version (host app)
-// - version_demoplugin, version_tachibana (internal plugins)
+// - version_demoplugin
 
 // Java version
 java {
@@ -55,7 +55,6 @@ application {
 
 // --- Custom source sets for internal plugins (built as separate jars) ---
 // Plugins have been migrated into independent Gradle subprojects:
-// - :tachibana
 // - :demoplugin
 // This avoids IDE classpath issues and keeps dependencies strictly scoped per plugin.
 
@@ -103,11 +102,13 @@ build.dependsOn jar, shadowJar
 // --- Plugin jars ---
 // Plugin builds moved to subprojects. For convenience, keep aggregate tasks.
 
-tasks.register('buildTachibana') {
-    group = 'tachibana'
-    description = 'Build the Tachibana plugin shaded JAR (includes plugin dependencies)'
-    dependsOn ':tachibana:shadowJar'
-}
+// DEPRECATED: Tachibana plugin is now a separate project (not open sources).
+// It is used to realize my custom bot's deployment and not public anymore.
+//tasks.register('buildTachibana') {
+//    group = 'tachibana'
+//    description = 'Build the Tachibana plugin shaded JAR (includes plugin dependencies)'
+//    dependsOn ':tachibana:shadowJar'
+//}
 
 tasks.register('buildDemoplugin') {
     group = 'demoplugin'
@@ -136,7 +137,6 @@ tasks.register('runBot', JavaExec) {
 // Clean up generated plugin jars on clean
 clean {
     delete "$projectDir/run/plugins/demoplugin-${version_demoplugin}.jar"
-    delete "$projectDir/run/plugins/tachibana-${version_tachibana}.jar"
 }
 
 // Test configuration
@@ -161,9 +161,7 @@ tasks.withType(Javadoc).configureEach {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
-            artifact javadocJar
+            from components.java
 
             pom {
                 name = 'fatin2'

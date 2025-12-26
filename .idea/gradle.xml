@@ -10,7 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/src/demoplugin" />
-            <option value="$PROJECT_DIR$/src/tachibana" />
+            <option value="$PROJECT_DIR$/tachibana" />
           </set>
         </option>
       </GradleProjectSettings>

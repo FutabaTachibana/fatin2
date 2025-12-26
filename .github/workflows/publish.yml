@@ -36,7 +36,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build artifacts (jar + sources + javadoc + shadowJar)
-        run: ./gradlew --no-daemon clean build shadowJar
+        run: ./gradlew --no-daemon clean build
         env:
           RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
 
@@ -61,6 +61,13 @@ jobs:
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
+      - name: Upload JReleaser out directory
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jreleaser-out
+          path: out/jreleaser/**
+
       - name: Generate CHANGELOG
         id: changelog
         uses: mindsers/changelog-reader-action@v2
@@ -82,7 +89,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload JReleaser out directory
+      - name: Upload build out directory
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts

@@ -2,5 +2,4 @@ rootProject.name = 'fatin2'
 
 include('demoplugin', 'tachibana')
 project(':demoplugin').projectDir = file('src/demoplugin')
-project(':tachibana').projectDir = file('src/tachibana')
 
