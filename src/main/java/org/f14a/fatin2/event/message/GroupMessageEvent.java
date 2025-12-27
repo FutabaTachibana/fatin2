@@ -1,10 +1,10 @@
 package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonArray;
-import org.f14a.fatin2.type.MessageType;
-import org.f14a.fatin2.type.message.GroupOnebotMessage;
-import org.f14a.fatin2.util.MessageGenerator;
-import org.f14a.fatin2.util.MessageSender;
+import org.f14a.fatin2.model.MessageType;
+import org.f14a.fatin2.model.message.GroupOnebotMessage;
+import org.f14a.fatin2.api.MessageGenerator;
+import org.f14a.fatin2.api.MessageSender;
 
 public class GroupMessageEvent extends MessageEvent {
     private final GroupOnebotMessage message;

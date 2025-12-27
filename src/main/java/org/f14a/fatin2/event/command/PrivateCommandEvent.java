@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.command;
 
 import org.f14a.fatin2.event.message.PrivateMessageEvent;
-import org.f14a.fatin2.type.message.PrivateOnebotMessage;
+import org.f14a.fatin2.model.message.PrivateOnebotMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

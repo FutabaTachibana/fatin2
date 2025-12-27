@@ -6,12 +6,12 @@ import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
-import org.f14a.fatin2.type.Message;
-import org.f14a.fatin2.type.MessageType;
-import org.f14a.fatin2.type.Response;
-import org.f14a.fatin2.type.message.GroupOnebotMessage;
-import org.f14a.fatin2.type.message.OnebotMessage;
-import org.f14a.fatin2.util.MessageGenerator;
+import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.MessageType;
+import org.f14a.fatin2.model.Response;
+import org.f14a.fatin2.model.message.GroupOnebotMessage;
+import org.f14a.fatin2.model.message.OnebotMessage;
+import org.f14a.fatin2.api.MessageGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

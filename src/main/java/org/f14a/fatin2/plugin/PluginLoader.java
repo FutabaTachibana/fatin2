@@ -3,15 +3,14 @@ package org.f14a.fatin2.plugin;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.plugin.integrated.IntegratedHelpGenerator;
 import org.f14a.fatin2.plugin.integrated.IntegratedPermissionProvider;
-import org.f14a.fatin2.type.exception.IllegalPluginException;
-import org.f14a.fatin2.type.exception.MainClassNotFoundException;
+import org.f14a.fatin2.exception.IllegalPluginException;
+import org.f14a.fatin2.exception.MainClassNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;

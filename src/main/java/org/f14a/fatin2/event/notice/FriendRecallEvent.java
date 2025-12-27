@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.notice;
 
-import org.f14a.fatin2.type.MessageType;
-import org.f14a.fatin2.type.notice.FriendRecallOnebotNotice;
+import org.f14a.fatin2.model.MessageType;
+import org.f14a.fatin2.model.notice.FriendRecallOnebotNotice;
 
 public class FriendRecallEvent extends RecallEvent {
     private final FriendRecallOnebotNotice notice;

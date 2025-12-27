@@ -2,7 +2,7 @@ package org.f14a.fatin2.event.response;
 
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.EventBus;
-import org.f14a.fatin2.type.Response;
+import org.f14a.fatin2.model.Response;
 
 public class ResponseEvent extends Event {
     private final Response response;

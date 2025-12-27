@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.meta;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.meta.OnebotLifecycle;
+import org.f14a.fatin2.model.meta.OnebotLifecycle;
 
 public class LifecycleEvent extends Event {
     private final OnebotLifecycle lifecycle;

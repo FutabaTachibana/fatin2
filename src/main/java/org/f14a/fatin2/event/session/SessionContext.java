@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.session;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.Message;
+import org.f14a.fatin2.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

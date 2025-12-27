@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.notice;
 
-import org.f14a.fatin2.type.MessageType;
-import org.f14a.fatin2.type.notice.GroupRecallOnebotNotice;
+import org.f14a.fatin2.model.MessageType;
+import org.f14a.fatin2.model.notice.GroupRecallOnebotNotice;
 
 public class GroupRecallEvent extends RecallEvent {
     private final GroupRecallOnebotNotice notice;

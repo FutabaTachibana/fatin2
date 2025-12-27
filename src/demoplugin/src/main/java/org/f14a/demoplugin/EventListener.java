@@ -7,12 +7,11 @@ import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.command.PrivateCommandEvent;
 import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.event.session.Coroutines;
-import org.f14a.fatin2.type.Message;
-import org.f14a.fatin2.type.Response;
-import org.f14a.fatin2.util.MessageGenerator;
-import org.f14a.fatin2.util.MessageSender;
-import org.f14a.fatin2.util.NodeGenerator;
-import org.f14a.fatin2.util.RequestSender;
+import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.Response;
+import org.f14a.fatin2.api.MessageGenerator;
+import org.f14a.fatin2.api.MessageSender;
+import org.f14a.fatin2.api.RequestSender;
 
 import java.util.Arrays;
 import java.util.Map;

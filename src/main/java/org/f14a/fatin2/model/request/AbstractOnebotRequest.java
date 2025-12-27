@@ -1,0 +1,12 @@
+package org.f14a.fatin2.model.request;
+
+import com.google.gson.annotations.SerializedName;
+import org.f14a.fatin2.model.AbstractOnebotMessage;
+
+public interface AbstractOnebotRequest extends AbstractOnebotMessage {
+    // friend | group
+    @SerializedName("request_type") String requestType();
+    @SerializedName("flag") String flag();
+    @SerializedName("user_id") long userId();
+    @SerializedName("comment") String comment();
+}

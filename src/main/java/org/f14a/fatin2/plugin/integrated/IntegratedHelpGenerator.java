@@ -10,7 +10,7 @@ import org.f14a.fatin2.event.lifecycle.PluginsLoadDoneEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.f14a.fatin2.plugin.PluginManager;
 import org.f14a.fatin2.plugin.PluginWrapper;
-import org.f14a.fatin2.util.MessageGenerator;
+import org.f14a.fatin2.api.MessageGenerator;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;

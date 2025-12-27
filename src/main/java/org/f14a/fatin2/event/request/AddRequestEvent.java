@@ -1,8 +1,9 @@
 package org.f14a.fatin2.event.request;
 
+import org.f14a.fatin2.api.GroupRequestGenerator;
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.request.AddOnebotRequest;
-import org.f14a.fatin2.util.RequestSender;
+import org.f14a.fatin2.model.request.AddOnebotRequest;
+import org.f14a.fatin2.api.RequestSender;
 
 /**
 * Called when someone sends a group request.
@@ -22,13 +23,13 @@ public class AddRequestEvent extends Event {
         return this.request.groupId();
     }
     public void agree() {
-        RequestSender.approveGroup(this.request.flag(), true);
+        GroupRequestGenerator.approveGroup(this.request.flag(), true);
     }
     public void decline() {
-        RequestSender.approveGroup(this.request.flag(), false);
+        GroupRequestGenerator.approveGroup(this.request.flag(), false);
     }
     public void decline(String reason) {
-        RequestSender.approveGroup(this.request.flag(), false, reason);
+        GroupRequestGenerator.approveGroup(this.request.flag(), false, reason);
     }
     @Override
     public boolean isAsync() {

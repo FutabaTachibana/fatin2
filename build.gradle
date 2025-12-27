@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'maven-publish'
@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.6.0'
 
     // Json processing library
-    implementation 'com.google.code.gson:gson:2.13.2'
+    api 'com.google.code.gson:gson:2.13.2'
 
     // YAML processing library
     implementation 'org.yaml:snakeyaml:2.5'
@@ -162,6 +162,9 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            artifact jar
+            artifact sourcesJar
+            artifact javadocJar
 
             pom {
                 name = 'fatin2'

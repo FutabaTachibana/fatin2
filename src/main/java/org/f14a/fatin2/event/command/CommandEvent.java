@@ -3,10 +3,10 @@ package org.f14a.fatin2.event.command;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.message.MessageEvent;
-import org.f14a.fatin2.type.Message;
-import org.f14a.fatin2.type.MessageType;
-import org.f14a.fatin2.type.Response;
-import org.f14a.fatin2.type.message.OnebotMessage;
+import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.MessageType;
+import org.f14a.fatin2.model.Response;
+import org.f14a.fatin2.model.message.OnebotMessage;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;

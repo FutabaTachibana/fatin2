@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.command;
 
 import org.f14a.fatin2.event.message.GroupMessageEvent;
-import org.f14a.fatin2.type.message.GroupOnebotMessage;
+import org.f14a.fatin2.model.message.GroupOnebotMessage;
 
 public class GroupCommandEvent extends GroupMessageEvent implements CommandEvent {
     private final CommandParser.Result result;

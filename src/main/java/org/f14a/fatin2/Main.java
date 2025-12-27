@@ -1,6 +1,6 @@
 package org.f14a.fatin2;
 
-import org.f14a.fatin2.client.Client;
+import org.f14a.fatin2.websocket.Client;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.config.ConfigLoader;
 import org.f14a.fatin2.event.EventBus;

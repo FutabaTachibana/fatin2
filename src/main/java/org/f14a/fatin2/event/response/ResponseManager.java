@@ -1,6 +1,6 @@
 package org.f14a.fatin2.event.response;
 
-import org.f14a.fatin2.type.Response;
+import org.f14a.fatin2.model.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.notice;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.notice.GroupUploadOnebotNotice;
+import org.f14a.fatin2.model.notice.GroupUploadOnebotNotice;
 
 public class GroupUploadEvent extends Event {
     private final GroupUploadOnebotNotice notice;

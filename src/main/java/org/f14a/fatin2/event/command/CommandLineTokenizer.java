@@ -1,6 +1,6 @@
 package org.f14a.fatin2.event.command;
 
-import org.f14a.fatin2.type.exception.CommandSyntaxException;
+import org.f14a.fatin2.exception.CommandSyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;

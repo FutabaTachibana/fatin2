@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- 重构文档注释，使用中文。x
+- 
+
+## [0.1.2] - 2025-12-27
+
+### Fixed
+- 修复了从 Maven 仓库下载依赖时缺少依赖的问题（这次应该真的修好了）
+
+
 ## [0.1.1] - 2025-12-26
 
 ### Fixed

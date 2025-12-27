@@ -1,10 +1,10 @@
 package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonArray;
-import org.f14a.fatin2.type.MessageType;
-import org.f14a.fatin2.type.message.PrivateOnebotMessage;
-import org.f14a.fatin2.util.MessageGenerator;
-import org.f14a.fatin2.util.MessageSender;
+import org.f14a.fatin2.model.MessageType;
+import org.f14a.fatin2.model.message.PrivateOnebotMessage;
+import org.f14a.fatin2.api.MessageGenerator;
+import org.f14a.fatin2.api.MessageSender;
 
 public class PrivateMessageEvent extends MessageEvent {
     private final PrivateOnebotMessage message;

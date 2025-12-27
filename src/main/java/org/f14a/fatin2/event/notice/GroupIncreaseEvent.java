@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.notice;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.notice.GroupIncreaseOnebotNotice;
+import org.f14a.fatin2.model.notice.GroupIncreaseOnebotNotice;
 
 public class GroupIncreaseEvent extends Event {
     private final GroupIncreaseOnebotNotice notice;

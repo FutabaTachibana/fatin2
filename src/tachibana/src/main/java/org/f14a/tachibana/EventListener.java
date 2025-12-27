@@ -3,7 +3,7 @@ package org.f14a.tachibana;
 import org.f14a.fatin2.event.command.GroupCommandEvent;
 import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.session.Coroutines;
-import org.f14a.fatin2.util.MessageGenerator;
+import org.f14a.fatin2.api.MessageGenerator;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;

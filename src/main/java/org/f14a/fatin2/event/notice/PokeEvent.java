@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.notice;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.notice.PokeOnebotNotify;
+import org.f14a.fatin2.model.notice.PokeOnebotNotify;
 
 public class PokeEvent extends Event {
     private final PokeOnebotNotify notify;

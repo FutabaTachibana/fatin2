@@ -1,8 +1,8 @@
 package org.f14a.fatin2.event.command;
 
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.type.Message;
-import org.f14a.fatin2.type.exception.OnebotProtocolException;
+import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.exception.OnebotProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

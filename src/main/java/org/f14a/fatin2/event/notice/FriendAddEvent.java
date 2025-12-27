@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.notice;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.type.notice.FriendAddOnebotNotice;
+import org.f14a.fatin2.model.notice.FriendAddOnebotNotice;
 
 public class FriendAddEvent extends Event {
     private final FriendAddOnebotNotice notice;
