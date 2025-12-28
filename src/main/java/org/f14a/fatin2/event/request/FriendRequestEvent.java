@@ -7,7 +7,7 @@ import org.f14a.fatin2.api.RequestSender;
 /**
  * Called when someone sends a friend request.
  */
-public class FriendRequestEvent extends Event {
+public class FriendRequestEvent implements Event {
     private final FriendOnebotRequest request;
     public FriendRequestEvent(FriendOnebotRequest request) {
         this.request = request;

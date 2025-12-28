@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
 
-public class EventBus {
+public final class EventBus {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
     private static final Map<Class<?>, CommandEventListener.Scope> SCOPE_BY_EVENT = Map.of(
             CommandEvent.class, CommandEventListener.Scope.BOTH,

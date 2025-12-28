@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.GroupUploadOnebotNotice;
 
-public class GroupUploadEvent extends Event {
+public class GroupUploadEvent implements Event {
     private final GroupUploadOnebotNotice notice;
     public GroupUploadEvent(GroupUploadOnebotNotice notice) {
         this.notice = notice;

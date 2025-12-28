@@ -14,7 +14,7 @@ public class GroupMessageEvent extends MessageEvent {
     private final GroupOnebotMessage message;
 
     public GroupMessageEvent(GroupOnebotMessage message) {
-        super(message, MessageType.GROUP);
+        super(message);
         this.message = message;
     }
 
@@ -22,8 +22,14 @@ public class GroupMessageEvent extends MessageEvent {
      * @return 获取群聊消息对象
      * @see GroupOnebotMessage
      */
+    @Override
     public GroupOnebotMessage getMessage() {
         return message;
+    }
+
+    @Override
+    public MessageType getMessageType() {
+        return MessageType.GROUP;
     }
 
     /**

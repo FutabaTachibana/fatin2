@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.LuckyKingOnebotNotify;
 
-public class LuckyKingEvent extends Event {
+public class LuckyKingEvent implements Event {
     private final LuckyKingOnebotNotify notify;
     public LuckyKingEvent(LuckyKingOnebotNotify notify) {
         this.notify = notify;

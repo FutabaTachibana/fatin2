@@ -8,7 +8,7 @@ import org.f14a.fatin2.api.RequestSender;
 /**
 * Called when someone sends a group request.
 */
-public class AddRequestEvent extends Event {
+public class AddRequestEvent implements Event {
     private final AddOnebotRequest request;
     public AddRequestEvent(AddOnebotRequest request) {
         this.request = request;

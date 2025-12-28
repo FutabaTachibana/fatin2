@@ -4,7 +4,7 @@ import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.model.Response;
 
-public class ResponseEvent extends Event {
+public class ResponseEvent implements Event {
     private final Response response;
     public ResponseEvent(Response response) {
         this.response = response;
@@ -18,7 +18,7 @@ public class ResponseEvent extends Event {
         if (this.response != null && this.response.echo() != null) {
             EventBus.getResponseManager().receiveResponse(this.response);
         }
-        super.fire();
+        Event.super.fire();
     }
     @Override
     public boolean isAsync() {

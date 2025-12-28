@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.PokeOnebotNotify;
 
-public class PokeEvent extends Event {
+public class PokeEvent implements Event {
     private final PokeOnebotNotify notify;
     public PokeEvent(PokeOnebotNotify notify) {
         this.notify = notify;

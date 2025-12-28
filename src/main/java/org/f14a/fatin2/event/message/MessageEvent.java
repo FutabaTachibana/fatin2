@@ -2,11 +2,10 @@ package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.session.SessionContext;
 import org.f14a.fatin2.event.session.SessionManager;
-import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.model.MessageType;
 import org.f14a.fatin2.model.Response;
 import org.f14a.fatin2.model.message.GroupOnebotMessage;
@@ -17,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -25,28 +25,31 @@ import java.util.function.Consumer;
  * <p>
  * 这个类提供了发送消息、等待用户输入以及会话管理的功能，继承这个类必须实现 {@link #send(JsonArray)} 方法来发送消息。
  */
-public abstract class MessageEvent extends Event {
+public abstract class MessageEvent implements IMessageEvent {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageEvent.class);
 
     private final OnebotMessage message;
-    private final MessageType messageType;
 
     private SessionContext<MessageEvent> sessionContext;
     private boolean sendForward = false;
     private boolean sendReply = false;
     private boolean sendAt = false;
 
+    @Deprecated
     public MessageEvent(OnebotMessage message, MessageType messageType) {
         this.message = message;
-        this.messageType = messageType;
     }
 
+    public MessageEvent(OnebotMessage message) {
+        this.message = message;
+    }
+
+//    @Override
+//    public abstract MessageType getMessageType();
+
+    @Override
     public OnebotMessage getMessage() {
         return message;
-    }
-
-    public MessageType getMessageType() {
-        return this.messageType;
     }
 
     @Override
@@ -55,28 +58,15 @@ public abstract class MessageEvent extends Event {
     }
 
     // 需要子类实现的抽象方法
-    /**
-     * 简单发送消息。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 请求的 {@code echo} 值，用于追踪响应
-     */
-    abstract public int send(JsonArray messages);
+//    @Override
+//    public abstract int send(JsonArray messages);
 
-    /**
-     * 简单发送消息。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 请求的 {@code echo} 值，用于追踪响应
-     */
-    public int send(JsonObject ... messages) {
+    @Override
+    public int send(JsonObject... messages) {
         return send(MessageGenerator.create(messages));
     }
 
-    /**
-     * 发送消息并指定响应回调函数。
-     * @param onFinish 接收一个 {@link Response} 对象作为参数的响应回调函数
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 请求的 {@code echo} 值，用于追踪响应
-     */
+    @Override
     public int send(Consumer<Response> onFinish, JsonArray messages) {
         int echo = send(messages);
         CompletableFuture<Response> future = EventBus.getResponseManager().registerFuture(Integer.toString(echo), 30);
@@ -84,32 +74,19 @@ public abstract class MessageEvent extends Event {
         return echo;
     }
 
-    /**
-     * 发送消息并指定响应回调函数。
-     * @param onFinish 接收一个 {@link Response} 对象作为参数的响应回调函数
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 请求的 {@code echo} 值，用于追踪响应
-     */
-    public int send(Consumer<Response> onFinish, JsonObject ... messages) {
+    @Override
+    public int send(Consumer<Response> onFinish, JsonObject... messages) {
         return send(onFinish, MessageGenerator.create(messages));
     }
 
-    /**
-     * 发送消息后等待用户回复，它会创建一个会话并挂起当前事件监听器。
-     * <p>
-     * 这个方法会阻塞执行事件监听器的线程，直到用户回复消息或会话超时，因此只能在标记了 {@code @Coroutines} 注解的处理器中使用。
-     * <p>
-     * 注意: 在事件监听器结束后必须使用 {@link #finish()} 或其重载方法来结束会话。
-     * @param prompt 通过 {@link MessageGenerator} 构建的消息内容，发送后等待用户回复
-     * @return 用户回复的内容，如果超时或发生错误则返回 null
-     */
-    public @Nullable Message[] wait(JsonArray prompt) {
+    @Override
+    public @Nullable List<Message> wait(JsonArray prompt) {
         if (prompt != null) {
             send(prompt);
         }
         createSessionContext();
-        CompletableFuture<Message[]> future = this.sessionContext.waitForInput();
-        Message[] reply;
+        CompletableFuture<List<Message>> future = this.sessionContext.waitForInput();
+        List<Message> reply;
         try {
             reply = future.get();
         } catch (Exception e) {
@@ -118,54 +95,29 @@ public abstract class MessageEvent extends Event {
         return reply;
     }
 
-    /**
-     * 发送消息后等待用户回复，它会创建一个会话并挂起当前事件监听器。
-     * <p>
-     * 这个方法会阻塞执行事件监听器的线程，直到用户回复消息或会话超时，因此只能在标记了 {@code @Coroutines} 注解的处理器中使用。
-     * <p>
-     * 注意: 在事件监听器结束后必须使用 {@link #finish()} 或其重载方法来结束会话。
-     * @param prompt 通过 {@link MessageGenerator} 构建的消息内容，发送后等待用户回复
-     * @return 用户回复的内容，如果超时或发生错误则返回 null
-     */
-    public @Nullable Message[] wait(JsonObject ... prompt) {
+    @Override
+    public @Nullable List<Message> wait(JsonObject... prompt) {
         return wait(MessageGenerator.create(prompt));
     }
 
-    /**
-     * 等待用户回复，它会创建一个会话并挂起当前事件监听器。
-     * <p>
-     * 这个方法会阻塞执行事件监听器的线程，直到用户回复消息或会话超时，因此只能在标记了 {@code @Coroutines} 注解的处理器中使用。
-     * <p>
-     * 注意: 在事件监听器结束后必须使用 {@link #finish()} 或其重载方法来结束会话。
-     * @return 用户回复的内容，如果超时或发生错误则返回 null
-     */
-    public @Nullable Message[] waitSilent() {
+    @Override
+    public @Nullable List<Message> waitSilent() {
         return wait((JsonArray) null);
     }
 
-    /**
-     * 发送消息并结束会话，用于在 {@link #wait(JsonArray prompt)} 或其重载方法之后调用。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 请求的 {@code echo} 值，用于追踪响应
-     */
+    @Override
     public int finish(JsonArray messages) {
         finish();
         return send(messages);
     }
 
-    /**
-     * 发送消息并结束会话，用于在 {@link #wait(JsonArray prompt)} 或其重载方法之后调用。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 请求的 {@code echo} 值，用于追踪响应
-     */
-    public int finish(JsonObject ... messages) {
+    @Override
+    public int finish(JsonObject... messages) {
         finish();
         return send(messages);
     }
 
-    /**
-     * 结束会话，用于在 {@link #wait(JsonArray prompt)} 或其重载方法之后调用。
-     */
+    @Override
     public void finish() {
         if (this.sessionContext != null) {
             EventBus.getSessionManager().endSession(this.sessionContext.getSessionId());
@@ -173,36 +125,17 @@ public abstract class MessageEvent extends Event {
         }
     }
 
-    /**
-     * 发送信息并返回获取响应的 {@link CompletableFuture} 对象。
-     * <p>
-     * 相比较于使用 {@link #sendAndWait(JsonArray)} 方法同步等待响应，这个方法不会阻塞当前线程。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 一个 {@link CompletableFuture} 对象，当响应到达时会被完成
-     */
+    @Override
     public @NotNull CompletableFuture<Response> sendFuture(JsonArray messages) {
         return EventBus.getResponseManager().registerFuture(String.valueOf(send(messages)), 30);
     }
 
-    /**
-     * 发送信息并返回获取响应的 {@link CompletableFuture} 对象。
-     * <p>
-     * 相比较于使用 {@link #sendAndWait(JsonObject... messages)} 方法同步等待响应，这个方法不会阻塞当前线程。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 一个 {@link CompletableFuture} 对象，当响应到达时会被完成
-     */
-    public @NotNull CompletableFuture<Response> sendFuture(JsonObject ... messages) {
+    @Override
+    public @NotNull CompletableFuture<Response> sendFuture(JsonObject... messages) {
         return EventBus.getResponseManager().registerFuture(String.valueOf(send(messages)), 30);
     }
 
-    /**
-     * 发送信息并同步等待响应。
-     * <p>
-     * 相比较于使用 {@link #sendFuture(JsonArray)} 方法异步获取响应，
-     * 这个方法会阻塞当前线程直到响应到达或超时，因此只能在标记了 {@code @Coroutines} 注解的处理器中使用。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 消息对应的 {@link Response} 对象，包括状态和消息 ID
-     */
+    @Override
     public @Nullable Response sendAndWait(JsonArray messages) {
         CompletableFuture<Response> future = sendFuture(messages);
         try {
@@ -213,112 +146,69 @@ public abstract class MessageEvent extends Event {
         }
     }
 
-    /**
-     * 发送信息并同步等待响应。
-     * <p>
-     * 相比较于使用 {@link #sendFuture(JsonObject... messages)} 方法异步获取响应，
-     * 这个方法会阻塞当前线程直到响应到达或超时，因此只能在标记了 {@code @Coroutines} 注解的处理器中使用。
-     * @param messages 通过 {@link MessageGenerator} 构建的消息内容
-     * @return 消息对应的 {@link Response} 对象，包括状态和消息 ID
-     */
-    public @Nullable Response sendAndWait(JsonObject ... messages) {
+    @Override
+    public @Nullable Response sendAndWait(JsonObject... messages) {
         return sendAndWait(MessageGenerator.create(messages));
     }
 
-    /**
-     * 设置会话超时时间。
-     * @param seconds 超时时间，单位为秒。
-     */
+    @Override
     public void setTimeOut(int seconds) {
         createSessionContext();
         this.sessionContext.setTimeout(seconds);
     }
 
-    /**
-     * 设置会话超时回调函数。
-     * @param callback 回调函数，接受上一个消息事件作为参数。
-     */
+    @Override
     public void setOnTimeout(Consumer<MessageEvent> callback) {
         createSessionContext();
         this.sessionContext.setOnTimeout(callback);
     }
 
-    /**
-     * 设置会话结束回调函数。
-     * @param callback 回调函数，接受上一个消息事件作为参数。
-     */
+    @Override
     public void setOnFinish(Consumer<MessageEvent> callback) {
         createSessionContext();
         this.sessionContext.setOnFinish(callback);
     }
 
-    /**
-     * 获取当前会话的 {@link  MessageEvent} 对象。
-     */
+    @Override
     public MessageEvent getCurrentEvent() {
         createSessionContext();
         return this.sessionContext.getCurrentEvent();
     }
 
-    /**
-     * 设置是否将消息作为转发消息发送。
-     * <p>
-     * 适用于较长的消息内容，可以将消息包装为转发消息发送。
-     * <p>
-     * 仅适用于下一次发送的消息，发送后会自动重置为默认值。
-     */
+    @Override
     public MessageEvent setSendForward(boolean sendForward) {
         this.sendForward = sendForward;
         return this;
     }
 
-    /**
-     * 设置是否将消息作为回复发送。
-     * <p>
-     * 仅适用于下一次发送的消息，发送后会自动重置为默认值。
-     */
+    @Override
     public MessageEvent setSendReply(boolean sendReply) {
         this.sendReply = sendReply;
         return this;
     }
 
-    /**
-     * 设置是否在发送消息时 @ 触发事件的用户。
-     * <p>
-     * 仅适用于下一次发送的消息，发送后会自动重置为默认值。
-     */
+    @Override
     public MessageEvent setSendAt(boolean sendAt) {
         this.sendAt = sendAt;
         return this;
     }
 
-    /**
-     * @return 是否将消息作为转发消息发送
-     * @see #setSendForward(boolean sendForward)
-     */
+    @Override
     public boolean isSendForward() {
         return sendForward;
     }
 
-    /**
-     * @return 是否将消息作为回复发送。
-     * @see #setSendReply(boolean sendReply)
-     */
+    @Override
     public boolean isSendReply() {
         return sendReply;
     }
 
-    /**
-     * @return 是否在发送消息时 @ 触发事件的用户。
-     * @see #setSendAt(boolean sendAt)
-     */
+    @Override
     public boolean isSendAt() {
         return sendAt;
     }
 
-    /**
-     * 重置发送选项为默认值。
-     */
+    @Override
     public void resetOptions() {
         this.sendAt = false;
         this.sendForward = false;
@@ -332,7 +222,7 @@ public abstract class MessageEvent extends Event {
     @Override
     public void fire() {
         SessionManager sessionManager = EventBus.getSessionManager();
-        long scope = messageType == MessageType.PRIVATE ?
+        long scope = this.getMessageType() == MessageType.PRIVATE ?
                 message.userId() : ((GroupOnebotMessage) this.getMessage()).groupId();
         SessionContext<MessageEvent> context = sessionManager.getSession(message.userId(), scope);
         // Check if an active session exists
@@ -341,7 +231,7 @@ public abstract class MessageEvent extends Event {
             context.setCurrentEvent(this);
             context.receiveInput(message.messages());
         } else {
-            super.fire();
+            IMessageEvent.super.fire();
         }
     }
 
@@ -349,7 +239,7 @@ public abstract class MessageEvent extends Event {
         if (this.sessionContext == null) {
             this.sessionContext = EventBus.getSessionManager().createSession(
                     message.userId(),
-                    messageType == MessageType.PRIVATE
+                    this.getMessageType() == MessageType.PRIVATE
                             ? message.userId()
                             : ((GroupOnebotMessage) this.getMessage()).groupId()
             );

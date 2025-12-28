@@ -1,10 +1,11 @@
 package org.f14a.fatin2.event.session;
 
 import org.f14a.fatin2.event.Event;
-import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -23,7 +24,7 @@ public class SessionContext<T extends Event> {
     private long lastActiveTime;
     private int timeout; // in seconds
 
-    private CompletableFuture<Message[]> waitingFuture;
+    private CompletableFuture<List<Message>> waitingFuture;
     private boolean active;
 
     // Callbacks
@@ -40,7 +41,7 @@ public class SessionContext<T extends Event> {
         this.timeout = 60;
         this.active = true;
     }
-    public CompletableFuture<Message[]> waitForInput() {
+    public CompletableFuture<List<Message>> waitForInput() {
         this.lastActiveTime = System.currentTimeMillis();
         this.waitingFuture = new CompletableFuture<>();
 
@@ -53,7 +54,7 @@ public class SessionContext<T extends Event> {
         });
         return this.waitingFuture;
     }
-    public void receiveInput(Message[] input) {
+    public void receiveInput(List<Message> input) {
         this.lastActiveTime = System.currentTimeMillis();
         if (this.waitingFuture != null && !this.waitingFuture.isDone()) {
             this.waitingFuture.complete(input);

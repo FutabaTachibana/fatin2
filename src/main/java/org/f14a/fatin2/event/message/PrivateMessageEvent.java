@@ -14,7 +14,7 @@ public class PrivateMessageEvent extends MessageEvent {
     private final PrivateOnebotMessage message;
 
     public PrivateMessageEvent(PrivateOnebotMessage message) {
-        super(message, MessageType.PRIVATE);
+        super(message);
         this.message = message;
     }
 
@@ -22,8 +22,14 @@ public class PrivateMessageEvent extends MessageEvent {
      * @return 获取私聊消息对象
      * @see PrivateOnebotMessage
      */
+    @Override
     public PrivateOnebotMessage getMessage() {
         return message;
+    }
+
+    @Override
+    public MessageType getMessageType() {
+        return MessageType.PRIVATE;
     }
 
     /**

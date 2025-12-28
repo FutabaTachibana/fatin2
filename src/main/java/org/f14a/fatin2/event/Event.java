@@ -7,16 +7,16 @@ package org.f14a.fatin2.event;
  * <p>
  * {@link #fire()} 方法能被重写，但是必须调用 {@code super.fire()} 以确保事件能够正确分发。
  */
-public abstract class Event {
+public interface Event {
     /**
      * @see Event
      */
-    public abstract boolean isAsync();
+    boolean isAsync();
 
     /**
      * @see Event
      */
-    public void fire() {
+    default void fire() {
         EventBus.getInstance().post(this);
     }
 }

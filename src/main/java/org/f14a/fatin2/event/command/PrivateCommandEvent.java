@@ -18,6 +18,7 @@ public class PrivateCommandEvent extends PrivateMessageEvent implements CommandE
         }
         return new PrivateMessageEvent(message);
     }
+
     public PrivateCommandEvent(PrivateOnebotMessage message, CommandParseResult result) {
         super(message);
         this.result = result;
@@ -26,21 +27,5 @@ public class PrivateCommandEvent extends PrivateMessageEvent implements CommandE
     @Override
     public CommandParseResult getResult() {
         return result;
-    }
-    @Override
-    public String getCommand() {
-        return result.command();
-    }
-    @Override
-    public String[] getArgs() {
-        return result.args();
-    }
-    @Override
-    public boolean isAtBot() {
-        return result.atBot();
-    }
-    @Override
-    public boolean hasReply() {
-        return result.hasReply();
     }
 }

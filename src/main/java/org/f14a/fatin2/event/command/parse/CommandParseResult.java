@@ -1,8 +1,10 @@
 package org.f14a.fatin2.event.command.parse;
 
-import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.message.Message;
 
-public interface CommandParseResult {
+import java.util.List;
+
+public sealed interface CommandParseResult permits CommandParser.Result {
     boolean isCommand();
     boolean atBot();
     boolean hasReply();
@@ -10,7 +12,7 @@ public interface CommandParseResult {
     String[] args();
     String rawCommandLine();
 
-    static CommandParseResult of(long selfId, Message[] segments) {
-        return CommandParser.parse(selfId, segments);
+    static CommandParseResult of(long selfId, List<Message> messages) {
+        return CommandParser.parse(selfId, messages);
     }
 }

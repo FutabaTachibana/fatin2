@@ -6,7 +6,7 @@ import org.f14a.fatin2.event.Event;
 /**
  * Called when the client attempts to reconnect to the server.
  */
-public class ClientReconnectEvent extends Event implements Cancelable {
+public class ClientReconnectEvent implements Event, Cancelable {
     private boolean cancelled = false;
     @Override
     public boolean isAsync() {

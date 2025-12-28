@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.GroupAdminOnebotNotice;
 
-public class GroupAdminEvent extends Event {
+public class GroupAdminEvent implements Event {
     private final GroupAdminOnebotNotice notice;
     public enum SubType {
         SET,

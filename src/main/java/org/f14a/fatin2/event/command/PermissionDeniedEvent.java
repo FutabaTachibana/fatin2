@@ -5,7 +5,7 @@ import org.f14a.fatin2.event.Event;
 /**
  * 当权限被拒绝时触发
  */
-public class PermissionDeniedEvent extends Event {
+public class PermissionDeniedEvent implements Event {
     private final CommandEvent currentEvent;
     private final CommandEventListener listener;
 

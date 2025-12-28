@@ -7,14 +7,15 @@ import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.command.PrivateCommandEvent;
 import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.event.session.Coroutines;
-import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.model.Response;
 import org.f14a.fatin2.api.MessageGenerator;
 import org.f14a.fatin2.api.MessageSender;
 import org.f14a.fatin2.api.RequestSender;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.random.RandomGenerator;
 
@@ -23,12 +24,12 @@ public class EventListener {
     @OnCommand(command = "echo", description = "复述你说的话")
     public void onEcho(CommandEvent event) {
         // Do NOT edit the original message array directly
-        Message[] messages = Arrays.copyOf(event.getMessage().messages(), event.getMessage().messages().length);
-        for (int i = 0; i < messages.length; i++) {
-            if (messages[i].parse().startsWith("/echo")) {
+        List<Message> messages = List.copyOf(event.getMessage().messages());
+        for (Message message : messages) {
+            if (message.parse().startsWith("/echo")) {
                 try {
-                    messages[i] = new Message(messages[i].type(), Map.of(
-                            "text", messages[i].parse().replace("/echo ", "").trim()
+                    message = new Message(message.type(), Map.of(
+                            "text", message.parse().replace("/echo ", "").trim()
                     ));
                     break;
                 } catch (Exception e) {
@@ -36,7 +37,8 @@ public class EventListener {
                 }
             }
         }
-        event.send(MessageGenerator.create(messages));
+        // MessageGenerator#create 接受的参数是可变参数，因此需要将 List 转换为数组
+        event.send(MessageGenerator.create(messages.toArray(new Message[0])));
     }
     // Example for coroutine handling and session management
     @OnCommand(command = "guess", description = "猜数字游戏")
@@ -44,13 +46,13 @@ public class EventListener {
     public void onGuessNumber(GroupCommandEvent event) {
         String reply;
         int number = RandomGenerator.getDefault().nextInt(1, 101);
-        reply = event.wait(MessageGenerator.text("请输入一个1-100的数字"))[0].parse();
         try {
+        reply = Objects.requireNonNull(event.wait(MessageGenerator.text("请输入一个1-100的数字"))).getFirst().parse();
             while (Integer.parseInt(reply) != number) {
-                reply = event.wait(MessageGenerator.text(
-                        Integer.parseInt(reply) > number ? "太大了" : "太小了"))[0].parse();
+                reply = Objects.requireNonNull(event.wait(MessageGenerator.text(
+                        Integer.parseInt(reply) > number ? "太大了" : "太小了"))).getFirst().parse();
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | NullPointerException e) {
             event.send(MessageGenerator.text("游戏结束。"));
             return;
         }

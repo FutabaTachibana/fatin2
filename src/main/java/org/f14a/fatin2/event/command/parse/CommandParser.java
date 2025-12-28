@@ -1,7 +1,7 @@
 package org.f14a.fatin2.event.command.parse;
 
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.exception.OnebotProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +32,8 @@ final class CommandParser {
             String[] args,
             String rawCommandLine
     ) implements CommandParseResult {}
-    public static Result parse(long selfId, Message[] segments) {
-        if (segments == null || segments.length == 0) {
+    public static Result parse(long selfId, List<Message> segments) {
+        if (segments == null || segments.isEmpty()) {
             return new Result(false, false, false, "", new String[0], "");
         }
         PrefixScan scan = scanPrefixes(selfId, segments);
@@ -62,13 +62,13 @@ final class CommandParser {
      * If non-text segments appear before any meaningful text and allowNonTextAfterPrefix=false,
      * we treat it as not a command (remainingText becomes empty).
      */
-    private static PrefixScan scanPrefixes(long selfId, Message[] segments) {
+    private static PrefixScan scanPrefixes(long selfId, List<Message> segments) {
         boolean atBot = false;
         boolean hasReply = false;
         int index = 0;
         // Consume leading reply / at / whitespace text
-        while (index < segments.length) {
-            Message seg = segments[index];
+        while (index < segments.size()) {
+            Message seg = segments.get(index);
             String type = seg.type();
             switch (type) {
                 case "reply" -> {
@@ -94,18 +94,18 @@ final class CommandParser {
                 }
             }
             // If we broke from switch by "break" inside case "text"/default, we need to stop outer while too.
-            if (index < segments.length) {
-                String t = segments[index].type();
-                if ("text".equals(t) && !requireDataString(segments[index], "text").trim().isEmpty()) {
+            if (index < segments.size()) {
+                String t = segments.get(index).type();
+                if ("text".equals(t) && !requireDataString(segments.get(index), "text").trim().isEmpty()) {
                     break;
                 }
             }
         }
         // Build remaining text from index...end: concatenate text segments only.
-        String remaining = concatTextSegments(Arrays.copyOfRange(segments, index, segments.length));
+        String remaining = concatTextSegments(segments.stream().skip(index).toList());
         return new PrefixScan(atBot, hasReply, remaining);
     }
-    private static String concatTextSegments(Message[] segments) {
+    private static String concatTextSegments(List<Message> segments) {
         StringBuilder sb = new StringBuilder();
         for (Message seg : segments) {
             if (seg == null) continue;

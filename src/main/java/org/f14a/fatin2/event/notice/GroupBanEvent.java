@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.GroupBanOnebotNotice;
 
-public class GroupBanEvent extends Event {
+public class GroupBanEvent implements Event {
     private final GroupBanOnebotNotice notice;
     public GroupBanEvent(GroupBanOnebotNotice notice) {
         this.notice = notice;

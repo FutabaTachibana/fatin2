@@ -1,149 +1,40 @@
 package org.f14a.fatin2.event.command;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import org.f14a.fatin2.event.command.parse.CommandParseResult;
-import org.f14a.fatin2.event.message.MessageEvent;
-import org.f14a.fatin2.model.Message;
-import org.f14a.fatin2.model.MessageType;
-import org.f14a.fatin2.model.Response;
+import org.f14a.fatin2.event.message.IMessageEvent;
 import org.f14a.fatin2.model.message.OnebotMessage;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
-public interface CommandEvent {
-    String getCommand();
+public interface CommandEvent extends IMessageEvent {
+    /**
+     * @return 命令解析的 {@link CommandParseResult} 对象
+     */
     CommandParseResult getResult();
-    String[] getArgs();
-    OnebotMessage getMessage();
-    boolean isAtBot();
-    boolean hasReply();
-    MessageType getMessageType();
 
     /**
-     * @see MessageEvent#send(JsonArray messages)
+     * @return 当前的命令名称，以区分不同的别名
      */
-    int send(JsonArray messages);
+    default String getCommand() {
+        return getResult().command();
+    }
 
     /**
-     * @see MessageEvent#send(JsonObject... messages)
+     * @return 命令参数，不包含图片、表情等非文本内容
      */
-    int send(JsonObject... messages);
+    default String[] getArgs() {
+        return getResult().args();
+    }
 
     /**
-     * @see MessageEvent#send(Consumer onFinish, JsonArray messages)
+     * @return 获取触发指令时是否艾特了机器人自身
      */
-    int send(Consumer<Response> onFinish, JsonArray messages);
+    default boolean isAtBot() {
+        return getResult().atBot();
+    }
 
     /**
-     * @see MessageEvent#send(Consumer onFinish, JsonObject... messages)
+     * @return 获取触发指令时是否艾特了机器人自身
      */
-    int send(Consumer<Response> onFinish, JsonObject... messages);
-
-    /**
-     * @see MessageEvent#wait(JsonArray prompt)
-     */
-    Message[] wait(JsonArray prompt);
-
-    /**
-     * @see MessageEvent#wait(JsonObject... prompt)
-     */
-    Message[] wait(JsonObject... prompt);
-
-    /**
-     * @see MessageEvent#waitSilent()
-     */
-    Message[] waitSilent();
-
-    /**
-     * @see MessageEvent#finish(JsonArray messages)
-     */
-    int finish(JsonArray messages);
-
-    /**
-     * @see MessageEvent#finish(JsonObject... messages)
-     */
-    int finish(JsonObject... messages);
-
-    /**
-     * @see MessageEvent#finish()
-     */
-    void finish();
-
-    /**
-     * @see MessageEvent#sendFuture(JsonArray messages) ()
-     */
-    CompletableFuture<Response> sendFuture(JsonArray messages);
-
-    /**
-     * @see MessageEvent#sendFuture(JsonObject... messages) ()
-     */
-    CompletableFuture<Response> sendFuture(JsonObject... messages);
-
-    /**
-     * @see MessageEvent#sendAndWait(JsonArray messages)
-     */
-    Response sendAndWait(JsonArray messages);
-
-    /**
-     * @see MessageEvent#sendAndWait(JsonObject... messages)
-     */
-    Response sendAndWait(JsonObject... messages);
-
-    /**
-     * @see MessageEvent#setTimeOut(int seconds)
-     */
-    void setTimeOut(int seconds);
-
-    /**
-     * @see MessageEvent#setOnTimeout(Consumer callback)
-     */
-    void setOnTimeout(Consumer<MessageEvent> callback);
-
-    /**
-     * @see MessageEvent#setOnFinish(Consumer callback)
-     */
-    void setOnFinish(Consumer<MessageEvent> callback);
-
-    /**
-     * @see MessageEvent#getCurrentEvent()
-     */
-    MessageEvent getCurrentEvent();
-
-    /**
-     * @see MessageEvent#setSendForward(boolean sendForward)
-     */
-    MessageEvent setSendForward(boolean sendForward);
-
-    /**
-     * @see MessageEvent#setSendReply(boolean sendReply)
-     */
-    MessageEvent setSendReply(boolean sendReply);
-
-    /**
-     * @see MessageEvent#setSendAt(boolean sendAt)
-     */
-    MessageEvent setSendAt(boolean sendAt);
-
-    /**
-     * @see MessageEvent#isSendForward()
-     */
-    boolean isSendForward();
-
-    /**
-     * @see MessageEvent#isSendReply()
-     */
-    boolean isSendReply();
-
-    /**
-     * @see MessageEvent#isSendAt()
-     */
-    boolean isSendAt();
-
-    /**
-     * @see MessageEvent#resetOptions()
-     */
-    void resetOptions();
-
+    default boolean hasReply() {
+        return getResult().hasReply();
+    }
 }

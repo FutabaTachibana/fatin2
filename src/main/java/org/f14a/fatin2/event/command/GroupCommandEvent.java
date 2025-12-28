@@ -18,6 +18,7 @@ public class GroupCommandEvent extends GroupMessageEvent implements CommandEvent
         }
         return new GroupMessageEvent(message);
     }
+
     public GroupCommandEvent(GroupOnebotMessage message, CommandParseResult result) {
         super(message);
         this.result = result;
@@ -26,21 +27,5 @@ public class GroupCommandEvent extends GroupMessageEvent implements CommandEvent
     @Override
     public CommandParseResult getResult() {
         return result;
-    }
-    @Override
-    public String getCommand() {
-        return result.command();
-    }
-    @Override
-    public String[] getArgs() {
-        return result.args();
-    }
-    @Override
-    public boolean isAtBot() {
-        return result.atBot();
-    }
-    @Override
-    public boolean hasReply() {
-        return result.hasReply();
     }
 }

@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.GroupIncreaseOnebotNotice;
 
-public class GroupIncreaseEvent extends Event {
+public class GroupIncreaseEvent implements Event {
     private final GroupIncreaseOnebotNotice notice;
     public enum SubType{
         APPROVE,

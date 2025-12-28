@@ -3,7 +3,7 @@ package org.f14a.fatin2.event.notice;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.notice.HonorOnebotNotify;
 
-public class HonorEvent extends Event {
+public class HonorEvent implements Event {
     private final HonorOnebotNotify notify;
     public HonorEvent(HonorOnebotNotify notify) {
         this.notify = notify;

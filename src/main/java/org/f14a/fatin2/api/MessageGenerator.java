@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.f14a.fatin2.model.Faces;
-import org.f14a.fatin2.model.Message;
+import org.f14a.fatin2.model.message.Message;
 
 import java.util.HashMap;
 import java.util.Map;
