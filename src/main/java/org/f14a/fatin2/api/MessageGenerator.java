@@ -37,7 +37,7 @@ import java.util.Map;
  * );
  * </pre></Blockquote>
  */
-public class MessageGenerator {
+public final class MessageGenerator {
     private static final Gson GSON = new Gson();
 
     /**
@@ -54,7 +54,7 @@ public class MessageGenerator {
      *         .build();
      * </pre></Blockquote>
      */
-    public static class MessageBuilder {
+    public final static class MessageBuilder {
         private final JsonArray segments;
         /**
          * @see MessageBuilder
@@ -194,7 +194,7 @@ public class MessageGenerator {
      * <p>
      * 使用 {@link SegmentBuilder#end()} 结束创建。
      */
-    public static class SegmentBuilder {
+    public final static class SegmentBuilder {
         private final MessageBuilder parent;
         private final String type;
         private final Map<String, Object> data;

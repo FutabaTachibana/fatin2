@@ -1,25 +1,30 @@
 package org.f14a.fatin2.event.command;
 
+import org.f14a.fatin2.event.command.parse.CommandParseResult;
 import org.f14a.fatin2.event.message.GroupMessageEvent;
 import org.f14a.fatin2.model.message.GroupOnebotMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroupCommandEvent extends GroupMessageEvent implements CommandEvent {
-    private final CommandParser.Result result;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupCommandEvent.class);
+    private final CommandParseResult result;
 
     public static GroupMessageEvent getCommandOrBasic(GroupOnebotMessage message) {
-        CommandParser.Result result = CommandParser.parse(message.selfId(), message.messages());
+        CommandParseResult result = CommandParseResult.of(message.selfId(), message.messages());
         if (result.isCommand()) {
+            LOGGER.debug("GroupCommandEvent: Command parsed: {}", result.rawCommandLine());
             return new GroupCommandEvent(message, result);
         }
         return new GroupMessageEvent(message);
     }
-    public GroupCommandEvent(GroupOnebotMessage message, CommandParser.Result result) {
+    public GroupCommandEvent(GroupOnebotMessage message, CommandParseResult result) {
         super(message);
         this.result = result;
     }
 
     @Override
-    public CommandParser.Result getResult() {
+    public CommandParseResult getResult() {
         return result;
     }
     @Override

@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * 这个类是发送请求的工具类，提供了 同意/拒绝 好友、撤回消息、戳一戳、贴表情等操作。
  */
-public class RequestSender {
+public final class RequestSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestSender.class);
     private static final Gson GSON = new Gson();
 

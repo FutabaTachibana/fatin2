@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * 这个类是一个消息发送的工具类，提供了发送私聊消息、群消息以及转发消息的功能。
  */
-public class MessageSender {
+public final class MessageSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageSender.class);
     private static final Gson GSON = new Gson();
 

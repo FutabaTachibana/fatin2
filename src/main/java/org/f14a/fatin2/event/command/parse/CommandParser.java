@@ -1,4 +1,4 @@
-package org.f14a.fatin2.event.command;
+package org.f14a.fatin2.event.command.parse;
 
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.model.Message;
@@ -20,7 +20,7 @@ import java.util.List;
  * </ul>
  * It does NOT depend on Message.parse() (display text), so it is stable against formatting changes.
  */
-public class CommandParser {
+final class CommandParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandParser.class);
     private CommandParser() {
     }
@@ -31,7 +31,7 @@ public class CommandParser {
             String command,
             String[] args,
             String rawCommandLine
-    ) {}
+    ) implements CommandParseResult {}
     public static Result parse(long selfId, Message[] segments) {
         if (segments == null || segments.length == 0) {
             return new Result(false, false, false, "", new String[0], "");

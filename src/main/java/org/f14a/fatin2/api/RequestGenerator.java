@@ -17,7 +17,7 @@ import org.f14a.fatin2.model.Faces;
  * </pre></Blockquote>
  * @see RequestBuilder
  */
-public class RequestGenerator {
+public final class RequestGenerator {
     private static final Gson GSON = new Gson();
 
     /**
@@ -37,7 +37,7 @@ public class RequestGenerator {
      * <p>
      * 常用的操作已经被整合进 {@link RequestSender} 类中，如果你没有特别的需求，通常不需要直接使用此类。
      */
-    public static class RequestBuilder {
+    public final static class RequestBuilder {
         private final JsonObject fields;
 
         /**

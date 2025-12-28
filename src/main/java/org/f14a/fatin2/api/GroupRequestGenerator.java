@@ -7,7 +7,7 @@ import static org.f14a.fatin2.api.RequestSender.sendRequest;
 /**
  * 这个类是发送请求的工具类，提供了 同意/拒绝 群申请、禁言、设置群名片等操作。
  */
-public class GroupRequestGenerator {
+public final class GroupRequestGenerator {
     /**
      * 处理加群/拉群申请。
      * @param flag 申请的 {@code falg} 属性，对应一个申请

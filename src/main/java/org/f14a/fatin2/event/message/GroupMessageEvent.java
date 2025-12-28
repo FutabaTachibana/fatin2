@@ -6,18 +6,38 @@ import org.f14a.fatin2.model.message.GroupOnebotMessage;
 import org.f14a.fatin2.api.MessageGenerator;
 import org.f14a.fatin2.api.MessageSender;
 
+/**
+ * 当客户端接收到<b>群聊</b>消息时触发的事件基类。
+ * @see MessageEvent
+ */
 public class GroupMessageEvent extends MessageEvent {
     private final GroupOnebotMessage message;
+
     public GroupMessageEvent(GroupOnebotMessage message) {
         super(message, MessageType.GROUP);
         this.message = message;
     }
 
+    /**
+     * @return 获取群聊消息对象
+     * @see GroupOnebotMessage
+     */
     public GroupOnebotMessage getMessage() {
         return message;
     }
+
+    /**
+     * @return 获取事件发生的群 ID
+     */
     public long getGroupId() {
         return message.groupId();
+    }
+
+    /**
+     * @return 获取触发事件的用户 ID
+     */
+    public long getUserId() {
+        return message.userId();
     }
 
     @Override

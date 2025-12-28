@@ -1,4 +1,4 @@
-package org.f14a.fatin2.event.command;
+package org.f14a.fatin2.event.command.parse;
 
 import org.f14a.fatin2.exception.CommandSyntaxException;
 

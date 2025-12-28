@@ -12,13 +12,13 @@ import com.google.gson.JsonObject;
  * <p>
  * 如果不知道怎么使用这个类，可以看上述两个方法的实现。
  */
-public class NodeGenerator {
+public final class NodeGenerator {
     private static Gson GSON = new Gson();
 
     /**
      * @see NodeGenerator
      */
-    public static class NodeBuilder {
+    public final static class NodeBuilder {
         private final JsonObject node;
 
         /**

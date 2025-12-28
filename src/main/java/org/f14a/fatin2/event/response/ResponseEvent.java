@@ -18,7 +18,7 @@ public class ResponseEvent extends Event {
         if (this.response != null && this.response.echo() != null) {
             EventBus.getResponseManager().receiveResponse(this.response);
         }
-        EventBus.getInstance().post(this);
+        super.fire();
     }
     @Override
     public boolean isAsync() {
