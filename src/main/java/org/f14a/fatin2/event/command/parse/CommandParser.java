@@ -1,5 +1,6 @@
 package org.f14a.fatin2.event.command.parse;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.exception.OnebotProtocolException;
@@ -51,8 +52,8 @@ final class CommandParser {
             LOGGER.debug("CommandParser: command prefix only, no command found.");
             return new Result(false, scan.atBot, scan.hasReply, "", new String[0], commandLine);
         }
-        CommandLine cl = parseCommandLine(withoutPrefix);
-        return new Result(true, scan.atBot, scan.hasReply, cl.command, cl.args, withoutPrefix);
+        Pair<String, String[]> cl = parseCommandLine(withoutPrefix);
+        return new Result(true, scan.atBot, scan.hasReply, cl.getLeft(), cl.getRight(), withoutPrefix);
     }
     /** Holds prefix scan result. */
     private record PrefixScan(boolean atBot, boolean hasReply, String remainingText) {}
@@ -102,7 +103,7 @@ final class CommandParser {
             }
         }
         // Build remaining text from index...end: concatenate text segments only.
-        String remaining = concatTextSegments(segments.stream().skip(index).toList());
+        String remaining = concatTextSegments(segments.subList(index, segments.size()));
         return new PrefixScan(atBot, hasReply, remaining);
     }
     private static String concatTextSegments(List<Message> segments) {
@@ -116,19 +117,18 @@ final class CommandParser {
         }
         return sb.toString();
     }
-    private static CommandLine parseCommandLine(String string) {
+    private static Pair<String, String[]> parseCommandLine(String string) {
         // minimal parser: split by whitespace, no quotes support
         // You can upgrade later to support quoted args.
         String remaining = string.trim();
         if (remaining.isEmpty()) {
-            return new CommandLine("", new String[0]);
+            return Pair.of("", new String[0]);
         }
         List<String> tokens = CommandLineTokenizer.tokenize(remaining);
         String command = tokens.getFirst();
         String[] args = tokens.subList(1, tokens.size()).toArray(new String[0]);
-        return new CommandLine(command, args);
+        return Pair.of(command, args);
     }
-    private record CommandLine(String command, String[] args) {}
     private static String requireDataString(Message segment, String key) {
         try {
             Object v = segment.data().get(key);

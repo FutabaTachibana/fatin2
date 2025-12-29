@@ -1,16 +1,23 @@
 package org.f14a.fatin2.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An enum representing various facial expressions with their corresponding slot numbers and meanings.
+ * 这个枚举类提供了几乎所有的内置表情，每个表情都有一个对应的序号和含义。
  * <ul>
- * <li> For getting the meaning of a specific face by its slot number, use <b>static</b> method <code>Faces.meaningOf(14)</code> returns "微笑" (Smiling). </li>
- * <li> For getting the face enum by its slot number, use <b>static</b> method <code>Faces.fromSlot(11)</code> which returns <code>Faces.ANGRY</code>. </li>
- * <li> For getting the meaning of a specific face, use <code>Faces.QUESTION.meaning()</code> which returns "疑问". </li>
- * <li>For getting the slot of a specific face, use <code>Faces.SURPRISED.slot()</code> which returns 0. </li>
+ *     <li> 通过序号访问表情的含义，可以使用<b>静态</b>方法 {@code Faces.meaningOf(14)}，这里返回 {@code "微笑"}。 </li>
+ *     <li> 通过序号访问表情枚举，可以使用<b>静态</b>方法 {@code Faces.fromSlot(11)}，这里返回 {@code Faces.ANGRY}。 </li>
+ *     <li> 访问特定表情的含义，可以使用 {@code Faces.QUESTION.meaning()}，这里返回 {@code "疑问"}。 </li>
+ *     <li> 获取特定表情的序号，可以使用 {@code Faces.SURPRISED.slot()}，这里返回 {@code 0}。 </li>
  * </ul>
+ * @see Faces#meaningOf(int slot)
+ * @see Faces#fromSlot(int slot)
+ * @see Faces#meaning()
+ * @see Faces#slot()
  */
 public enum Faces {
     SURPRISED(0, "惊讶"),
@@ -196,14 +203,23 @@ public enum Faces {
 
     private final int slot;
     private final String meaning;
+
     Faces(int slot, String meaning) {
         this.slot = slot;
         this.meaning = meaning;
     }
+
+    /**
+     * @return 表情的序号
+     */
     public int slot() {
         return this.slot;
     }
-    public String meaning() {
+
+    /**
+     * @return 表情的含义
+     */
+    public @NotNull String meaning() {
         return this.meaning;
     }
 
@@ -213,10 +229,22 @@ public enum Faces {
             SLOT_INDEX.put(face.slot(), face);
         }
     }
-    public static Faces fromSlot(int slot) {
+
+    /**
+     * 通过表情的序号获取对应的表情枚举。
+     * @param slot 表情的序号
+     * @return 对应的表情枚举，如果序号不存在则返回 {@code null}
+     */
+    public static @Nullable Faces fromSlot(int slot) {
         return SLOT_INDEX.get(slot);
     }
-    public static String meaningOf(int slot) {
+
+    /**
+     * 通过表情的序号获取对应的表情含义。
+     * @param slot 表情的序号
+     * @return 对应的表情含义，如果序号不存在则返回 {@code "Unknown"}
+     */
+    public static @NotNull String meaningOf(int slot) {
         Faces face = fromSlot(slot);
         return face != null ? face.meaning() : "Unknown";
     }

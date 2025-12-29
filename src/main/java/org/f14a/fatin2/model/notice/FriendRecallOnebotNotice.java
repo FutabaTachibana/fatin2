@@ -2,11 +2,17 @@ package org.f14a.fatin2.model.notice;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * 好友撤回消息通知。
+ * @param userId 撤回消息的好友 ID
+ * @param messageId 被撤回的消息 ID
+ * @see AbstractOnebotNotice
+ */
 public record FriendRecallOnebotNotice(
-        @SerializedName("time") long time,
-        @SerializedName("post_type") String postType,
-        @SerializedName("self_id") long selfId,
+        @SerializedName("time")        long   time,
+        @SerializedName("post_type")   String postType,
+        @SerializedName("self_id")     long   selfId,
         @SerializedName("notice_type") String noticeType,
-        @SerializedName("user_id") long userId,
-        @SerializedName("message_id") long messageId
+        @SerializedName("user_id")     long   userId,
+        @SerializedName("message_id")  int    messageId
 ) implements AbstractOnebotNotice { }

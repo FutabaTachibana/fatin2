@@ -1,7 +1,6 @@
 package org.f14a.fatin2.model.message;
 
 import com.google.gson.annotations.SerializedName;
-import org.f14a.fatin2.model.Sender;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,12 +11,12 @@ import java.util.List;
  * @param postType 报文类型，固定为 "message"
  * @param selfId 机器人自身的 ID
  * @param messageType 消息的域，固定为 "group"
- * @param subType 消息的子类型，如 "normal"、"anonymous"、"notice"
+ * @param subType 消息的子类型，如 "normal" "anonymous" "notice"
  * @param messageId 消息的唯一 ID
  * @param userId 发送消息的用户 ID
  * @param messages 消息内容的列表
  * @param font 消息使用的字体
- * @param sender 发送者的信息
+ * @param sender 发送者的信息，是一个 {@link Sender} 对象
  * @param groupId 消息的群 ID
  * @see OnebotMessage
  */

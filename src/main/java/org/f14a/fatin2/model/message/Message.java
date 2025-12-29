@@ -16,7 +16,7 @@ import java.util.Map;
  * @see OnebotMessage
  */
 public record Message(
-        @SerializedName("type") String type,
+        @SerializedName("type") String              type,
         @SerializedName("data") Map<String, Object> data
 ) {
     private static final Gson GSON = new Gson();

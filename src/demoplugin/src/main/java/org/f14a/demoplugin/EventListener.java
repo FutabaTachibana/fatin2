@@ -13,34 +13,39 @@ import org.f14a.fatin2.api.MessageGenerator;
 import org.f14a.fatin2.api.MessageSender;
 import org.f14a.fatin2.api.RequestSender;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.random.RandomGenerator;
 
 public class EventListener {
-    // Example for command handling
+    // 命令处理示例: 一个简单的 echo 实现
+    // 别看它很长，其实一点也不简单x
     @OnCommand(command = "echo", description = "复述你说的话")
     public void onEcho(CommandEvent event) {
-        // Do NOT edit the original message array directly
-        List<Message> messages = List.copyOf(event.getMessage().messages());
-        for (Message message : messages) {
-            if (message.parse().startsWith("/echo")) {
-                try {
-                    message = new Message(message.type(), Map.of(
-                            "text", message.parse().replace("/echo ", "").trim()
-                    ));
-                    break;
-                } catch (Exception e) {
-                    return;
-                }
+        // 不要直接修改原始的 event#getMessage().messages() 列表，因为它是不可变的
+        List<Message> messages = new ArrayList<>();
+        AtomicReference<Boolean> findEcho = new AtomicReference<>(false);
+        event.getMessage().messages().forEach(msg -> {
+            if (!findEcho.get() && msg.parse().startsWith("/echo")) {
+                findEcho.set(true);
+                messages.add(new Message(msg.type(), Map.of(
+                        "text", msg.parse().replace("/echo ", "").trim()
+                )));
+            } else {
+                messages.add(msg);
             }
-        }
+        });
+
         // MessageGenerator#create 接受的参数是可变参数，因此需要将 List 转换为数组
         event.send(MessageGenerator.create(messages.toArray(new Message[0])));
     }
-    // Example for coroutine handling and session management
+
+    // 阻塞式异步命令处理示例: 猜数字游戏
+    // 注意必须使用 @Coroutines 注解来启用协程（虚拟线程）支持
     @OnCommand(command = "guess", description = "猜数字游戏")
     @Coroutines
     public void onGuessNumber(GroupCommandEvent event) {
@@ -53,22 +58,25 @@ public class EventListener {
                         Integer.parseInt(reply) > number ? "太大了" : "太小了"))).getFirst().parse();
             }
         } catch (NumberFormatException | NullPointerException e) {
-            event.send(MessageGenerator.text("游戏结束。"));
+            event.finish(MessageGenerator.text("游戏结束。"));
             return;
         }
-        event.send(MessageGenerator.text("恭喜你，成功猜中数字" + number));
+        event.finish(MessageGenerator.text("恭喜你，成功猜中数字" + number));
     }
-    // Example for raw message handling
+
+    // 对于监听消息的示例
     @EventHandler
     public void onCallMe(MessageEvent event) {
         if (event.getMessage().parse().contains("Fatin")) {
             event.send(MessageGenerator.text("有什么事情吗"));
         }
     }
-    // Example for action after sending successfully by callback and message reply
-    @OnCommand(command = "sendandreply", alias = {"sar"}, description = "发送并回复示例")
-    @Coroutines
+
+    // 使用回调函数在发送成功后执行操作的示例
+    @OnCommand(command = "sendandreply", alias = {"sar"}, description = "发送并回复")
     public void onSendAndReply(GroupCommandEvent event) {
+        // 提供回调函数可以实现简单的异步操作
+        // 相较于 CompletableFuture，这种方式更为简洁
         event.send(response -> {
             try {
                 Thread.sleep(5000);
@@ -79,12 +87,15 @@ public class EventListener {
                     MessageGenerator.text("这是对5秒前消息的回复"));
         }, MessageGenerator.text("这条消息将在5秒后被回复"));
     }
-    // Example for action after sending successfully by CompletableFuture and message recall
-    @OnCommand(command = "sendandrecall", description = "发送并撤回示例")
+
+    // 使用 CompletableFuture 在发送成功后执行操作的示例
+    @OnCommand(command = "sendandrecall", description = "发送并撤回")
     public void onSendAndRecall(CommandEvent event) {
         CompletableFuture<Response> future = event.sendFuture(MessageGenerator.text("这条消息将在5秒后被撤回"));
+
+        // 使用 thenAccept 注册回调函数
+        // 事实上，CompletableFuture 还可以完成更复杂的异步控制流
         future.thenAccept(response -> {
-            // Recall the message after 5 seconds
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -93,20 +104,24 @@ public class EventListener {
             RequestSender.deleteMessage(response.getMessageId());
         });
     }
-    // Example for command with arguments
-    @OnCommand(command = "cmd", needAt = true, description = "带参数的命令示例")
+
+    // 带参数的命令示例
+    @OnCommand(command = "cmd", needAt = true, description = "带参数的命令")
     public void onCommandWithArgs(CommandEvent event) {
         StringBuilder sb = new StringBuilder();
         sb.append("命令: ").append(event.getCommand()).append("\n");
         sb.append("参数: \n");
+
+        // 对于 CommandEvent，使用 getArgs() 方法获取参数列表
         String[] args = event.getArgs();
         for (int i = 0; i < args.length; i++) {
             sb.append("arg[").append(i).append("]: ").append(args[i]).append("\n");
         }
         event.send(MessageGenerator.text(sb.toString()));
     }
-    // Example for forward message
-    @OnCommand(command = "forward", description = "转发消息示例")
+
+    // 转发消息示例
+    @OnCommand(command = "forward", description = "转发消息")
     public void onForwardMessage(CommandEvent event) {
         String[] args = event.getArgs();
         long userId;
@@ -116,11 +131,15 @@ public class EventListener {
             event.send(MessageGenerator.text("请提供有效的用户ID作为第一个参数"));
             return;
         }
+
+        // 构建转发消息
         userId = event.getMessage().userId();
         MessageGenerator.MessageBuilder mb = MessageGenerator.builder();
         for (int i = 1; i < args.length; i++) {
             mb.text(args[i]);
         }
+
+        // 发送转发消息
         if (event instanceof PrivateCommandEvent) {
             MessageSender.sendPrivateForward(event.getMessage().userId(), userId, "人", mb.build());
         }

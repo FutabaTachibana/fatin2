@@ -7,7 +7,7 @@ import org.f14a.fatin2.event.command.CommandEventListener;
 import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.command.PermissionDeniedEvent;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
-import org.f14a.fatin2.model.Sender;
+import org.f14a.fatin2.model.message.Sender;
 import org.f14a.fatin2.exception.PluginInternalException;
 import org.f14a.fatin2.model.message.OnebotMessage;
 import org.f14a.fatin2.api.MessageGenerator;

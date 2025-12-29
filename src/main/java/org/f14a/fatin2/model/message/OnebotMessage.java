@@ -3,7 +3,6 @@ package org.f14a.fatin2.model.message;
 import com.google.gson.annotations.SerializedName;
 import org.f14a.fatin2.exception.IllegalTypeException;
 import org.f14a.fatin2.model.AbstractOnebotMessage;
-import org.f14a.fatin2.model.Sender;
 
 import java.util.List;
 
@@ -17,25 +16,13 @@ import java.util.List;
  * @see GroupOnebotMessage
  */
 public sealed interface OnebotMessage extends AbstractOnebotMessage permits GroupOnebotMessage, PrivateOnebotMessage {
-    // private | group
-    @SerializedName("message_type")
-    String messageType();
-    // friend | normal | anonymous | notice
-    @SerializedName("sub_type")
-    String subType();
-    @SerializedName("message_id")
-    int messageId();
-    @SerializedName("user_id")
-    long userId();
-    @SerializedName("message")
-    List<Message> messages();
-//    @Deprecated
-//    @SerializedName("raw_message")
-//    String rawMessage();
-    @SerializedName("font")
-    int font();
-    @SerializedName("sender")
-    Sender sender();
+    @SerializedName("message_type")  String        messageType();
+    @SerializedName("sub_type")      String        subType();
+    @SerializedName("message_id")    int           messageId();
+    @SerializedName("user_id")       long          userId();
+    @SerializedName("message")       List<Message> messages();
+    @SerializedName("font")          int           font();
+    @SerializedName("sender")        Sender        sender();
 
     default String parse(){
         StringBuilder sb = new StringBuilder();

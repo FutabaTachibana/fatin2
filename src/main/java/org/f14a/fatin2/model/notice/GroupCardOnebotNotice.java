@@ -3,22 +3,20 @@ package org.f14a.fatin2.model.notice;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * 群禁言通知。
- * @param subType 子类型，取值为 "ban" 或 "lift_ban"
- * @param groupId 事件发生的群 ID
- * @param operatorId 操作者的用户 ID
- * @param userId 被禁言的用户 ID
- * @param duration 禁言时长，单位为秒
+ * 表示群名片变更通知的通知。
+ * @param groupId 发生的群 ID
+ * @param userId 群名片变更的用户 ID
+ * @param cardNew 新的群名片
+ * @param cardOld 旧的群名片
  * @see AbstractOnebotNotice
  */
-public record GroupBanOnebotNotice(
+public record GroupCardOnebotNotice(
         @SerializedName("time")        long   time,
         @SerializedName("post_type")   String postType,
         @SerializedName("self_id")     long   selfId,
         @SerializedName("notice_type") String noticeType,
-        @SerializedName("sub_type")    String subType,
         @SerializedName("group_id")    long   groupId,
-        @SerializedName("operator_id") long   operatorId,
         @SerializedName("user_id")     long   userId,
-        @SerializedName("duration")    int    duration
+        @SerializedName("card_new")    String cardNew,
+        @SerializedName("card_old")    String cardOld
 ) implements AbstractOnebotNotice { }

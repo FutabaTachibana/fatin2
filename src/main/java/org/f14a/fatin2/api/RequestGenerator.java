@@ -70,7 +70,7 @@ public final class RequestGenerator {
         }
         
         /**
-         * 设置 <code>group_id</code> 的值。
+         * 设置 {@code group_id} 的值。
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder groupId(long groupId) {
@@ -79,7 +79,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>user_id</code> 的值.
+         * 设置 {@code user_id} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder userId(long userId) {
@@ -88,7 +88,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>message_id</code> 的值.
+         * 设置 {@code message_id} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder messageId(int messageId) {
@@ -97,7 +97,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>message</code> 的值.
+         * 设置 {@code message} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder message(JsonArray message) {
@@ -106,7 +106,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>messages</code> 的值.
+         * 设置 {@code messages} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder messages(JsonArray messages) {
@@ -115,7 +115,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>enable</code> 的值.
+         * 设置 {@code enable} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder enable(boolean enable) {
@@ -124,7 +124,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>special_title</code> 的值.
+         * 设置 {@code special_title} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder specialTitle(String specialTitle) {
@@ -133,7 +133,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>reject_add_request</code> 的值.
+         * 设置 {@code reject_add_request} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder rejectAddRequest(boolean rejectAddRequest) {
@@ -142,7 +142,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>duration</code> 的值.
+         * 设置 {@code duration} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder duration(int durationSeconds) {
@@ -151,7 +151,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>flag</code> 的值.
+         * 设置 {@code flag} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder flag(String flag) {
@@ -160,7 +160,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>approve</code> 的值.
+         * 设置 {@code approve} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder approve(boolean approve) {
@@ -169,7 +169,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>reason</code> 的值.
+         * 设置 {@code reason} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder reason(String reason) {
@@ -178,7 +178,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>remark</code> 的值.
+         * 设置 {@code remark} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder remark(String remark) {
@@ -187,7 +187,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>emoji_id</code> 的值.
+         * 设置 {@code emoji_id} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder emojiId(Faces emojiId) {
@@ -196,7 +196,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>emoji_id</code> 的值.
+         * 设置 {@code emoji_id} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder emojiId(int emojiId) {
@@ -205,7 +205,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>set</code> 的值.
+         * 设置 {@code set} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder set(boolean set) {
@@ -214,7 +214,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>group_name</code> 的值.
+         * 设置 {@code group_name} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder groupName(String groupName) {
@@ -223,7 +223,7 @@ public final class RequestGenerator {
         }
 
         /**
-         * 设置 <code>card</code> 的值.
+         * 设置 {@code card} 的值.
          * @return 当前的 {@link RequestBuilder} 实例
          */
         public RequestBuilder card(String card) {
