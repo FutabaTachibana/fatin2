@@ -6,13 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - 重构文档注释，使用中文。x
+- 重构 Config 的反序列化逻辑，增加 config_version 字段以支持向后兼容。x
 - 
 
-## [0.1.2] - 2025-12-27
+## [0.1.2] - 2025-12-29
 
 ### Fixed
-- 修复了从 Maven 仓库下载依赖时缺少依赖的问题（这次应该真的修好了）
-
+- 修复了从 Maven 仓库下载依赖时缺少依赖的问题（这次应该真的修好了）。
+- 重构了部分软件包。
+- 重构了大部分 API 的文档注释。
 
 ## [0.1.1] - 2025-12-26
 
