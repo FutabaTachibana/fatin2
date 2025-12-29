@@ -53,6 +53,10 @@ application {
     mainClass = 'org.f14a.fatin2.Main'
 }
 
+components.java.withVariantsFromConfiguration(configurations.shadowRuntimeElements) {
+    skip()
+}
+
 // --- Custom source sets for internal plugins (built as separate jars) ---
 // Plugins have been migrated into independent Gradle subprojects:
 // - :demoplugin
@@ -84,8 +88,6 @@ shadowJar {
     archiveVersion.set(project.version.toString())
     // Requirement: shadowJar output named as: fatin2-{version}.jar
     archiveClassifier.set('all')
-
-    // Plugins are no longer in the host source set, so no excludes are needed.
 
     manifest {
         attributes(
@@ -162,9 +164,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifact jar
-            artifact sourcesJar
-            artifact javadocJar
 
             pom {
                 name = 'fatin2'
