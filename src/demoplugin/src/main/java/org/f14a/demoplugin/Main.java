@@ -23,17 +23,17 @@ public class Main implements Fatin2Plugin {
     // It should be unique among all plugins
     @Override
     public String getName() {
-        return "echo";
+        return "demo-plugin";
     }
     // Display name of your plugin
     @Override
     public String getDisplayName() {
-        return "Echo Plugin";
+        return "Demo Plugin";
     }
     // The name of yours
     @Override
     public String getAuthor() {
-        return "Fatin2";
+        return "Futaba_Tachibana";
     }
 
     @Override
@@ -43,6 +43,6 @@ public class Main implements Fatin2Plugin {
 
     @Override
     public String getDescription() {
-        return "A demo plugin that echoes messages back to the sender.";
+        return "示例插件，展示如何开发一个 Fatin2 插件。";
     }
 }

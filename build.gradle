@@ -45,6 +45,12 @@ dependencies {
     // Tools
     implementation 'org.apache.commons:commons-lang3:3.18.0'
 
+    // Javalin Web
+    implementation 'io.javalin:javalin:6.7.0'
+
+    // JWT
+    implementation 'com.auth0:java-jwt:4.5.0'
+
     // Tests
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
 }

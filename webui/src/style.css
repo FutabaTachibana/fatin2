@@ -1,0 +1,79 @@
+:root {
+  /* --- 浅色模式 (默认) --- */
+  --bg-app: #ffffff;           /* 应用背景 */
+  --bg-sidebar: #f6f8fa;       /* 侧边栏背景 */
+  --bg-card: #ffffff;          /* 卡片背景 */
+  --bg-hover: #eaeef2;         /* 悬停背景 */
+  --bg-active: #e6ebf1;        /* 选中项背景 (略深) */
+
+  --text-main: #24292f;        /* 主要文字 */
+  --text-secondary: #57606a;   /* 次要文字 */
+
+  --border-color: #d0d7de;     /* 边框颜色 */
+  --accent-color: #0969da;     /* 强调色 (GitHub 蓝) */
+
+  --sidebar-width: 260px;      /* 桌面端宽度 */
+  --sidebar-collapsed-width: 64px;
+}
+
+/* --- 深色模式 (预留类名，未来只需在 html 标签加 class="dark") --- */
+html.dark {
+  --bg-app: #0d1117;
+  --bg-sidebar: #161b22;
+  --bg-card: #161b22;
+  --bg-hover: #21262d;
+  --bg-active: #30363d;
+
+  --text-main: #c9d1d9;
+  --text-secondary: #8b949e;
+
+  --border-color: #30363d;
+  --accent-color: #58a6ff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+}
+
+/* 全局样式调整 */
+.el-main {
+  /* 背景色保持铺满 */
+  background-color: var(--el-bg-color-page);
+  padding: 0 !important; /* 移除默认 padding，由内部容器控制 */
+  display: flex;
+  justify-content: center; /* 水平居中 */
+}
+
+/* 新增一个内容容器类，包裹每个页面的根元素 */
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px; /* 限制最大宽度，在大屏上不至于太散 */
+  padding: 80px 150px; /* 增加上下左右的呼吸感 */
+  box-sizing: border-box;
+  /* 响应式调整：屏幕较窄时减少留白 */
+}
+
+@media (max-width: 1400px) {
+  .content-wrapper {
+    max-width: 90%;
+    padding: 30px;
+  }
+}
+
+/* 各个页面的统一样式调整 */
+.content-header {
+  margin-bottom: 20px;
+}
+.content-header h1 {
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+}
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
