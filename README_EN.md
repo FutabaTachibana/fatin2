@@ -1,7 +1,9 @@
 # Fatin2
 | [English](README.md) | [中文](README_CN.md) |
 
-A lightweight chatbot framework and plugin platform built on top of [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket). Fatin2 acts as a **WebSocket client** that connects to **OneBot-compatible** upstream implementations, receives events, and dispatches them to built-in handlers or third-party plugins.
+A lightweight chatbot framework and plugin platform built on top of [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket). 
+Fatin2 acts as a **WebSocket client** that connects to **Onebot v11** upstream implementations, 
+receives events, and dispatches them to built-in handlers or third-party plugins.
 
 ## Table of contents
 - [Features](#features)
@@ -19,16 +21,16 @@ A lightweight chatbot framework and plugin platform built on top of [Java-WebSoc
 - **Event system** - flexible event listeners with priority and cancellation
 - **Multiple message types** - private / group messages and more
 - **Abstracted message model** - JSON parsing and modeling via [Gson](https://github.com/google/gson)
-- **Command framework** - shell-style parsing + annotation-based command handlers (see the demo plugin)
-- **Session-like interactions** - `@Coroutines` + `event.wait(...)` for “wait for the next message” flows (implemented with virtual threads, so you can write sync-style code)
+- **Command framework** - built-in command parsing and handling; supports shell-style commands and annotation-based command listeners
+- **Session-like interactions** - supporting session-like APIs for synchronous-style code, powered by Java 21 virtual threads
 - **Track outgoing messages** - callback / future-based APIs enable follow-up actions like reply/recall
-- **YAML configuration** - configured via YAML
+- **YAML configuration** - using YAML for simple and convenient configuration
 
 ## Requirements & dependencies
 - OS: Windows / Linux / macOS
 - Java: 21+
 - Build tool: Gradle 8+ (recommended: use the bundled [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html))
-- Upstream: a OneBot-compatible implementation that provides a WebSocket endpoint (Fatin2 connects to it)
+- Upstream: a Onebot v11 implementation that provides a WebSocket endpoint (Fatin2 connects to it)
 
 Key dependencies (partial):
 - [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) - WebSocket client
@@ -36,6 +38,7 @@ Key dependencies (partial):
 - [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml) - YAML parsing
 - [SLF4J](https://www.slf4j.org/) + [Logback](https://logback.qos.ch/) - logging
 - [Gradle Shadow](https://github.com/johnrengelman/shadow) - building a shadow (fat) JAR
+- [Javalin](https://javalin.io/) - built-in HTTP server (optional)
 
 ## Quickstart
 
@@ -44,25 +47,35 @@ Download the latest released **shadow JAR** (with all dependencies included) and
 
 ```shell
 # Linux / macOS / Windows
-java -jar fatin2-<version>-shadow.jar
+java -jar fatin2-{version}-all.jar
 ```
+
+You need Java 21 or higher to run Fatin2.
 
 ### Build
 
 Linux / macOS (bash):
 ```bash
+# Build the project
 ./gradlew build
+
+# Build standalone JAR
 ./gradlew jar
+
+# Build shadow JAR only
 ./gradlew shadowJar
-./gradlew buildAll
 ```
 
 Windows (PowerShell):
 ```powershell
+# Build the project
 .\gradlew.bat build
+
+# Build standalone JAR
 .\gradlew.bat jar
+
+# Build shadow JAR only
 .\gradlew.bat shadowJar
-.\gradlew.bat buildAll
 ```
 
 ### Run
@@ -73,7 +86,7 @@ It’s recommended to run the bot from the `run/` directory, which contains runt
 
 Option 1: run the shadow JAR (replace `<version>` with the actual one)
 ```bash
-java -jar ..\build\libs\fatin2-<version>-shadow.jar
+java -jar ..\build\libs\fatin2-{version}-all.jar
 ```
 
 Option 2: run via Gradle (sets working directory to `run/` automatically)
@@ -85,7 +98,7 @@ Option 2: run via Gradle (sets working directory to `run/` automatically)
 .\gradlew.bat runBot
 ```
 
-> By default, Fatin2 reads `config.yml`. You can also pass a config path as the first argument: `java -jar ... <configPath>`.
+> Fatin2 read the config from `run/config.yml`, and loads plugins from `run/plugins/` by default.
 
 ## Configuration
 The default example config is at `src/main/resources/config.yml`. For actual runs, use `run/config.yml`.
@@ -116,9 +129,11 @@ Common fields:
 - `websocket_url`: the upstream OneBot WebSocket URL (**Fatin2 actively connects** to this endpoint)
 - `access_token`: auth token; set to `""` if no token is needed
 - `command_prefix`: command prefix used by command handlers (demo uses `/echo`, etc.)
-- `debug`: enables debug logs internally (sets `log.level=DEBUG/INFO`)
+- `debug`: enables debug logs internally
 - `plugin.directory`: plugin directory (relative to working dir; usually under `run/`)
 - `plugin.auto_reload`: watch the plugin directory and reload on changes
+- `plugin.integrated.permission`: enable built-in permission manager
+- `plugin.integrated.help_generator`: enable built-in help command generation
 
 ## Core concepts
 
@@ -132,7 +147,7 @@ By default, handlers run asynchronously. If you annotate your handler with `@Cor
 
 Further reading (source):
 - Entry point: `src/main/java/org/f14a/fatin2/Main.java`
-- Demo listener: `src/main/java/org/f14a/demoplugin/EventListener.java`
+- Demo listener: `src/demoplugin/src/main/java/org/f14a/demoplugin/EventListener.java`
 
 ### Commands
 Fatin2 includes a command processor (parsing, arguments, permissions, etc.).
@@ -141,6 +156,7 @@ The demo plugin provides examples:
 - `/echo`: echo back the message
 - `/guess`: guess-the-number game (with `event.wait(...)`)
 - `/sendandrecall`: send a message and recall it later
+- ...
 
 ### Plugin system
 A plugin is the smallest unit of functionality:
@@ -170,32 +186,48 @@ This repository ships with a demo plugin (`org.f14a.demoplugin`) as the minimal 
 ### 1) Build the plugin into run/plugins
 ```bash
 # Linux/macOS
-./gradlew buildPlugin
+./gradlew buildDemoplugin
 
 # Windows
-.\gradlew.bat buildPlugin
+.\gradlew.bat buildDemoplugin
 ```
-The output JAR will be written to: `run/plugins/demoplugin-<version>.jar`.
+The output JAR will be written to: `run/plugins/demoplugin-{version}.jar`.
 
 ### 2) Useful annotations & APIs (from the demo)
 - `@EventHandler`: handle raw message events
 - `@OnCommand(...)`: handle commands (e.g. `echo`, `guess`)
-- `@Coroutines`: enable a session-like API (e.g. `event.wait(...)`)
+- `@Coroutines`: dispatch the handler in a virtual thread, enabling session-like APIs
 
-Further reading (source):
-- Demo plugin entry: `src/main/java/org/f14a/demoplugin/Main.java`
-- Demo listener: `src/main/java/org/f14a/demoplugin/EventListener.java`
+### 3） Starting from a new project
+You can create a new Gradle project and add dependencies on Fatin2 core and API modules:
+
+```groovy
+dependencies {
+    compileOnly 'org.f14a:fatin2:{latest-version}'
+}
+```
+
+```xml
+<dependency>
+    <groupId>org.f14a</groupId>
+    <artifactId>fatin2</artifactId>
+    <version>{latest-version}</version>
+</dependency>
+```
+
+Replace `{latest-version}` with the actual latest version.
+
+After that, you can follow the demo structure and code to develop your own plugins.
 
 ## Troubleshooting
 
 ### Stuck at “Connecting” / can’t connect
 - Verify `websocket_url` is reachable and the port is correct
-- If the upstream requires auth, make sure `access_token` matches
+- If the upstream requirements auth, make sure `access_token` matches
 
 ### Plugins not loaded / hot reload not working
 - Make sure the plugin JAR is under `plugin.directory` (default: `run/plugins/`)
 - Make sure `plugin.auto_reload=true`
-- Run with `run/` as the working directory (Gradle tasks `runBot` / `runPlugin` already do this)
 
 ## Other
 
@@ -203,4 +235,4 @@ Further reading (source):
 Issues and pull requests are welcome.
 
 ### License
-Licensed under the **[MIT](LICENSE.txt)** license.
+Licensed under the **[MIT License](LICENSE.txt)**.

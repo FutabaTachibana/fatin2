@@ -1,7 +1,9 @@
 # Fatin2
 | [English](README_EN.md) | [中文](README.md) |
 
-一款基于 [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) 的轻量聊天机器人框架与插件平台，可作为 **WebSocket 客户端** 对接兼容 **OneBot** 的上游实现，接收事件并分发给内置处理器或第三方插件。
+一款基于 [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) 的轻量聊天机器人框架与插件平台，
+可作为 **WebSocket 客户端** 对接兼容 **Onebot v11** 的上游实现，
+接收事件并分发给内置处理器或第三方插件。
 
 ## 目录
 - [特性](#特性)
@@ -19,16 +21,16 @@
 - **完善的事件系统** - 灵活的事件监听器，支持优先级和取消机制
 - **多种消息类型支持** - 支持私聊、群聊等多种消息类型
 - **抽象化消息模型** - 使用 [Gson](https://github.com/google/gson) 进行消息解析与封装，简化消息处理
-- **命令处理** - 内置命令解析与处理功能，支持 SHELL 风格命令与注解式命令监听（见 Demo 插件）
-- **会话/对话式交互** - 通过 `@Coroutines` + `event.wait(...)` 提供“等待下一条消息”的会话式 API（底层使用虚拟线程，便于写同步风格代码）
+- **命令处理** - 内置命令解析与处理功能，支持 SHELL 风格命令与注解式命令监听
+- **会话/对话式交互** - 提供会话式 API，支持同步风格代码，通过 Java 21 的虚拟线程实现
 - **跟踪发出的消息** - 支持通过回调或 `Future` 跟踪发送结果，并进行撤回/回复等后续操作
-- **配置** - 使用 YAML 配置应用
+- **配置** - 使用 YAML 简单、方便配置
 
 ## 系统要求与依赖
 - 操作系统：跨平台（Windows、Linux、macOS 等）
 - Java：21 或更高版本
 - 构建工具：Gradle 8+（推荐直接使用项目自带的 [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)）
-- 上游：支持 WebSocket 的 OneBot 兼容实现（本项目作为客户端连接上游）
+- 上游：支持 WebSocket 的 Onebot v11 兼容实现（本项目作为客户端连接上游）
 
 核心依赖（部分）：
 - [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) - WebSocket 客户端
@@ -36,6 +38,7 @@
 - [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml) - YAML 配置
 - [SLF4J](https://www.slf4j.org/) + [Logback](https://logback.qos.ch/) - 日志
 - [Gradle Shadow](https://github.com/johnrengelman/shadow) - 打包 Shadow JAR
+- [Javalin](https://javalin.io/) - 内置 HTTP 服务器（可选）
 
 ## 快速开始
 
@@ -44,10 +47,12 @@
 
 ```shell
 # Linux / macOS / Windows
-java -jar fatin2-<version>-shadow.jar
+java -jar fatin2-{version}-all.jar
 ```
 
-### 构建 fatin2 主程序
+你需要 Java 21 或更高版本。
+
+### 构建 Fatin2 主程序
 
 Linux / macOS（bash）：
 ```bash
@@ -59,12 +64,9 @@ Linux / macOS（bash）：
 
 # 构建 Shadow JAR（包含所有依赖）
 ./gradlew shadowJar
-
-# 构建所有类型的 JAR
-./gradlew buildAll
 ```
 
-Windows（PowerShell）：
+Windows (PowerShell):
 ```powershell
 # 构建项目
 .\gradlew.bat build
@@ -74,9 +76,6 @@ Windows（PowerShell）：
 
 # 构建 Shadow JAR（包含所有依赖）
 .\gradlew.bat shadowJar
-
-# 构建所有类型的 JAR
-.\gradlew.bat buildAll
 ```
 
 ### 运行
@@ -88,7 +87,7 @@ Windows（PowerShell）：
 方式一：直接运行 Shadow JAR（以实际版本号为准）
 ```bash
 # 进入 run 目录后运行（建议）
-java -jar ..\build\libs\fatin2-<version>-shadow.jar
+java -jar ..\build\libs\fatin2-{version}-all.jar
 ```
 
 方式二：使用 Gradle 任务（自动将工作目录设置为 `run/`）
@@ -100,7 +99,7 @@ java -jar ..\build\libs\fatin2-<version>-shadow.jar
 .\gradlew.bat runBot
 ```
 
-> 程序默认读取 `config.yml`；也可以传入参数指定配置文件路径：`java -jar ... <configPath>`。
+> Fatin2 读取 `config.yml` 作为配置文件，插件位于 `plugins/` 目录。
 
 ### IDE
 推荐使用 IntelliJ IDEA 构建项目。
@@ -136,9 +135,11 @@ plugin:
 - `websocket_url`：上游 OneBot WebSocket 地址（本项目会 **主动连接** 该地址）
 - `access_token`：鉴权 token；不需要鉴权可设为 `""`
 - `command_prefix`：命令前缀，影响 `@OnCommand` 的触发（Demo 中例如 `/echo`）
-- `debug`：是否开启调试日志（内部会设置 `log.level=DEBUG/INFO`）
+- `debug`：是否开启调试日志
 - `plugin.directory`：插件目录（相对工作目录；通常配合 `run/` 使用）
 - `plugin.auto_reload`：监视插件目录变化并自动热重载
+- `plugin.integrated.permission`：是否启用内置权限管理
+- `plugin.integrated.help_generator`：是否启用内置 help 命令生成器
 
 ## 核心概念
 
@@ -154,7 +155,7 @@ plugin:
 
 进一步阅读（源码）：
 - 程序入口：`src/main/java/org/f14a/fatin2/Main.java`
-- Demo 插件监听器：`src/main/java/org/f14a/demoplugin/EventListener.java`
+- Demo 插件监听器：`src/demoplugin/src/main/java/org/f14a/demoplugin/EventListener.java`
 
 ### 命令支持
 Fatin2 内置命令处理器，提供命令解析、分词、权限管理等功能。
@@ -163,6 +164,7 @@ Demo 插件中包含若干命令示例：
 - `/echo`：回显消息
 - `/guess`：猜数字（会话等待示例）
 - `/sendandrecall`：发送后延时撤回
+- ...
 
 ### 插件系统
 插件是功能的最小单元，每个插件：
@@ -188,26 +190,43 @@ EventBus 分发事件
 
 ## 开发插件（最小示例）
 
-项目内置了一个 Demo 插件（`org.f14a.demoplugin`），可作为最小示例参考。
+项目内置了一个 Demo 插件（`src/demoplugin/src/main/java/org/f14a/demoplugin/EventListener.java`），可作为最小示例参考。
 
 ### 1) 构建并输出插件到 run/plugins
 ```bash
 # Linux/macOS
-./gradlew buildPlugin
+./gradlew buildDemoplugin
 
 # Windows
-.\gradlew.bat buildPlugin
+.\gradlew.bat buildDemoplugin
 ```
-构建产物会输出到：`run/plugins/demoplugin-<version>.jar`
+构建产物会输出到：`run/plugins/demoplugin-{version}.jar`
 
 ### 2) 关键注解与能力速览（来自 Demo）
 - `@EventHandler`：监听原始消息事件（如包含关键词回复）
 - `@OnCommand(...)`：监听命令（如 `echo/guess`）
-- `@Coroutines`：启用会话式 API（如 `event.wait(...)` 等待下一条消息）
+- `@Coroutines`：将当前监听器分配至虚拟线程池，支持会话式 API
 
-进一步阅读（源码）：
-- Demo 插件入口：`src/main/java/org/f14a/demoplugin/Main.java`
-- Demo 插件监听器：`src/main/java/org/f14a/demoplugin/EventListener.java`
+### 3） 从新项目开始
+你可以创建一个新的 Gradle 项目，并添加对 Fatin2 主程序的依赖：
+
+```groovy
+dependencies {
+    compileOnly 'org.f14a:fatin2:{latest-version}'
+}
+```
+
+```xml
+<dependency>
+    <groupId>org.f14a</groupId>
+    <artifactId>fatin2</artifactId>
+    <version>{latest-version}</version>
+</dependency>
+```
+
+{latest-version} 需要替换为最新版本号。
+
+之后仿照 Demo 插件的结构与代码即可开发自己的插件。
 
 ## 常见问题
 
@@ -218,7 +237,6 @@ EventBus 分发事件
 ### 插件未加载 / 热重载不生效
 - 确认插件 JAR 位于 `plugin.directory` 指定目录（默认 `run/plugins/`）
 - 确认 `plugin.auto_reload=true`
-- 建议从 `run/` 作为工作目录启动（`./gradlew runBot` / `runPlugin` 已自动设置）
 
 ## 其它
 
@@ -226,5 +244,5 @@ EventBus 分发事件
 欢迎提交 issue 或 pull request 贡献代码。
 
 ### 许可证
-本项目采用 **[MIT](LICENSE.txt)** 许可证。
+本项目采用 **[MIT License](LICENSE.txt)** 许可证。
 
