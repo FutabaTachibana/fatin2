@@ -10,7 +10,7 @@ import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.f14a.fatin2.model.message.Sender;
 import org.f14a.fatin2.exception.PluginInternalException;
 import org.f14a.fatin2.model.message.OnebotMessage;
-import org.f14a.fatin2.api.MessageGenerator;
+import org.f14a.fatin2.api.generator.MessageGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;

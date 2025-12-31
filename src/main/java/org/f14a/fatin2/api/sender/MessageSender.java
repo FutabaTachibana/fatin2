@@ -1,8 +1,11 @@
-package org.f14a.fatin2.api;
+package org.f14a.fatin2.api.sender;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.api.generator.MessageGenerator;
+import org.f14a.fatin2.api.generator.NodeGenerator;
+import org.f14a.fatin2.api.generator.RequestGenerator;
 import org.f14a.fatin2.websocket.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

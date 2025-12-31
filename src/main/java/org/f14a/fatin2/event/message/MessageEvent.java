@@ -10,7 +10,7 @@ import org.f14a.fatin2.model.MessageType;
 import org.f14a.fatin2.model.Response;
 import org.f14a.fatin2.model.message.GroupOnebotMessage;
 import org.f14a.fatin2.model.message.OnebotMessage;
-import org.f14a.fatin2.api.MessageGenerator;
+import org.f14a.fatin2.api.generator.MessageGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

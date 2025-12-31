@@ -1,8 +1,9 @@
-package org.f14a.fatin2.api;
+package org.f14a.fatin2.api.generator;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.api.sender.MessageSender;
 
 /**
  * 这个类用于构造伪造消息聊天记录中的节点。

@@ -1,9 +1,10 @@
-package org.f14a.fatin2.api;
+package org.f14a.fatin2.api.generator;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.api.sender.MessageSender;
 import org.f14a.fatin2.model.Faces;
 import org.f14a.fatin2.model.message.Message;
 

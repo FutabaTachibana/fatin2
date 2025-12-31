@@ -2,7 +2,7 @@ package org.f14a.fatin2.event.message;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.f14a.fatin2.api.MessageGenerator;
+import org.f14a.fatin2.api.generator.MessageGenerator;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.model.MessageType;

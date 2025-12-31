@@ -1,8 +1,9 @@
-package org.f14a.fatin2.api;
+package org.f14a.fatin2.api.sender;
 
 import com.google.gson.JsonObject;
+import org.f14a.fatin2.api.generator.RequestGenerator;
 
-import static org.f14a.fatin2.api.RequestSender.sendRequest;
+import static org.f14a.fatin2.api.sender.RequestSender.sendRequest;
 
 /**
  * 这个类是发送请求的工具类，提供了 同意/拒绝 群申请、禁言、设置群名片等操作。

@@ -3,8 +3,8 @@ package org.f14a.fatin2.event.message;
 import com.google.gson.JsonArray;
 import org.f14a.fatin2.model.MessageType;
 import org.f14a.fatin2.model.message.PrivateOnebotMessage;
-import org.f14a.fatin2.api.MessageGenerator;
-import org.f14a.fatin2.api.MessageSender;
+import org.f14a.fatin2.api.generator.MessageGenerator;
+import org.f14a.fatin2.api.sender.MessageSender;
 
 /**
  * 当客户端接收到<b>私聊</b>消息时触发的事件基类。

@@ -2,7 +2,7 @@ package org.f14a.fatin2.event.request;
 
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.request.FriendOnebotRequest;
-import org.f14a.fatin2.api.RequestSender;
+import org.f14a.fatin2.api.sender.RequestSender;
 
 /**
  * Called when someone sends a friend request.

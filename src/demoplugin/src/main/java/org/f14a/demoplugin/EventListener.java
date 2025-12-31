@@ -9,9 +9,9 @@ import org.f14a.fatin2.event.message.MessageEvent;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.model.Response;
-import org.f14a.fatin2.api.MessageGenerator;
-import org.f14a.fatin2.api.MessageSender;
-import org.f14a.fatin2.api.RequestSender;
+import org.f14a.fatin2.api.generator.MessageGenerator;
+import org.f14a.fatin2.api.sender.MessageSender;
+import org.f14a.fatin2.api.sender.RequestSender;
 
 import java.util.ArrayList;
 import java.util.List;

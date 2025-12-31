@@ -1,6 +1,6 @@
 package org.f14a.fatin2.event.request;
 
-import org.f14a.fatin2.api.GroupRequestSender;
+import org.f14a.fatin2.api.sender.GroupRequestSender;
 import org.f14a.fatin2.event.Event;
 import org.f14a.fatin2.model.request.InviteOnebotRequest;
 
