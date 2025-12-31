@@ -7,9 +7,12 @@
   --bg-active: #e6ebf1;        /* 选中项背景 (略深) */
 
   --text-main: #24292f;        /* 主要文字 */
+  --text-regular: #424a53;     /* 常规文字 */
   --text-secondary: #57606a;   /* 次要文字 */
+  --text-placeholder: #6e7781; /* 占位/更浅文字 */
 
   --border-color: #d0d7de;     /* 边框颜色 */
+  --border-light: #d8dee4;     /* 浅色边框 */
   --accent-color: #0969da;     /* 强调色 (GitHub 蓝) */
 
   --sidebar-width: 260px;      /* 桌面端宽度 */
@@ -25,9 +28,12 @@ html.dark {
   --bg-active: #30363d;
 
   --text-main: #c9d1d9;
+  --text-regular: #b1bac4;
   --text-secondary: #8b949e;
+  --text-placeholder: #484f58;
 
   --border-color: #30363d;
+  --border-light: #21262d;
   --accent-color: #58a6ff;
 }
 
@@ -70,7 +76,7 @@ body {
 }
 .content-header h1 {
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
 }
 .subtitle {

@@ -69,7 +69,8 @@ WebSocket 客户端:
     "label": "string",
     "type": "string | number | boolean | select",
     "options": [],
-    "value": "any"
+    "value": "any",
+    "description":"string"
   }
 ]
 ```
