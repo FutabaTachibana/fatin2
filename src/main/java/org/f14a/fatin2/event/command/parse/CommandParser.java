@@ -2,6 +2,7 @@ package org.f14a.fatin2.event.command.parse;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.f14a.fatin2.config.Config;
+import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.exception.OnebotProtocolException;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ final class CommandParser {
         }
         PrefixScan scan = scanPrefixes(selfId, segments);
         String commandLine = scan.remainingText.trim();
-        String prefix = Config.getConfig().getCommandPrefix();
+        String prefix = ConfigManager.getGlobalConfig().getCommandPrefix();
         LOGGER.debug("CommandParser: after prefix scan: atBot={}, hasReply={}, remaining={}", scan.atBot, scan.hasReply, commandLine);
         if (!commandLine.startsWith(prefix)) {
             // does not start with prefix => not a command

@@ -2,6 +2,7 @@ package org.f14a.fatin2.websocket;
 
 import com.google.gson.Gson;
 import org.f14a.fatin2.config.Config;
+import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.exception.OnebotProtocolException;
 import org.f14a.fatin2.exception.UnknownMessageTypeException;
 import org.java_websocket.client.WebSocketClient;
@@ -75,7 +76,7 @@ public class Client extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshake) {
-        LOGGER.info("Connected to {}", Config.getConfig().getWebSocketUrl());
+        LOGGER.info("Connected to {}", ConfigManager.getGlobalConfig().getWebSocketUrl());
         LOGGER.debug("Server status: {}", handshake.getHttpStatusMessage());
         this.closed = false;
         stopReconnectLoop();

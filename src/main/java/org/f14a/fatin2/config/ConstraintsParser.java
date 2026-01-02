@@ -41,15 +41,16 @@ final class ConstraintsParser {
             this.isSingleValue = true;
         }
 
-        boolean contains(T value) {
+        @SuppressWarnings("unchecked")
+        boolean contains(Object value) throws ClassCastException {
             // 先判是否满足下界，不满足返回 false
             if (min != null) {
                 if (minInclusive) {
-                    if (min.compareTo(value) > 0) {
+                    if (min.compareTo((T) value) > 0) {
                         return false;
                     }
                 } else {
-                    if (min.compareTo(value) >= 0) {
+                    if (min.compareTo((T) value) >= 0) {
                         return false;
                     }
 
@@ -58,9 +59,9 @@ final class ConstraintsParser {
             // 确定是否满足下界后，再判上界
             if (max != null) {
                 if (maxInclusive) {
-                    return max.compareTo(value) >= 0;
+                    return max.compareTo((T) value) >= 0;
                 } else {
-                    return max.compareTo(value) > 0;
+                    return max.compareTo((T) value) > 0;
                 }
             }
             return true;
@@ -81,12 +82,15 @@ final class ConstraintsParser {
     static List<Range<?>> parse(String input, Class<?> clazz) {
         List<Range<?>> ranges = new ArrayList<>();
 
+        if (input == null || input.isEmpty()) {
+            return ranges;
+        }
         Matcher matcher = PATTERN.matcher(input);
         while (matcher.find()) {
             if (matcher.group(5) != null) {
                 // 单个数字
                 @SuppressWarnings({"unchecked", "rawtypes"})
-                Range<?> range = new Range(getObject(matcher.group(5), clazz));
+                Range<?> range = new Range(valueOf(matcher.group(5), clazz));
                 ranges.add(range);
             } else {
                 // 范围
@@ -96,8 +100,8 @@ final class ConstraintsParser {
                 boolean minInclusive = "[".equals(matcher.group(1));
                 boolean maxInclusive = "]".equals(matcher.group(4));
 
-                Comparable<?> min = minStr != null ? getObject(minStr, clazz) : null;
-                Comparable<?> max = maxStr != null ? getObject(maxStr, clazz) : null;
+                Comparable<?> min = minStr != null ? valueOf(minStr, clazz) : null;
+                Comparable<?> max = maxStr != null ? valueOf(maxStr, clazz) : null;
 
                 @SuppressWarnings({"unchecked", "rawtypes"})
                 Range<?> range = new Range(min, minInclusive, max, maxInclusive);
@@ -107,7 +111,7 @@ final class ConstraintsParser {
         return ranges;
     }
 
-    private static Comparable<?> getObject(String str, Class<?> clazz) {
+    static Comparable<?> valueOf(String str, Class<?> clazz) throws IllegalTypeException {
         return switch (clazz) {
             case Class<?> c when c == Integer.class -> Integer.parseInt(str);
             case Class<?> c when c == Long.class -> Long.parseLong(str);

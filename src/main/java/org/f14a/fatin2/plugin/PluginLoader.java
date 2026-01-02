@@ -1,6 +1,7 @@
 package org.f14a.fatin2.plugin;
 
 import org.f14a.fatin2.config.Config;
+import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.plugin.integrated.IntegratedHelpGenerator;
 import org.f14a.fatin2.plugin.integrated.IntegratedPermissionProvider;
 import org.f14a.fatin2.exception.IllegalPluginException;
@@ -28,7 +29,7 @@ public class PluginLoader {
      */
     public static void loadAllPlugins(File dir) {
         // Load integrated plugins
-        Config config = Config.getConfig();
+        Config config = ConfigManager.getGlobalConfig();
         if (config.isEnableHelp()) {
             PluginManager.getInstance().loadIntegratedPlugin(new IntegratedHelpGenerator());
         }
@@ -40,7 +41,7 @@ public class PluginLoader {
         // Load external plugins
         File[] files = dir.listFiles((d, name) -> name.endsWith(".jar"));
         if (files == null || files.length == 0) {
-            LOGGER.info("No plugins found in directory: {}", Config.getConfig().getPluginDirectory());
+            LOGGER.info("No plugins found in directory: {}", ConfigManager.getGlobalConfig().getPluginDirectory());
             return;
         }
         for (File file : files) {

@@ -34,18 +34,4 @@ public class Config {
     @ConfigItem(order = 7, label = "启用内置帮助插件", type = "boolean", defaultValue = "true",
             description = "启用后，Fatin2 会提供内置的帮助命令，自动生成 \"help\" 指令的内容。")
     private boolean enableHelp;
-
-    private static Config instance;
-    public static Config getConfig(){
-        return Config.instance;
-    }
-
-    public Config() {
-        if(Config.instance == null) {
-            Config.instance = this;
-        }
-        else {
-            throw new RuntimeException("Config instance already exists!");
-        }
-    }
 }

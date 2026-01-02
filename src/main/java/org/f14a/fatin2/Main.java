@@ -1,12 +1,11 @@
 package org.f14a.fatin2;
 
+import lombok.extern.slf4j.Slf4j;
+import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.websocket.Client;
 import org.f14a.fatin2.config.Config;
-import org.f14a.fatin2.config.ConfigLoader;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.plugin.PluginManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,8 +14,12 @@ import java.util.concurrent.CountDownLatch;
 /**
 * Entry of the application
 */
+@Slf4j
 public class Main {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    static {
+        Config config = ConfigManager.getGlobalConfig();
+        System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
+    }
 
     public static void main(String[] args) {
         // Load config from working directory (config.yml)
@@ -25,9 +28,8 @@ public class Main {
         PluginManager pluginManager = null;
         Client client = null;
         try {
-            LOGGER.info("Loading config from working directory (config.yml)");
-            Config config = ConfigLoader.load();
-            System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
+            log.info("Loading config from working directory (config.yml)");
+            Config config = ConfigManager.getGlobalConfig();
             // Init event bus
             eventBus = new EventBus();
             // Load plugins
@@ -40,22 +42,22 @@ public class Main {
             PluginManager finalPluginManager = pluginManager;
             // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                LOGGER.info("Shutting down Fatin2...");
+                log.info("Shutting down Fatin2...");
                 safeClose(finalPluginManager, finalEventBus, Client.getInstance());
                 stopLatch.countDown();
             }, "Shutdown-Hook-Thread"));
 
-            LOGGER.info("Connecting to {}...", serverUri);
+            log.info("Connecting to {}...", serverUri);
             client.connect();
             // Wait until shutdown
             stopLatch.await();
 
         } catch (URISyntaxException e) {
-            LOGGER.error("Invalid WebSocket URL in config: {}", e.getMessage(), e);
+            log.error("Invalid WebSocket URL in config: {}", e.getMessage(), e);
             safeClose(pluginManager, eventBus, client);
             System.exit(1);
         }  catch (Exception e) {
-            LOGGER.error("Failed to start Fatin2 due to unexpected error", e);
+            log.error("Failed to start Fatin2 due to unexpected error", e);
             safeClose(pluginManager, eventBus, client);
             System.exit(1);
         }
@@ -66,21 +68,21 @@ public class Main {
                 pm.shutdown();
             }
         } catch (Exception e) {
-            LOGGER.error("Error while shutting down PluginManager", e);
+            log.error("Error while shutting down PluginManager", e);
         }
         try {
             if (bus != null) {
                 bus.shutdown();
             }
         } catch (Exception e) {
-            LOGGER.error("Error while shutting down EventBus", e);
+            log.error("Error while shutting down EventBus", e);
         }
         try {
             if (client != null) {
                 client.close();
             }
         } catch (Exception e) {
-            LOGGER.error("Error while closing Client", e);
+            log.error("Error while closing Client", e);
         }
     }
 }
