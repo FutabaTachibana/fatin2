@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @Slf4j
-public final class ConfigWrapper {
+final class ConfigWrapper {
     private static final Gson GSON = new Gson();
 
     @Getter
@@ -188,9 +188,10 @@ public final class ConfigWrapper {
                 ConfigItem item = field.getAnnotation(ConfigItem.class);
                 field.setAccessible(true);
                 String defaultValue = item.defaultValue();
-                if (!defaultValue.isEmpty()) {
-                    try {
-                        Object value = switch (item.type()) {
+                try {
+                    Object value;
+                    if (!defaultValue.isEmpty()) {
+                        value = switch (item.type()) {
                             case "string", "password" -> defaultValue;
                             case "boolean" -> Boolean.parseBoolean(defaultValue);
                             case "number" -> {
@@ -213,14 +214,42 @@ public final class ConfigWrapper {
                                     throw new IllegalArgumentException("Unsupported integer type: " + fieldType.getName());
                                 }
                             }
-                            default -> null;
+                            case "select" -> defaultValue;
+                            default ->
+                                    throw new ConfigurationNotAppliedException("Unsupported config item type: " + item.type());
                         };
-                        if (value != null) {
-                            field.set(config, value);
-                        }
-                    } catch (Exception e) {
-                        log.error("Failed to set default value for field {}: {}", field.getName(), e.getMessage());
+                    } else {
+                        value = switch (item.type()) {
+                            case "string", "password" -> "";
+                            case "boolean" -> false;
+                            case "number" -> {
+                                Class<?> fieldType = field.getType();
+                                if (fieldType == double.class || fieldType == Double.class) {
+                                    yield .0;
+                                } else if (fieldType == float.class || fieldType == Float.class) {
+                                    yield .0f;
+                                } else {
+                                    yield null;
+                                }
+                            }
+                            case "integer" -> {
+                                Class<?> fieldType = field.getType();
+                                if (fieldType == int.class || fieldType == Integer.class) {
+                                    yield 0;
+                                } else if (fieldType == long.class || fieldType == Long.class) {
+                                    yield 0L;
+                                } else {
+                                    yield null;
+                                }
+                            }
+                            default ->
+                                    throw new ConfigurationNotAppliedException("Unsupported config item type: " + item.type());
+                        };
                     }
+                    field.setAccessible(true);
+                    field.set(config, value);
+                } catch (Exception e) {
+                    log.error("Failed to set default value for field {}: {}", field.getName(), e.getMessage());
                 }
             }
         }

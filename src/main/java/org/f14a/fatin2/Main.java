@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class Main {
     static {
-        Config config = ConfigManager.getGlobalConfig();
+        Config config = ConfigManager.getConfig();
         System.setProperty("log.level", config.isDebug() ? "DEBUG" : "INFO");
     }
 
@@ -29,13 +29,13 @@ public class Main {
         Client client = null;
         try {
             log.info("Loading config from working directory (config.yml)");
-            Config config = ConfigManager.getGlobalConfig();
+            Config config = ConfigManager.getConfig();
             // Init event bus
             eventBus = new EventBus();
             // Load plugins
             pluginManager = new PluginManager(config.isPluginAutoReload());
             // Init client
-            URI serverUri = new URI(config.getWebSocketUrl());
+            URI serverUri = new URI(config.getWebsocketUrl());
             client = new Client(serverUri, config.getAccessToken());
             // Keep references for shutdown hook
             EventBus finalEventBus = eventBus;

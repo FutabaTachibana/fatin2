@@ -1,14 +1,12 @@
 package org.f14a.fatin2.event.command.parse;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.model.message.Message;
 import org.f14a.fatin2.exception.OnebotProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,7 +38,7 @@ final class CommandParser {
         }
         PrefixScan scan = scanPrefixes(selfId, segments);
         String commandLine = scan.remainingText.trim();
-        String prefix = ConfigManager.getGlobalConfig().getCommandPrefix();
+        String prefix = ConfigManager.getConfig().getCommandPrefix();
         LOGGER.debug("CommandParser: after prefix scan: atBot={}, hasReply={}, remaining={}", scan.atBot, scan.hasReply, commandLine);
         if (!commandLine.startsWith(prefix)) {
             // does not start with prefix => not a command

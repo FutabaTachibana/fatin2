@@ -1,6 +1,5 @@
 package org.f14a.fatin2.plugin;
 
-import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.event.lifecycle.PluginsLoadDoneEvent;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class PluginManager {
     public PluginManager(boolean autoReload) {
         PluginManager.instance = this;
         this.plugins  = new ConcurrentHashMap<>();
-        String pluginDirectory = ConfigManager.getGlobalConfig().getPluginDirectory();
+        String pluginDirectory = ConfigManager.getConfig().getPluginDirectory();
 
         this.pluginDir = pluginDirectory;
         File dir = new File(this.pluginDir);

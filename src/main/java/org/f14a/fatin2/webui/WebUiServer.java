@@ -1,13 +1,20 @@
 package org.f14a.fatin2.webui;
 
 import io.javalin.Javalin;
+import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
+import org.f14a.fatin2.config.ConfigManager;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.util.Map;
 
 public class WebUiServer {
+
+    // 反代端口 (开发环境前端地址)
+    private static final String DEV_ORIGIN = "http://localhost:5173";
 
     public void start(int port) {
         Javalin app = Javalin.create(config -> {
@@ -25,15 +32,43 @@ public class WebUiServer {
             //config.staticFiles.add("../webui/dist", Location.EXTERNAL);
 
             // 2. 配置 CORS (允许前端开发服务器跨域访问)
-            config.bundledPlugins.enableCors(cors -> {
-                cors.addRule(it -> {
-                    it.allowHost("http://localhost:5173"); // Vite 默认端口
+            // 仅在调试模式下允许 CORS
+            if (ConfigManager.getConfig().isDebug()) {
+                config.bundledPlugins.enableCors(cors -> {
+                    cors.addRule(it -> {
+                        it.allowHost(DEV_ORIGIN); // Vite 默认端口
+                    });
                 });
-            });
+            }
         }).start(port);
 
         // 3. 定义路由
         app.post("/api/login", this::handleLogin);
+
+        // 获取全局设置
+        app.get("/api/settings", ctx -> {
+            // ConfigManager 返回的是 Gson 对象，需要转为 String 返回，否则 Javalin 默认的 Jackson 会再次序列化它
+            ctx.result(ConfigManager.getGlobalConfig().toString())
+               .contentType(ContentType.APPLICATION_JSON);
+        });
+
+        // 更新全局设置
+        app.post("/api/settings", ctx -> {
+            // 假设前端发送的是 {"key": "value", "key2": "value2"} 格式的 JSON
+            Map<String, Object> updates = ctx.bodyAsClass(Map.class);
+            JsonArray results = new JsonArray();
+
+            updates.forEach((key, value) -> {
+                // value 可能是 Boolean, Number 等，统一转为 String
+                JsonObject result = ConfigManager.setGlobalConfigItem(key, String.valueOf(value));
+                // 将 key 添加到返回结果中以便前端确认
+                result.addProperty("key", key);
+                results.add(result);
+            });
+
+            ctx.result(results.toString())
+               .contentType(ContentType.APPLICATION_JSON);
+        });
 
         // 4. 鉴权拦截器 (Before Handler)
         app.before("/api/protected/*", ctx -> {
@@ -61,6 +96,7 @@ public class WebUiServer {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private void handleLogin(Context ctx) {
         // 解析请求体 (这里简化处理，实际应使用 DTO 类)
         Map<String, String> credentials = ctx.bodyAsClass(Map.class);

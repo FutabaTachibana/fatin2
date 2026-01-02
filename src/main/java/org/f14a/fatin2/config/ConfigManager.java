@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.f14a.fatin2.exception.ConfigIOException;
+import org.f14a.fatin2.exception.ConfigurationNotAppliedException;
 import org.f14a.fatin2.exception.ConfigurationNotLoadedException;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +15,10 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
+import org.yaml.snakeyaml.introspector.Property;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -49,7 +52,11 @@ public final class ConfigManager {
         return loadConfig(Config.class, CONFIG_PATH);
     }
 
-    public static Config getGlobalConfig() {
+    /**
+     * 获取全局配置实例。
+     * @return 配置类实例
+     */
+    public static Config getConfig() {
         return (Config) globalConfigWrapper.getConfig();
     }
 
@@ -104,7 +111,26 @@ public final class ConfigManager {
         options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
-        Representer representer = new Representer(options);
+        Representer representer = new Representer(options) {
+            @Override
+            protected Set<Property> getProperties(Class<?> type) {
+                Set<Property> properties = super.getProperties(type);
+                List<Property> list = new ArrayList<>(properties);
+                list.sort(Comparator.comparingInt(p -> {
+                    try {
+                        Field field = type.getDeclaredField(p.getName());
+                        ConfigItem annotation = field.getAnnotation(ConfigItem.class);
+                        if (annotation != null) {
+                            return annotation.order();
+                        }
+                    } catch (NoSuchFieldException ignore) {
+                        // ignore
+                    }
+                    return Integer.MAX_VALUE;
+                }));
+                return new LinkedHashSet<>(list);
+            }
+        };
         // 避免 YAML 头部出现 !!com.example.Config 这种类名
         representer.addClassTag(wrapper.getConfig().getClass(), Tag.MAP);
 
@@ -137,7 +163,7 @@ public final class ConfigManager {
      * @param pluginName 插件名称
      * @return JSON 对象
      */
-    public static @NotNull JsonArray getJson(String pluginName) {
+    public static @NotNull JsonArray getPluginConfig(String pluginName) {
         ConfigWrapper wrapper = pluginConfigs.get(pluginName);
         if (wrapper == null) {
             log.error("No config found for plugin {}", pluginName);
@@ -152,7 +178,7 @@ public final class ConfigManager {
      * @param key 配置项键
      * @return JSON 对象
      */
-    public static @NotNull JsonObject getJson(String pluginName, String key) {
+    public static @NotNull JsonObject getPluginConfig(String pluginName, String key) {
         ConfigWrapper wrapper = pluginConfigs.get(pluginName);
         if (wrapper == null) {
             log.error("No config key found for plugin {}", pluginName);
@@ -167,7 +193,7 @@ public final class ConfigManager {
      * 获取全局配置的 JSON 格式作为 REST API 响应。
      * @return JSON 对象
      */
-    public static @NotNull JsonArray getGlobalJson() {
+    public static @NotNull JsonArray getGlobalConfig() {
         return globalConfigWrapper.getJson();
     }
 
@@ -176,7 +202,58 @@ public final class ConfigManager {
      * @param key 配置项键
      * @return JSON 对象
      */
-    public static @NotNull JsonObject getGlobalJson(String key) {
+    public static @NotNull JsonObject getGlobalConfig(String key) {
         return globalConfigWrapper.get(key);
+    }
+
+    /**
+     * 设置插件配置项的值。
+     * @param pluginName 插件名称
+     * @param key 配置项键
+     * @param value 配置项值
+     * @return JSON 对象，包含错误信息（如果有）
+     */
+    public static @NotNull JsonObject setPluginConfigItem(String pluginName, String key, String value) {
+        ConfigWrapper wrapper = pluginConfigs.get(pluginName);
+        if (wrapper == null) {
+            JsonObject response = new JsonObject();
+            response.addProperty("reason", "No config found for plugin " + pluginName);
+            return response;
+        }
+        return setConfigItem(wrapper, key, value);
+    }
+
+    /**
+     * 设置全局配置项的值。
+     * @param key 配置项键
+     * @param value 配置项值
+     * @return JSON 对象，包含错误信息（如果有）
+     */
+    public static @NotNull JsonObject setGlobalConfigItem(String key, String value) {
+        return setConfigItem(globalConfigWrapper, key, value);
+    }
+
+    /**
+     * 设置配置项的值并保存配置文件。
+     * @param wrapper 配置包装类
+     * @param key 配置项键
+     * @param value 配置项值
+     * @return JSON 对象，包含错误信息（如果有）
+     */
+    private static @NotNull JsonObject setConfigItem(ConfigWrapper wrapper, String key, String value) {
+        JsonObject response = new JsonObject();
+        try {
+            wrapper.apply(key, value);
+        } catch (ConfigurationNotAppliedException e) {
+            response.addProperty("reason", String.format("Something goes wrong when applying config: %s", e.getMessage()));
+            return response;
+        }
+        try {
+            save(wrapper, new File(wrapper.getConfigPath()));
+        } catch (ConfigIOException e) {
+            response.addProperty("reason", String.format("Something goes wrong when saving config: %s", e.getMessage()));
+            return response;
+        }
+        return response;
     }
 }

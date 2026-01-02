@@ -12,7 +12,7 @@ public class Config {
     @ConfigItem(order = 0, label = "WebSocket 服务器地址",
             type = "string", defaultValue = "ws://localhost:3001", 
             description = "WebSocket 服务器的地址，通常是 NapCat 或其他 Onebot v11 兼容客户端的地址。")
-    private String webSocketUrl;
+    private String websocketUrl;
     @ConfigItem(order = 1, label = "WebSocket Token", type = "password", defaultValue = "",
             description = "连接 WebSocket 服务器时使用的 Token，没有则留空。")
     private String accessToken;
@@ -30,8 +30,9 @@ public class Config {
     private boolean pluginAutoReload;
     @ConfigItem(order = 6, label = "启用内置权限插件", type = "boolean", defaultValue = "true",
             description = "启用后，插件可以使用内置权限插件来控制命令的访问权限，如果你使用了第三方的权限插件，请关闭此选项。")
-    private boolean enablePermission;
+    private boolean integratedPermission;
     @ConfigItem(order = 7, label = "启用内置帮助插件", type = "boolean", defaultValue = "true",
             description = "启用后，Fatin2 会提供内置的帮助命令，自动生成 \"help\" 指令的内容。")
-    private boolean enableHelp;
+    private boolean integratedHelp;
+
 }

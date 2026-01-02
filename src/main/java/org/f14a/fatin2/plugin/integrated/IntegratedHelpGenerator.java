@@ -1,6 +1,5 @@
 package org.f14a.fatin2.plugin.integrated;
 
-import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.event.EventHandler;
@@ -70,7 +69,7 @@ public class IntegratedHelpGenerator implements Fatin2Plugin {
     @OnCommand(command = "help", alias = {"?"}, description = "显示这条消息")
     public void OnHelp(CommandEvent event) {
         StringBuilder sb = new StringBuilder();
-        String prefix = ConfigManager.getGlobalConfig().getCommandPrefix();
+        String prefix = ConfigManager.getConfig().getCommandPrefix();
         if (event.getArgs().length == 0) {
             // General help message
             sb.append("支持的命令列表:\n");

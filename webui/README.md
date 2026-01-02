@@ -65,12 +65,15 @@ WebSocket 客户端:
 ```json
 [
   {
-    "key": "string",
-    "label": "string",
-    "type": "string | number | boolean | select",
+    "order": 0,
+    "label": "WebSocket 服务器地址",
+    "type": "string",
+    "defaultValue": "ws://localhost:3001",
+    "description": "WebSocket 服务器的地址，通常是 NapCat 或其他 Onebot v11 兼容客户端的地址。",
+    "enable": false,
+    "constraints": "",
     "options": [],
-    "value": "any",
-    "description":"string"
+    "value": "ws://localhost:3001"
   }
 ]
 ```

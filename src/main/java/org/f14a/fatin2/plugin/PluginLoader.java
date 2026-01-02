@@ -29,11 +29,11 @@ public class PluginLoader {
      */
     public static void loadAllPlugins(File dir) {
         // Load integrated plugins
-        Config config = ConfigManager.getGlobalConfig();
-        if (config.isEnableHelp()) {
+        Config config = ConfigManager.getConfig();
+        if (config.isIntegratedHelp()) {
             PluginManager.getInstance().loadIntegratedPlugin(new IntegratedHelpGenerator());
         }
-        if (config.isEnablePermission()) {
+        if (config.isIntegratedPermission()) {
             // Something to load bot admins and banned users from config can be added here
             PluginManager.getInstance().loadIntegratedPlugin(new IntegratedPermissionProvider());
         }
@@ -41,7 +41,7 @@ public class PluginLoader {
         // Load external plugins
         File[] files = dir.listFiles((d, name) -> name.endsWith(".jar"));
         if (files == null || files.length == 0) {
-            LOGGER.info("No plugins found in directory: {}", ConfigManager.getGlobalConfig().getPluginDirectory());
+            LOGGER.info("No plugins found in directory: {}", ConfigManager.getConfig().getPluginDirectory());
             return;
         }
         for (File file : files) {
