@@ -1,12 +1,11 @@
 package org.f14a.fatin2.config;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.f14a.fatin2.exception.ConfigIOException;
 import org.f14a.fatin2.exception.ConfigurationNotAppliedException;
 import org.f14a.fatin2.exception.ConfigurationNotLoadedException;
 import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -58,6 +57,14 @@ public final class ConfigManager {
      */
     public static Config getConfig() {
         return (Config) globalConfigWrapper.getConfig();
+    }
+
+    /**
+     * 获取全局配置包装类。
+     * @return 全局配置包装类
+     */
+    public static ConfigWrapper getGlobalWrapper() {
+        return globalConfigWrapper;
     }
 
     /**
@@ -159,17 +166,26 @@ public final class ConfigManager {
     }
 
     /**
+     * 获取所有插件的配置包装类。
+     * @return 插件配置映射
+     */
+    public static @NotNull Map<String, ConfigWrapper> getPluginConfigs() {
+        return Collections.unmodifiableMap(pluginConfigs);
+    }
+
+    /**
      * 获取插件配置的 JSON 格式作为 REST API 响应。
      * @param pluginName 插件名称
      * @return JSON 对象
      */
-    public static @NotNull JsonArray getPluginConfig(String pluginName) {
+    @Deprecated
+    public static @NotNull List<Map<String, Object>> getPluginConfig(String pluginName) {
         ConfigWrapper wrapper = pluginConfigs.get(pluginName);
         if (wrapper == null) {
             log.error("No config found for plugin {}", pluginName);
-            return new JsonArray();
+            return new ArrayList<>();
         }
-        return wrapper.getJson();
+        return wrapper.getAll();
     }
 
     /**
@@ -178,23 +194,23 @@ public final class ConfigManager {
      * @param key 配置项键
      * @return JSON 对象
      */
-    public static @NotNull JsonObject getPluginConfig(String pluginName, String key) {
+    @Deprecated
+    public static @NotNull Map<String, String> getPluginConfig(String pluginName, String key) {
         ConfigWrapper wrapper = pluginConfigs.get(pluginName);
         if (wrapper == null) {
             log.error("No config key found for plugin {}", pluginName);
-            return new JsonObject();
+            return new LinkedHashMap<>();
         }
-        JsonObject result = wrapper.get(key);
-        result.addProperty("plugin", pluginName);
-        return result;
+        return wrapper.get(key);
     }
 
     /**
      * 获取全局配置的 JSON 格式作为 REST API 响应。
      * @return JSON 对象
      */
-    public static @NotNull JsonArray getGlobalConfig() {
-        return globalConfigWrapper.getJson();
+    @Deprecated
+    public static @NotNull List<Map<String, Object>> getGlobalConfig() {
+        return globalConfigWrapper.getAll();
     }
 
     /**
@@ -202,7 +218,8 @@ public final class ConfigManager {
      * @param key 配置项键
      * @return JSON 对象
      */
-    public static @NotNull JsonObject getGlobalConfig(String key) {
+    @Deprecated
+    public static @NotNull Map<String, String> getGlobalConfig(String key) {
         return globalConfigWrapper.get(key);
     }
 
@@ -213,12 +230,11 @@ public final class ConfigManager {
      * @param value 配置项值
      * @return JSON 对象，包含错误信息（如果有）
      */
-    public static @NotNull JsonObject setPluginConfigItem(String pluginName, String key, String value) {
+    @Deprecated
+    public static @NotNull Map<String, String> setPluginConfigItem(String pluginName, String key, String value) {
         ConfigWrapper wrapper = pluginConfigs.get(pluginName);
         if (wrapper == null) {
-            JsonObject response = new JsonObject();
-            response.addProperty("reason", "No config found for plugin " + pluginName);
-            return response;
+            return Map.of("reason", String.format("No config found for plugin %s", pluginName));
         }
         return setConfigItem(wrapper, key, value);
     }
@@ -229,7 +245,8 @@ public final class ConfigManager {
      * @param value 配置项值
      * @return JSON 对象，包含错误信息（如果有）
      */
-    public static @NotNull JsonObject setGlobalConfigItem(String key, String value) {
+    @Deprecated
+    public static @NotNull Map<String, String> setGlobalConfigItem(String key, String value) {
         return setConfigItem(globalConfigWrapper, key, value);
     }
 
@@ -240,20 +257,18 @@ public final class ConfigManager {
      * @param value 配置项值
      * @return JSON 对象，包含错误信息（如果有）
      */
-    private static @NotNull JsonObject setConfigItem(ConfigWrapper wrapper, String key, String value) {
-        JsonObject response = new JsonObject();
+    @Deprecated
+    private static @NotNull Map<String, String> setConfigItem(ConfigWrapper wrapper, String key, String value) {
         try {
             wrapper.apply(key, value);
         } catch (ConfigurationNotAppliedException e) {
-            response.addProperty("reason", String.format("Something goes wrong when applying config: %s", e.getMessage()));
-            return response;
+            return Map.of("reason", String.format("Something goes wrong when applying config: %s", e.getMessage()));
         }
         try {
             save(wrapper, new File(wrapper.getConfigPath()));
         } catch (ConfigIOException e) {
-            response.addProperty("reason", String.format("Something goes wrong when saving config: %s", e.getMessage()));
-            return response;
+            return Map.of("reason", String.format("Something goes wrong when saving config: %s", e.getMessage()));
         }
-        return response;
+        return Map.of();
     }
 }

@@ -88,14 +88,14 @@ WebSocket 客户端:
 ```json
 [
     {
-        "id": "string",
         "name": "string",
+        "displayName": "string",
         "enabled": "boolean",
-        "can_hot_reload": "boolean",
+        "canHotReload": "boolean",
         "version": "string",
         "author": "string",
         "description": "string",
-        "has_config": "boolean"
+        "hasConfig": "boolean"
     }
 ]
 ```

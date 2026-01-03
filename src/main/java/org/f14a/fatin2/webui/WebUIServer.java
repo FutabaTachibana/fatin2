@@ -1,17 +1,14 @@
 package org.f14a.fatin2.webui;
 
 import io.javalin.Javalin;
-import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import org.f14a.fatin2.config.ConfigManager;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import java.util.Map;
 
-public class WebUiServer {
+public class WebUIServer {
 
     // 反代端口 (开发环境前端地址)
     private static final String DEV_ORIGIN = "http://localhost:5173";
@@ -46,32 +43,34 @@ public class WebUiServer {
         app.post("/api/login", this::handleLogin);
 
         // 获取全局设置
-        app.get("/api/settings", ctx -> {
-            // ConfigManager 返回的是 Gson 对象，需要转为 String 返回，否则 Javalin 默认的 Jackson 会再次序列化它
-            ctx.result(ConfigManager.getGlobalConfig().toString())
-               .contentType(ContentType.APPLICATION_JSON);
-        });
+        app.get("/api/settings", ApiHandler::getSettings);
 
         // 更新全局设置
-        app.post("/api/settings", ctx -> {
-            // 假设前端发送的是 {"key": "value", "key2": "value2"} 格式的 JSON
-            Map<String, Object> updates = ctx.bodyAsClass(Map.class);
-            JsonArray results = new JsonArray();
+        app.post("/api/settings", ApiHandler::updateSettings);
 
-            updates.forEach((key, value) -> {
-                // value 可能是 Boolean, Number 等，统一转为 String
-                JsonObject result = ConfigManager.setGlobalConfigItem(key, String.valueOf(value));
-                // 将 key 添加到返回结果中以便前端确认
-                result.addProperty("key", key);
-                results.add(result);
-            });
+        // 获取插件列表
+        app.get("/api/plugins", ApiHandler::getPlugins);
 
-            ctx.result(results.toString())
-               .contentType(ContentType.APPLICATION_JSON);
-        });
+        // 获取插件配置
+        app.get("/api/plugins/{name}/config", ApiHandler::getPluginConfig);
+
+        // 更新插件配置
+        app.post("/api/plugins/{name}/config", ApiHandler::updatePluginConfig);
+
+        // 切换插件状态
+        app.post("/api/plugins/{name}/toggle", ApiHandler::togglePlugin);
 
         // 4. 鉴权拦截器 (Before Handler)
-        app.before("/api/protected/*", ctx -> {
+        // 保护所有 /api/ 开头的接口，除了 /api/login
+        app.before("/api/*", ctx -> {
+            // 放行 OPTIONS 请求 (CORS 预检)
+            if (ctx.req().getMethod().equalsIgnoreCase("OPTIONS")) {
+                return;
+            }
+            if (ctx.path().equals("/api/login")) {
+                return;
+            }
+
             String token = ctx.header("Authorization");
             // 简单剥离 "Bearer " 前缀
             if (token != null && token.startsWith("Bearer ")) {
@@ -98,11 +97,13 @@ public class WebUiServer {
 
     @SuppressWarnings("unchecked")
     private void handleLogin(Context ctx) {
-        // 解析请求体 (这里简化处理，实际应使用 DTO 类)
+        // 解析请求体
         Map<String, String> credentials = ctx.bodyAsClass(Map.class);
+        String providedToken = credentials.get("token");
+        String configuredToken = ConfigManager.getConfig().getWebUIToken();
 
-        // 模拟数据库验证
-        if ("admin".equals(credentials.get("username")) && "123456".equals(credentials.get("password"))) {
+        // 验证 Token
+        if (configuredToken != null && configuredToken.equals(providedToken)) {
             String token = JwtUtil.createToken("admin");
             ctx.json(Map.of("token", token));
         } else {

@@ -34,5 +34,10 @@ public class Config {
     @ConfigItem(order = 7, label = "启用内置帮助插件", type = "boolean", defaultValue = "true",
             description = "启用后，Fatin2 会提供内置的帮助命令，自动生成 \"help\" 指令的内容。")
     private boolean integratedHelp;
-
+    @ConfigItem(order = 8, label = "WebUI 端口", type = "integer", defaultValue = "8080",
+            description = "WebUI 服务器监听的端口。")
+    private int webUIPort;
+    @ConfigItem(order = 9, label = "WebUI Token", type = "password", defaultValue = "114514",
+            description = "WebUI 登录所需的 Token。")
+    private String webUIToken;
 }

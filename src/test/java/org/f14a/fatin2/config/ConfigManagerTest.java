@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,8 +21,8 @@ public class ConfigManagerTest {
     }
     @Test
     void load_initGlobal() {
-        JsonArray json = ConfigManager.getGlobalConfig();
-        assertNotNull(json);
-        assertNotEquals(0, json.size());
+        List<Map<String, Object>> all = ConfigManager.getGlobalWrapper().getAll();
+        assertNotNull(all);
+        assertNotEquals(0, all.size());
     }
 }

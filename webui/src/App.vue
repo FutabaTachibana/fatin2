@@ -1,6 +1,9 @@
 <template>
+  <!-- 登录界面 -->
+  <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
+
   <!-- 整个容器 -->
-  <el-container class="layout-container">
+  <el-container v-else class="layout-container">
 
     <!-- 侧边栏 -->
     <el-aside :width="isCollapsed ? '64px' : 'var(--sidebar-width)'" class="app-sidebar">
@@ -81,6 +84,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { Odometer, Monitor, Setting, Grid, Moon, SwitchButton, Fold, Expand } from '@element-plus/icons-vue'
 
 // 导入组件
+import Login from './components/Login.vue'
 import Dashboard from './components/Dashboard.vue'
 import Console from './components/Console.vue'
 import Settings from './components/Settings.vue'
@@ -90,6 +94,18 @@ const views = { Dashboard, Console, Settings, Plugins }
 const currentView = ref('Dashboard')
 const isCollapsed = ref(false)
 const isDarkMode = ref(false)
+const isLoggedIn = ref(false)
+
+// 检查登录状态
+const checkLogin = () => {
+  const token = localStorage.getItem('fatin_token')
+  isLoggedIn.value = !!token
+}
+
+// 登录成功回调
+const handleLoginSuccess = () => {
+  isLoggedIn.value = true
+}
 
 // 响应式逻辑：窗口小于 1000px 自动收起
 const checkScreenSize = () => {
@@ -114,16 +130,24 @@ const toggleSidebar = () => isCollapsed.value = !isCollapsed.value
 
 const handleLogout = () => {
   localStorage.removeItem('fatin_token')
-  location.reload() // 简单粗暴刷新，触发登录拦截
+  isLoggedIn.value = false
+}
+
+const onAuthLogout = () => {
+  localStorage.removeItem('fatin_token')
+  isLoggedIn.value = false
 }
 
 onMounted(() => {
+  checkLogin()
   checkScreenSize()
   window.addEventListener('resize', checkScreenSize)
+  window.addEventListener('auth-logout', onAuthLogout)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize)
+  window.removeEventListener('auth-logout', onAuthLogout)
 })
 </script>
 

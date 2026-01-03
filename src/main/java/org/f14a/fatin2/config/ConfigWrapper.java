@@ -1,8 +1,6 @@
 package org.f14a.fatin2.config;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.f14a.fatin2.exception.ConfigurationNotAppliedException;
@@ -13,9 +11,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @Slf4j
-final class ConfigWrapper {
-    private static final Gson GSON = new Gson();
-
+public final class ConfigWrapper {
     @Getter
     private final Object config;
     @Getter
@@ -35,9 +31,9 @@ final class ConfigWrapper {
 
     /**
      * 获取配置的 JSON 格式作为 REST API 响应。
-     * @return JsonArray 格式的配置项列表
+     * @return 配置项列表，每个配置项是一个包含属性的映射
      */
-    @NotNull JsonArray getJson() {
+    public @NotNull List<Map<String, Object>> getAll() {
         Class<?> clazz = config.getClass();
         ArrayList<Map<String, Object>> itemList = new ArrayList<>();
 
@@ -67,7 +63,7 @@ final class ConfigWrapper {
         }
         itemList.sort(Comparator.comparingInt(i -> (int) i.get("order")));
 
-        return GSON.toJsonTree(itemList).getAsJsonArray();
+        return itemList;
     }
 
     /**
@@ -75,18 +71,18 @@ final class ConfigWrapper {
      * @param key 配置项键
      * @return 配置项的 JSON 对象，包含键和值；如果未找到则返回空的 JsonObject
      */
-    @NotNull JsonObject get(String key) {
+    public @NotNull Map<String, String> get(String key) {
         try {
             Field field = config.getClass().getDeclaredField(key);
             field.setAccessible(true);
             // 转化为 String 以简化前端处理
             String value = field.get(config).toString();
-            JsonObject result = new JsonObject();
-            result.addProperty("key", key);
-            result.addProperty("value", value);
+            Map<String, String> result = new LinkedHashMap<>();
+            result.put("key", key);
+            result.put("value", value);
             return result;
         } catch (Exception e) {
-            return new JsonObject();
+            return new LinkedHashMap<>();
         }
     }
 
@@ -96,7 +92,7 @@ final class ConfigWrapper {
      * @param value 配置项值
      * @throws ConfigurationNotAppliedException 配置未能应用时抛出
      */
-    void apply(String key, String value) throws ConfigurationNotAppliedException {
+    public void apply(String key, String value) throws ConfigurationNotAppliedException {
         Class<?> clazz = config.getClass();
         try {
             Field field = clazz.getDeclaredField(key);

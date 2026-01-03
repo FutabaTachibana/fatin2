@@ -1,5 +1,7 @@
 package org.f14a.fatin2.plugin;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.f14a.fatin2.event.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +12,13 @@ public class PluginWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginWrapper.class);
     public static final String INTEGRATED_JAR_PATH = "Integrated";
 
+    @Getter
     private final Fatin2Plugin plugin;
+    @Getter
     private final URLClassLoader classLoader;
+    @Getter
     private final String jarPath;
+    @Getter
     private boolean enabled = false;
 
     public PluginWrapper(Fatin2Plugin plugin, URLClassLoader classLoader, String jarPath) {
@@ -21,19 +27,6 @@ public class PluginWrapper {
         this.jarPath = jarPath;
     }
 
-    // Getters
-    public Fatin2Plugin getPlugin() {
-        return this.plugin;
-    }
-    public URLClassLoader getClassLoader() {
-        return this.classLoader;
-    }
-    public String getJarPath() {
-        return this.jarPath;
-    }
-    public boolean isEnabled() {
-        return this.enabled;
-    }
     // Setters
     public void enable() {
         if (this.enabled) {

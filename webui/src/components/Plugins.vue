@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-// import request from '../api/request'
+import request from '../api/request'
 import ConfigForm from './ConfigForm.vue'
 
 // 插件数据列表
@@ -18,51 +18,20 @@ const configLoading = ref(false)
 const fetchPlugins = async () => {
   loading.value = true
   try {
-    // --- 调试模式：生成假数据 (生产环境请注释掉此块) ---
-    // --- Debug Mode: Generate fake data (Comment out in production) ---
-    await new Promise(resolve => setTimeout(resolve, 500))
-    plugins.value = [
-      {
-        id: 'demoplugin',
-        name: 'Demo Plugin',
-        author: 'Fatin Team',
-        version: '1.0.0',
-        description: 'A demonstration plugin to show config capabilities. This plugin has configurable options.',
-        enabled: true,
-        canHotReload: true,
-        hasConfig: true
-      },
-      {
-        id: 'core-guard',
-        name: 'Core Guard',
-        author: 'System',
-        version: '2.1.0',
-        description: 'Protects the bot from spam and abuse. This is a system plugin and cannot be disabled.',
-        enabled: true,
-        canHotReload: false,
-        hasConfig: false
-      },
-      {
-        id: 'logger-plus',
-        name: 'Logger Plus',
-        author: 'Community',
-        version: '0.5.2',
-        description: 'Enhanced logging with file rotation and color output.',
-        enabled: false,
-        canHotReload: true,
-        hasConfig: true
-      }
-    ]
-    // -----------------------------------------------------
-
-    // --- 生产环境：API 请求 (生产环境请取消注释并替换上面的调试代码) ---
-    // --- Production: API Request (Uncomment and replace debug code above) ---
-    /*
     const res = await request.get('/plugins')
-    plugins.value = res.data
-    */
+    // 适配后端数据结构
+    plugins.value = res.map(p => ({
+      id: p.name,
+      name: p.displayName || p.name,
+      author: p.author,
+      version: p.version,
+      description: p.description,
+      enabled: p.enabled,
+      canHotReload: p.canHotReload,
+      hasConfig: p.hasConfig
+    }))
   } catch (e) {
-    ElMessage.error('无法加载插件列表: ' + e.message)
+    ElMessage.error('无法加载插件列表: ' + (e.message || '未知错误'))
   } finally {
     loading.value = false
   }
@@ -73,20 +42,17 @@ const togglePlugin = async (plugin) => {
   if (!plugin.canHotReload) return
 
   const newState = !plugin.enabled
-  try {
-    // --- 调试模式 ---
-    await new Promise(resolve => setTimeout(resolve, 300))
-    plugin.enabled = newState
-    ElMessage.success(`${plugin.name} 已${newState ? '启用' : '禁用'} (模拟)`)
-    // ----------------
+  // 乐观更新 UI
+  const oldState = plugin.enabled
+  plugin.enabled = newState
 
-    /*
+  try {
     await request.post(`/plugins/${plugin.id}/toggle`, { enabled: newState })
-    plugin.enabled = newState
     ElMessage.success(`${plugin.name} 已${newState ? '启用' : '禁用'}`)
-    */
   } catch (e) {
-    ElMessage.error('操作失败')
+    // 回滚状态
+    plugin.enabled = oldState
+    ElMessage.error('操作失败: ' + (e.message || '未知错误'))
   }
 }
 
@@ -99,54 +65,10 @@ const openDetails = async (plugin) => {
   if (plugin.hasConfig) {
     configLoading.value = true
     try {
-      // --- 调试模式：为 demoplugin 生成假配置 ---
-      if (plugin.id === 'demoplugin') {
-        await new Promise(resolve => setTimeout(resolve, 400))
-        pluginConfig.value = [
-          {
-            key: "api_key",
-            label: "API Key",
-            type: "string",
-            value: "sk-xxxxxxxxxxxx",
-            description: "External service API Key"
-          },
-          {
-            key: "max_requests",
-            label: "Max Requests",
-            type: "number",
-            value: 100,
-            description: "Maximum requests per minute"
-          },
-          {
-            key: "enable_notify",
-            label: "Enable Notifications",
-            type: "boolean",
-            value: true,
-            description: "Send notifications on events"
-          },
-          {
-            key: "mode",
-            label: "Operation Mode",
-            type: "select",
-            options: ["Standard", "Strict", "Relaxed"],
-            value: "Standard",
-            description: "Plugin operation behavior"
-          }
-        ]
-      } else if (plugin.id === 'logger-plus') {
-         await new Promise(resolve => setTimeout(resolve, 400))
-         pluginConfig.value = [
-           { key: "log_dir", label: "Log Directory", type: "string", value: "./logs", description: "Path to save logs" }
-         ]
-      }
-      // -------------------------------------------
-
-      /*
       const res = await request.get(`/plugins/${plugin.id}/config`)
-      pluginConfig.value = res.data
-      */
+      pluginConfig.value = res
     } catch (e) {
-      ElMessage.warning('无法加载插件配置')
+      ElMessage.warning('无法加载插件配置: ' + (e.message || '未知错误'))
     } finally {
       configLoading.value = false
     }
@@ -157,21 +79,11 @@ const openDetails = async (plugin) => {
 const saveConfig = async (formData) => {
   try {
     configLoading.value = true
-
-    // --- 调试模式 ---
-    await new Promise(resolve => setTimeout(resolve, 800))
-    console.log(`Saving config for ${currentPlugin.value.id}:`, formData)
-    ElMessage.success('配置已保存 (模拟)')
-    dialogVisible.value = false
-    // ----------------
-
-    /*
     await request.post(`/plugins/${currentPlugin.value.id}/config`, formData)
     ElMessage.success('配置已保存')
     dialogVisible.value = false
-    */
   } catch (e) {
-    ElMessage.error('保存失败')
+    ElMessage.error('保存失败: ' + (e.message || '未知错误'))
   } finally {
     configLoading.value = false
   }

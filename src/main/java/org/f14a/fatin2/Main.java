@@ -6,6 +6,7 @@ import org.f14a.fatin2.websocket.Client;
 import org.f14a.fatin2.config.Config;
 import org.f14a.fatin2.event.EventBus;
 import org.f14a.fatin2.plugin.PluginManager;
+import org.f14a.fatin2.webui.WebUIServer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,6 +38,12 @@ public class Main {
             // Init client
             URI serverUri = new URI(config.getWebsocketUrl());
             client = new Client(serverUri, config.getAccessToken());
+
+            // Start WebUI
+            WebUIServer webUiServer = new WebUIServer();
+            webUiServer.start(config.getWebUIPort());
+            log.info("WebUI started on port {}", config.getWebUIPort());
+
             // Keep references for shutdown hook
             EventBus finalEventBus = eventBus;
             PluginManager finalPluginManager = pluginManager;
