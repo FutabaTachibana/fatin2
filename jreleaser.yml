@@ -2,16 +2,16 @@ project:
   name: fatin2
   description: A quick and easy-to-use bot framework for Onebot v11.
   links:
-    homepage: https://github.com/FutabaTachibana/fatin2
+    homepage: https://github.com/f0xea/fatin2
   license: MIT
   authors:
-    - Futaba_Tachibana
+    - f14a
   java:
     groupId: org.f14a
     artifactId: fatin2
     version: 21
     mainClass: org.f14a.fatin2.Main
-  copyright: 2025 Futaba_Tachibana
+  copyright: 2025 f14a
 
 signing:
   active: ALWAYS
@@ -28,7 +28,7 @@ deploy:
 
 #release:
 #  github:
-#    owner: FutabaTachibana
+#    owner: f14a
 #    name: fatin2
 #    branch: master
 #    overwrite: true
@@ -42,15 +42,15 @@ deploy:
 #  fatin2:
 #    type: JAVA_BINARY
 #    artifacts:
-#      # 可执行 fat jar（仅 GitHub Release）
+#      # 可执行 fat jar
 #      - path: build/libs/fatin2-{{projectVersion}}-all.jar
 #        extraProperties:
 #          classifier: all
-#      # sources jar（如果你也想放到 GitHub Release）
+#      # sources jar
 #      - path: build/libs/fatin2-{{projectVersion}}-sources.jar
 #        extraProperties:
 #          classifier: sources
-#      # javadoc jar（如果你也想放到 GitHub Release）
+#      # javadoc jar
 #      - path: build/libs/fatin2-{{projectVersion}}-javadoc.jar
 #        extraProperties:
 #          classifier: javadoc

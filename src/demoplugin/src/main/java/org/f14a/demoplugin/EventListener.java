@@ -39,7 +39,6 @@ public class EventListener {
                 messages.add(msg);
             }
         });
-
         // MessageGenerator#create 接受的参数是可变参数，因此需要将 List 转换为数组
         event.send(MessageGenerator.create(messages.toArray(new Message[0])));
     }

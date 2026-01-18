@@ -33,7 +33,7 @@ public class Main implements Fatin2Plugin {
     // The name of yours
     @Override
     public String getAuthor() {
-        return "Futaba_Tachibana";
+        return "f14a";
     }
 
     @Override
