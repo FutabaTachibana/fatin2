@@ -1,9 +1,9 @@
 package org.f14a.demoplugin;
 
 import org.f14a.fatin2.event.EventBus;
-import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.Plugin;
 
-public class Main implements Fatin2Plugin {
+public class Main implements Plugin {
     // This method is called when the plugin is loaded
     @Override
     public void onLoad() {

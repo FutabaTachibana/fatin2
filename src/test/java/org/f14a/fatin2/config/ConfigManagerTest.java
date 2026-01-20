@@ -1,6 +1,5 @@
 package org.f14a.fatin2.config;
 
-import com.google.gson.JsonArray;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

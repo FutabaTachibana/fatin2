@@ -12,6 +12,9 @@ import java.lang.annotation.Target;
 public @interface ConfigItem {
     /**
      * 配置项的顺序，数值越小越靠前。
+     * <p>
+     * 因为 Java 不能通过反射获取字段的声明顺序，
+     * 所以需要通过该属性是必要的。
      */
     int order();
 

@@ -7,7 +7,7 @@ import org.f14a.fatin2.event.command.CommandEvent;
 import org.f14a.fatin2.event.command.CommandEventListener;
 import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.lifecycle.PluginsLoadDoneEvent;
-import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.Plugin;
 import org.f14a.fatin2.plugin.PluginManager;
 import org.f14a.fatin2.plugin.PluginWrapper;
 import org.f14a.fatin2.api.generator.MessageGenerator;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class IntegratedHelpGenerator implements Fatin2Plugin {
+public class IntegratedHelpGenerator implements Plugin {
     private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IntegratedHelpGenerator.class);
     List<Map.Entry<String, CommandEventListener>> commands;
 

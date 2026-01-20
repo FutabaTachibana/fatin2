@@ -6,7 +6,7 @@ import org.f14a.fatin2.config.ConfigManager;
 import org.f14a.fatin2.config.ConfigWrapper;
 import org.f14a.fatin2.exception.ConfigIOException;
 import org.f14a.fatin2.exception.ConfigurationNotAppliedException;
-import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.Plugin;
 import org.f14a.fatin2.plugin.PluginManager;
 import org.f14a.fatin2.plugin.PluginWrapper;
 
@@ -116,7 +116,7 @@ public final class ApiHandler {
         List<Map<String, Object>> pluginList = new ArrayList<>();
 
         for (PluginWrapper wrapper : plugins.values()) {
-            Fatin2Plugin plugin = wrapper.getPlugin();
+            Plugin plugin = wrapper.getPlugin();
             Map<String, Object> info = new HashMap<>();
             info.put("name", plugin.getName());
             info.put("displayName", plugin.getDisplayName());

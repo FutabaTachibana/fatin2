@@ -13,12 +13,12 @@ class PluginBasicsTest {
 
     @Test
     void integratedPlugins_haveValidNames() {
-        Fatin2Plugin help = new IntegratedHelpGenerator();
+        Plugin help = new IntegratedHelpGenerator();
         assertNotNull(help.getName());
         assertFalse(help.getName().isBlank());
         assertTrue(help.getName().matches("^[a-zA-Z0-9_-]+$"));
 
-        Fatin2Plugin perm = new IntegratedPermissionProvider();
+        Plugin perm = new IntegratedPermissionProvider();
         assertNotNull(perm.getName());
         assertFalse(perm.getName().isBlank());
         assertTrue(perm.getName().matches("^[a-zA-Z0-9_-]+$"));
@@ -29,7 +29,7 @@ class PluginBasicsTest {
         // Ensure EventBus singleton exists.
         new EventBus();
 
-        Fatin2Plugin p = new Fatin2Plugin() {
+        Plugin p = new Plugin() {
             @Override public void onLoad() {}
             @Override public void onEnable() {}
             @Override public void onDisable() { throw new RuntimeException("boom"); }

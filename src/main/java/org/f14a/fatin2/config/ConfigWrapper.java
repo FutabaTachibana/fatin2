@@ -1,38 +1,120 @@
 package org.f14a.fatin2.config;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.f14a.fatin2.exception.ConfigurationNotAppliedException;
+import org.f14a.fatin2.exception.ConfigurationNotLoadedException;
 import org.f14a.fatin2.exception.IllegalTypeException;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.util.*;
 
 @Slf4j
-public final class ConfigWrapper {
+public final class ConfigWrapper<T> {
     @Getter
-    private final Object config;
+    private final T config;
     @Getter
-    private final String configPath;
-    private final Map<String, List<ConstraintsParser.Range<?>>> constraintsCache = new HashMap<>();
+    private final Path configPath;
 
-    ConfigWrapper(Object config, String configPath) {
-        this.config = config;
+    private final YamlConfigurationLoader loader;
+    private final CommentedConfigurationNode rootNode;
+
+    ConfigWrapper(Class<T> configClass, Path configPath) throws ConfigurationNotLoadedException {
         this.configPath = configPath;
+        this.loader = YamlConfigurationLoader.builder()
+                .defaultOptions(opts -> opts.serializers(ConfigManager.getInstance().getSerializers()))
+                .path(configPath)
+                .build();
+        try {
+            if (configPath.toFile().exists()) {
+                this.rootNode = loader.load();
+                this.config = rootNode.get(configClass);
+            } else {
+                this.rootNode = loader.createNode();
+                this.config = configClass.getDeclaredConstructor().newInstance();
+                save();
+            }
+        } catch (Exception e) {
+            throw new ConfigurationNotLoadedException("Failed to load config from " + configPath, e);
+        }
+
+
     }
 
-    ConfigWrapper(Class<?> configClass, String configPath) throws Exception {
-        this.config = configClass.getDeclaredConstructor().newInstance();
-        applyDefaults(this.config);
-        this.configPath = configPath;
+    /**
+     * 保存当前配置到文件。
+     */
+    public synchronized void save() {
+        try {
+            rootNode.set(config.getClass(), config);
+            loader.save(rootNode);
+        } catch (Exception e) {
+            log.error("Failed to save config to {}", configPath, e);
+        }
     }
 
+    /**
+     * 应用配置更改。
+     * @param updates 配置项更新映射，键为配置项路径，值为新的配置值
+     */
+    public synchronized boolean applyChanges(Map<String, String> updates) {
+        try {
+            for (Map.Entry<String, String> entry : updates.entrySet()) {
+                ConfigReflector.updateValue(config, entry.getKey(), entry.getValue());
+            }
+            save();
+            log.info("Configuration updated for {}", configPath.getFileName());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to apply config changes", e);
+            return false;
+        }
+    }
+
+    /**
+     * 获取配置列表，可以序列化为 JSON 作为 REST API 响应。
+     * <p>
+     * 生成的结构示例:
+     * <Blockquote><pre>
+     * [
+     *   {
+     *     "key": "websocket",
+     *     "type": "node",
+     *     "label": "Websocket 设置",
+     *     "description": "",
+     *     "content": [
+     *       {
+     *         "key": "websocket.url",
+     *         "type": "item",
+     *         "label": "WebSocket 服务器地址",
+     *         "valueType": "string",
+     *         "defaultValue": "ws://localhost:3001",
+     *         "description": "WebSocket 服务器的地址",
+     *         "enable": false,
+     *         "constraints": "",
+     *         "options": [],
+     *         "value": "ws://localhost:3001"
+     *       }
+     *     ]
+     *   }
+     * ]
+     * </pre></Blockquote>
+     * @return 配置项列表，每个配置项是一个包含属性的映射
+     */
+    public List<Map<String, Object>> getConfigAsList() {
+        return ConfigReflector.scanConfig(this.config);
+    }
+
+    // 以下为旧 API
     /**
      * 获取配置的 JSON 格式作为 REST API 响应。
      * @return 配置项列表，每个配置项是一个包含属性的映射
      */
+    @Deprecated
     public @NotNull List<Map<String, Object>> getAll() {
         Class<?> clazz = config.getClass();
         ArrayList<Map<String, Object>> itemList = new ArrayList<>();
@@ -71,6 +153,7 @@ public final class ConfigWrapper {
      * @param key 配置项键
      * @return 配置项的 JSON 对象，包含键和值；如果未找到则返回空的 JsonObject
      */
+    @Deprecated
     public @NotNull Map<String, String> get(String key) {
         try {
             Field field = config.getClass().getDeclaredField(key);
@@ -92,6 +175,7 @@ public final class ConfigWrapper {
      * @param value 配置项值
      * @throws ConfigurationNotAppliedException 配置未能应用时抛出
      */
+    @Deprecated
     public void apply(String key, String value) throws ConfigurationNotAppliedException {
         Class<?> clazz = config.getClass();
         try {
@@ -177,6 +261,7 @@ public final class ConfigWrapper {
      * 初始化配置类实例，设置默认值。
      * @param config 配置对象
      */
+    @Deprecated
     static void applyDefaults(Object config) {
         Class<?> configClass = config.getClass();
         for (Field field : configClass.getDeclaredFields()) {

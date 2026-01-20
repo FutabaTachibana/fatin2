@@ -6,7 +6,7 @@ import org.f14a.fatin2.event.command.CommandEvent;
 import org.f14a.fatin2.event.command.CommandEventListener;
 import org.f14a.fatin2.event.command.OnCommand;
 import org.f14a.fatin2.event.command.PermissionDeniedEvent;
-import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.Plugin;
 import org.f14a.fatin2.model.message.Sender;
 import org.f14a.fatin2.exception.PluginInternalException;
 import org.f14a.fatin2.model.message.OnebotMessage;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class IntegratedPermissionProvider implements Fatin2Plugin {
+public class IntegratedPermissionProvider implements Plugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegratedPermissionProvider.class);
     private static final String PERM = "perm.yml";
 

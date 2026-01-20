@@ -1,20 +1,14 @@
 package org.f14a.fatin2.config;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import lombok.extern.slf4j.Slf4j;
 import org.f14a.fatin2.exception.ConfigIOException;
-import org.f14a.fatin2.exception.ConfigurationNotAppliedException;
 import org.f14a.fatin2.exception.ConfigurationNotLoadedException;
-import org.f14a.fatin2.plugin.Fatin2Plugin;
-import org.f14a.fatin2.plugin.PluginManager;
+import org.f14a.fatin2.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
-import org.yaml.snakeyaml.introspector.Property;
+import org.spongepowered.configurate.CommentedConfigurationNodeIntermediary;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -25,9 +19,38 @@ import java.util.*;
 
 @Slf4j
 public final class ConfigManager {
-    private static final String CONFIG_PATH = "config.yml";
-    private static final Map<String, ConfigWrapper> pluginConfigs = new HashMap<>();
-    private static final ConfigWrapper globalConfigWrapper = initGlobal();
+    // 单例模式
+    private static class Holder {
+        private static final ConfigManager INSTANCE = new ConfigManager();
+    }
+    public static ConfigManager getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    // 配置对象映射工厂，处理 @Comment 注解
+    private final ObjectMapper.Factory MAPPER_FACTORY = ObjectMapper.factoryBuilder()
+            .addProcessor(Comment.class, (annotation, fieldType) ->
+                    ((value, destination) -> {
+                        if (destination instanceof CommentedConfigurationNodeIntermediary<?>) {
+                            ((CommentedConfigurationNodeIntermediary<?>) destination).comment(annotation.value());
+                        }
+                    })
+            )
+            .build();
+
+    // 配置序列化器集合，注册 @ConfigObject 注解的处理器
+    private final TypeSerializerCollection SERIALIZERS = TypeSerializerCollection.defaults().childBuilder()
+            .register(type -> GenericTypeReflector.annotate(type).isAnnotationPresent(ConfigObject.class), MAPPER_FACTORY.asTypeSerializer())
+            .build();
+
+    // 获取配置序列化器集合
+    TypeSerializerCollection getSerializers() {
+        return SERIALIZERS;
+    }
+
+    private final String CONFIG_PATH = "config.yml";
+    private final Map<String, ConfigWrapper<?>> pluginConfigs = new HashMap<>();
+    private final ConfigWrapper globalConfigWrapper = initGlobal();
 
     /**
      * 注册并加载插件配置文件。
@@ -37,7 +60,7 @@ public final class ConfigManager {
      * @return 配置类实例
      */
     @SuppressWarnings("unchecked")
-    public static <T> T register(Fatin2Plugin plugin, Class<T> configClass, String configPath) {
+    public <T> T register(Plugin plugin, Class<T> configClass, String configPath) {
         ConfigWrapper wrapper = loadConfig(configClass, "plugins" + File.separator + configPath);
         pluginConfigs.put(plugin.getName(), wrapper);
         return (T) wrapper.getConfig();
@@ -47,7 +70,7 @@ public final class ConfigManager {
      * 初始化全局配置文件。
      * @return 配置包装类
      */
-    private static ConfigWrapper initGlobal() {
+    private ConfigWrapper initGlobal() {
         return loadConfig(Config.class, CONFIG_PATH);
     }
 
@@ -55,7 +78,7 @@ public final class ConfigManager {
      * 获取全局配置实例。
      * @return 配置类实例
      */
-    public static Config getConfig() {
+    public Config getConfig() {
         return (Config) globalConfigWrapper.getConfig();
     }
 
@@ -63,7 +86,7 @@ public final class ConfigManager {
      * 获取全局配置包装类。
      * @return 全局配置包装类
      */
-    public static ConfigWrapper getGlobalWrapper() {
+    public ConfigWrapper getGlobalWrapper() {
         return globalConfigWrapper;
     }
 
@@ -74,7 +97,7 @@ public final class ConfigManager {
      * @return 配置包装类
      * @throws ConfigurationNotLoadedException 配置文件加载失败时抛出
      */
-    private static ConfigWrapper loadConfig(Class<?> configClass, String configPath) throws ConfigurationNotLoadedException {
+    private ConfigWrapper loadConfig(Class<?> configClass, String configPath) throws ConfigurationNotLoadedException {
         File file = new File(configPath);
         ConfigWrapper wrapper;
         if (!file.exists()) {
@@ -113,7 +136,7 @@ public final class ConfigManager {
      * @param wrapper 配置包装类
      * @param file 配置文件
      */
-    public static void save(ConfigWrapper wrapper, File file) throws ConfigIOException {
+    public void save(ConfigWrapper wrapper, File file) throws ConfigIOException {
         DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -169,106 +192,7 @@ public final class ConfigManager {
      * 获取所有插件的配置包装类。
      * @return 插件配置映射
      */
-    public static @NotNull Map<String, ConfigWrapper> getPluginConfigs() {
+    public @NotNull Map<String, ConfigWrapper> getPluginConfigs() {
         return Collections.unmodifiableMap(pluginConfigs);
-    }
-
-    /**
-     * 获取插件配置的 JSON 格式作为 REST API 响应。
-     * @param pluginName 插件名称
-     * @return JSON 对象
-     */
-    @Deprecated
-    public static @NotNull List<Map<String, Object>> getPluginConfig(String pluginName) {
-        ConfigWrapper wrapper = pluginConfigs.get(pluginName);
-        if (wrapper == null) {
-            log.error("No config found for plugin {}", pluginName);
-            return new ArrayList<>();
-        }
-        return wrapper.getAll();
-    }
-
-    /**
-     * 获取插件配置项的 JSON 格式作为 REST API 响应。
-     * @param pluginName 插件名称
-     * @param key 配置项键
-     * @return JSON 对象
-     */
-    @Deprecated
-    public static @NotNull Map<String, String> getPluginConfig(String pluginName, String key) {
-        ConfigWrapper wrapper = pluginConfigs.get(pluginName);
-        if (wrapper == null) {
-            log.error("No config key found for plugin {}", pluginName);
-            return new LinkedHashMap<>();
-        }
-        return wrapper.get(key);
-    }
-
-    /**
-     * 获取全局配置的 JSON 格式作为 REST API 响应。
-     * @return JSON 对象
-     */
-    @Deprecated
-    public static @NotNull List<Map<String, Object>> getGlobalConfig() {
-        return globalConfigWrapper.getAll();
-    }
-
-    /**
-     * 获取全局配置项的 JSON 格式作为 REST API 响应。
-     * @param key 配置项键
-     * @return JSON 对象
-     */
-    @Deprecated
-    public static @NotNull Map<String, String> getGlobalConfig(String key) {
-        return globalConfigWrapper.get(key);
-    }
-
-    /**
-     * 设置插件配置项的值。
-     * @param pluginName 插件名称
-     * @param key 配置项键
-     * @param value 配置项值
-     * @return JSON 对象，包含错误信息（如果有）
-     */
-    @Deprecated
-    public static @NotNull Map<String, String> setPluginConfigItem(String pluginName, String key, String value) {
-        ConfigWrapper wrapper = pluginConfigs.get(pluginName);
-        if (wrapper == null) {
-            return Map.of("reason", String.format("No config found for plugin %s", pluginName));
-        }
-        return setConfigItem(wrapper, key, value);
-    }
-
-    /**
-     * 设置全局配置项的值。
-     * @param key 配置项键
-     * @param value 配置项值
-     * @return JSON 对象，包含错误信息（如果有）
-     */
-    @Deprecated
-    public static @NotNull Map<String, String> setGlobalConfigItem(String key, String value) {
-        return setConfigItem(globalConfigWrapper, key, value);
-    }
-
-    /**
-     * 设置配置项的值并保存配置文件。
-     * @param wrapper 配置包装类
-     * @param key 配置项键
-     * @param value 配置项值
-     * @return JSON 对象，包含错误信息（如果有）
-     */
-    @Deprecated
-    private static @NotNull Map<String, String> setConfigItem(ConfigWrapper wrapper, String key, String value) {
-        try {
-            wrapper.apply(key, value);
-        } catch (ConfigurationNotAppliedException e) {
-            return Map.of("reason", String.format("Something goes wrong when applying config: %s", e.getMessage()));
-        }
-        try {
-            save(wrapper, new File(wrapper.getConfigPath()));
-        } catch (ConfigIOException e) {
-            return Map.of("reason", String.format("Something goes wrong when saving config: %s", e.getMessage()));
-        }
-        return Map.of();
     }
 }

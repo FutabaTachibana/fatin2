@@ -1,13 +1,13 @@
 package org.f14a.fatin2.event;
 
-import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.Plugin;
 
 import java.lang.reflect.Method;
 
 /**
  * An object those already register with methods and corresponding object instance
  */
-public record EventListener(Object listener, Method method, Fatin2Plugin plugin, EventPriority priority, boolean isCoroutine) implements Comparable<EventListener> {
+public record EventListener(Object listener, Method method, Plugin plugin, EventPriority priority, boolean isCoroutine) implements Comparable<EventListener> {
     @Override
     public int compareTo(EventListener listener) {
         // MONITOR first and LOWEST last

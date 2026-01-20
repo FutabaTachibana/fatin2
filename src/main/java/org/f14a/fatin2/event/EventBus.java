@@ -4,7 +4,7 @@ import org.f14a.fatin2.event.command.*;
 import org.f14a.fatin2.event.response.ResponseManager;
 import org.f14a.fatin2.event.session.Coroutines;
 import org.f14a.fatin2.event.session.SessionManager;
-import org.f14a.fatin2.plugin.Fatin2Plugin;
+import org.f14a.fatin2.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public final class EventBus {
         LOGGER.debug("Event Bus initialized with thread pool");
     }
 
-    public void register(Object listener, Fatin2Plugin plugin) {
+    public void register(Object listener, Plugin plugin) {
         Class<?> clazz = listener.getClass();
 
         int countH = 0, countC = 0;
@@ -91,7 +91,7 @@ public final class EventBus {
         LOGGER.debug("Registered {} command handlers for plugin {}", countC, plugin.getName());
     }
     // Return 1 if registered successfully, 0 otherwise
-    private int registerCommon(Object listener, Fatin2Plugin plugin, Method method, EventHandler annotation){
+    private int registerCommon(Object listener, Plugin plugin, Method method, EventHandler annotation){
         // Check method parameters
         Class<?>[] paramTypes = method.getParameterTypes();
         if (paramTypes.length != 1) {
@@ -114,7 +114,7 @@ public final class EventBus {
                 .add(new EventListener(listener, method, plugin, annotation.priority(), method.isAnnotationPresent(Coroutines.class)));
         return 1;
     }
-    private int registerCommand(Object listener, Fatin2Plugin plugin, Method method, OnCommand annotation){
+    private int registerCommand(Object listener, Plugin plugin, Method method, OnCommand annotation){
         Class<?>[] paramTypes = method.getParameterTypes();
         AtomicInteger count = new AtomicInteger();
         if (paramTypes.length != 1) {
@@ -141,7 +141,7 @@ public final class EventBus {
         });
         return count.get();
     }
-    private void addCommand(String command, CommandEventListener listener, OnCommand annotation, Fatin2Plugin plugin) {
+    private void addCommand(String command, CommandEventListener listener, OnCommand annotation, Plugin plugin) {
         if (commandHandlers.containsKey(command)) {
             String newCommand = plugin.getName() + ":" + command;
             commandHandlers.put(newCommand, listener);
@@ -165,7 +165,7 @@ public final class EventBus {
         this.permissionProvider = null;
         LOGGER.info("PermissionProvider unregistered successfully.");
     }
-    public void unregister(Fatin2Plugin plugin) {
+    public void unregister(Plugin plugin) {
         // Unregister from common event handlers
         for (List<EventListener> listenerList : handlers.values()) {
             listenerList.removeIf(listener -> listener.plugin() == plugin);

@@ -1,7 +1,6 @@
 package org.f14a.fatin2.plugin;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.f14a.fatin2.event.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,7 @@ public class PluginWrapper {
     public static final String INTEGRATED_JAR_PATH = "Integrated";
 
     @Getter
-    private final Fatin2Plugin plugin;
+    private final Plugin plugin;
     @Getter
     private final URLClassLoader classLoader;
     @Getter
@@ -21,7 +20,7 @@ public class PluginWrapper {
     @Getter
     private boolean enabled = false;
 
-    public PluginWrapper(Fatin2Plugin plugin, URLClassLoader classLoader, String jarPath) {
+    public PluginWrapper(Plugin plugin, URLClassLoader classLoader, String jarPath) {
         this.plugin = plugin;
         this.classLoader = classLoader;
         this.jarPath = jarPath;

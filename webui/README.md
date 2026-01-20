@@ -62,18 +62,28 @@ WebSocket 客户端:
 - [ ] POST /api/settings - 更新配置
 
 表单结构: 
+
 ```json
 [
   {
-    "order": 0,
-    "label": "WebSocket 服务器地址",
-    "type": "string",
-    "defaultValue": "ws://localhost:3001",
-    "description": "WebSocket 服务器的地址，通常是 NapCat 或其他 Onebot v11 兼容客户端的地址。",
-    "enable": false,
-    "constraints": "",
-    "options": [],
-    "value": "ws://localhost:3001"
+    "key": "websocket",
+    "type": "node",
+    "label": "Websocket 设置",
+    "description": "",
+    "content": [
+      {
+        "key": "websocket.url",
+        "type": "item",
+        "label": "WebSocket 服务器地址",
+        "valueType": "string",
+        "defaultValue": "ws://localhost:3001",
+        "description": "WebSocket 服务器的地址，通常是 NapCat 或其他 Onebot v11 兼容客户端的地址。",
+        "enable": false,
+        "constraints": "",
+        "options": [],
+        "value": "ws://localhost:3001"
+      }
+    ]
   }
 ]
 ```

@@ -37,7 +37,7 @@ dependencies {
     api("com.google.code.gson:gson:2.13.2")
 
     // YAML processing library
-    implementation("org.yaml:snakeyaml:2.5")
+    implementation("org.spongepowered:configurate-yaml:4.2.0")
 
     // Logging library
     implementation("org.slf4j:slf4j-api:2.0.9")

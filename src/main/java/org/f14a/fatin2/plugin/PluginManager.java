@@ -49,7 +49,7 @@ public class PluginManager {
     public Map<String, PluginWrapper> getPlugins() {
         return Collections.unmodifiableMap(this.plugins);
     }
-    public PluginWrapper getPluginWrapper(Fatin2Plugin plugin) {
+    public PluginWrapper getPluginWrapper(Plugin plugin) {
         for (PluginWrapper wrapper : this.plugins.values()) {
             if (wrapper.getPlugin() == plugin) {
                 return wrapper;
@@ -59,7 +59,7 @@ public class PluginManager {
     }
     public PluginWrapper getPluginWrapper(String pluginName) {
         for (PluginWrapper wrapper : this.plugins.values()) {
-            Fatin2Plugin plugin = wrapper.getPlugin();
+            Plugin plugin = wrapper.getPlugin();
             if (plugin.getDisplayName().equals(pluginName) || plugin.getName().equals(pluginName)) {
                 return wrapper;
             }
@@ -91,7 +91,7 @@ public class PluginManager {
         }
     }
 
-    public void loadIntegratedPlugin(Fatin2Plugin plugin) {
+    public void loadIntegratedPlugin(Plugin plugin) {
         synchronized (pluginOpLock) {
             PluginWrapper wrapper = PluginLoader.createIntegratedWrapper(plugin);
             String name = wrapper.getPlugin().getName();

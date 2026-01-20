@@ -54,7 +54,7 @@ public class PluginLoader {
      * <p>
      * Integrated plugins do not have a jar or a dedicated classloader.
      */
-    public static PluginWrapper createIntegratedWrapper(Fatin2Plugin plugin) {
+    public static PluginWrapper createIntegratedWrapper(Plugin plugin) {
         validatePluginName(plugin);
         PluginWrapper wrapper = new PluginWrapper(plugin, null, INTEGRATED_JAR_PATH);
 
@@ -92,11 +92,11 @@ public class PluginLoader {
             LOGGER.debug("Main class of plugin {}: {}", jarFile.getName(), mainClass);
 
             Class<?> pluginClass = classLoader.loadClass(mainClass);
-            if (!Fatin2Plugin.class.isAssignableFrom(pluginClass)) {
+            if (!Plugin.class.isAssignableFrom(pluginClass)) {
                 throw new IllegalPluginException("It is NOT a valid Fatin2 plugin: " + jarFile.getName());
             }
 
-            Fatin2Plugin plugin = (Fatin2Plugin) pluginClass.getDeclaredConstructor().newInstance();
+            Plugin plugin = (Plugin) pluginClass.getDeclaredConstructor().newInstance();
             validatePluginName(plugin);
 
             PluginWrapper wrapper = new PluginWrapper(plugin, classLoader, jarFile.getAbsolutePath());
@@ -174,7 +174,7 @@ public class PluginLoader {
         }
     }
 
-    private static void validatePluginName(Fatin2Plugin plugin) {
+    private static void validatePluginName(Plugin plugin) {
         if (plugin == null || plugin.getName() == null || plugin.getName().isEmpty() || !plugin.getName().matches("^[a-zA-Z0-9_-]+$")) {
             throw new IllegalPluginException("Illegal plugin name: " + (plugin != null ? plugin.getClass().getName() : "null"));
         }

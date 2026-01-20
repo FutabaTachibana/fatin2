@@ -1,6 +1,6 @@
 package org.f14a.fatin2.plugin;
 
-public interface Fatin2Plugin {
+public interface Plugin {
     // Call when the plugin is loaded
     void onLoad();
     // Call when the plugin is enabled
